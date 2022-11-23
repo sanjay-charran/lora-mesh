@@ -1,42 +1,46 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
-#ifndef __LORA_END_DEVICE_H__
-#define __LORA_END_DEVICE_H__
+#ifndef __LORA_PHY_H__
+#define __LORA_PHY_H__
 
 #include "ns3/object.h"
 #include "ns3/ptr.h"
-#include "ns3/net-device.h"
+#include "ns3/packet.h"
+
 #include "ns3/lora-mesh-channel.h"   //to be written
-#include <vector>
+#include "ns3/lora-net-device.h"
+
+#include <list>
+#include <iterator>
 
 namespace ns3 {
 namespace lora_mesh {
     
 struct RoutingTableEntry
 {
-    uint16_t    s;
+    uint16_t    s;      /*  id's for sender and receiver    */
     uint16_t    r;
     float       etx;
     uint8_t     last;    
 };
     
-class LoRaEndDevice : public Object
+class LoRaPHY : public Object
 {
 pubilc:
 
     /*  Constructor & Destructor    */
-    LoRaEndDevice ();
-    ~LoRaEndDevice ();
+    LoRaPHY ();
+    ~LoRaPHY ();
     
     /*  TypeId  */
     static TypeId GetTypeId (void);
     
     /*  setter and getter for id    */
     void SetID (uint16_t id);
-    uint16_t GetID (void);
+    uint16_t GetID (void) const;
     
     /*  setter and getter for net device    */
-    void SetNetDevice (Ptr<NetDevice> nd);
-    Ptr<NetDevice> GetNetDevice (void) const;
+    void SetNetDevice (Ptr<LoRaNetDevice> lnd);
+    Ptr<LoRaNetDevice> GetNetDevice (void) const;
     
     /*  setter and getter for channel   */
     void SetChannel (Ptr<LoRaMeshChannel> c);
@@ -58,7 +62,7 @@ private:
     uint16_t m_id;              // need to define max id
     
     /*  the net device and channel attached to this node    */
-    Ptr<NetDevice> m_device;
+    Ptr<LoRaNetDevice> m_device;
     Ptr<LoRaMeshChannel> m_channel;
     
     /*  transmit power and receiver sensitivity of this device  */
@@ -74,10 +78,10 @@ private:
     uint8_t m_rx_sf;
     
     /*  routing table containing info the end device is aware of    */
-    vector<RoutingTableEntry> m_table;
+    list<RoutingTableEntry> m_table;
 };
     
 }
 }
 
-#endif /*   __LORA_END_DEVICE_H__    */
+#endif /*   __LORA_PHY_H__    */
