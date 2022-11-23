@@ -57,43 +57,5 @@ Ptr<LoRaMeshChannel> LoRaPHY::GetChannel (void) const
     return m_channel;
 }
 
-void LoRaPHY::AddTableEntry (RoutingTableEntry entry)
-{
-    list<RoutingTableEntry>::iterator it = m_table.begin();
-    
-    if (m_table.empty())
-    {
-        m_table.insert(it, entry);
-        return;
-    }
-    
-    for (;it != m_table.end();++it)
-    {
-        if (it->s > entry.s)
-        {
-            m_table.insert(it, entry);
-            return;
-        }
-        else if (it->s == entry.s && it->r > entry.r)
-        {
-            m_table.insert(it, entry);
-            return;
-        }
-        else if (it->s == entry.s && it->r == entry.r)
-        {
-            /*  entry already exists -- dont add duplicates */
-            return;
-        }
-    }
-    
-    m_table.insert(it, entry);
-    return;
-}
-
-RoutingTableEntry RemoveTableEntry (utin64_t n)
-{
-    
-}
-
 }
 }

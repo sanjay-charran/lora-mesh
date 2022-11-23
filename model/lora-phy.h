@@ -9,19 +9,8 @@
 #include "ns3/lora-mesh-channel.h"   //to be written
 #include "ns3/lora-net-device.h"
 
-#include <list>
-#include <iterator>
-
 namespace ns3 {
 namespace lora_mesh {
-    
-struct RoutingTableEntry
-{
-    uint16_t    s;      /*  id's for sender and receiver    */
-    uint16_t    r;
-    float       etx;
-    uint8_t     last;    
-};
     
 class LoRaPHY : public Object
 {
@@ -34,11 +23,7 @@ pubilc:
     /*  TypeId  */
     static TypeId GetTypeId (void);
     
-    /*  setter and getter for id    */
-    void SetID (uint16_t id);
-    uint16_t GetID (void) const;
-    
-    /*  setter and getter for net device    */
+    /*  setter and getter for net device    */    // add setters and getters for tx/rx params
     void SetNetDevice (Ptr<LoRaNetDevice> lnd);
     Ptr<LoRaNetDevice> GetNetDevice (void) const;
     
@@ -46,21 +31,30 @@ pubilc:
     void SetChannel (Ptr<LoRaMeshChannel> c);
     Ptr<LoRaMeshChannel> GetChannel (void) const;
     
-    /*  add and remove entry for routing table  */
-    void AddTableEntry (RoutingTableEntry entry);
-    RoutingTableEntry RemoveTableEntry (utin64_t n);        // adjsut lookup vector length max based on max id
+    /*  setter and getters for tx/rx params */
+    void SetTxPower (double power_dBm);//
+    double GetTxPower (void) const;//
     
-    /*  routing table lookup    */
-    RoutingTableEntry TableLookup (uint64_t n) const;
+    void SetRxSens (double sens_dBm);//
+    double GetRxSens (void) const;//
+    
+    void SetTxFreq (double freq_MHz);//
+    double GetTxFreq (void) const;//
+    
+    void SetRxFreq (double freq_MHz);//
+    double GetRxFreq (void) const;//
+    
+    void SetTxSF (uint8_t sf);//
+    uint8_t GetTxSF (void) const;//
+    
+    void SetRxSF (uint8_t sf);//
+    uint8_t GetRxSF (void) const;//
     
     /*  sending and receiving */
 //     void Send ();       //add in parameters for these
 //     void Receive ();    //
     
 private:
-    /*  unique device id    */
-    uint16_t m_id;              // need to define max id
-    
     /*  the net device and channel attached to this node    */
     Ptr<LoRaNetDevice> m_device;
     Ptr<LoRaMeshChannel> m_channel;
@@ -76,12 +70,8 @@ private:
     /*  frequency and spreading factor to listen for as receiver    */
     double m_rx_freq_MHz;
     uint8_t m_rx_sf;
-    
-    /*  routing table containing info the end device is aware of    */
-    list<RoutingTableEntry> m_table;
 };
     
 }
 }
-
 #endif /*   __LORA_PHY_H__    */
