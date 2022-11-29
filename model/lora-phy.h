@@ -9,8 +9,19 @@
 #include "ns3/lora-mesh-channel.h"   //to be written
 #include "ns3/lora-net-device.h"
 
+#define MINIMUM_LORA_SPREADING_FACTOR   7
+#define MAXIMUM_LORA_SPREADING_FACTOR   12
+
 namespace ns3 {
 namespace lora_mesh {
+    
+enum PHYState
+{
+    SLEEP,
+    TX,
+    RX,
+    STANDBY
+};
     
 class LoRaPHY : public Object
 {
@@ -32,29 +43,34 @@ pubilc:
     Ptr<LoRaMeshChannel> GetChannel (void) const;
     
     /*  setter and getters for tx/rx params */
-    void SetTxPower (double power_dBm);//
-    double GetTxPower (void) const;//
+    void SetTxPower (double power_dBm);
+    double GetTxPower (void) const;
     
-    void SetRxSens (double sens_dBm);//
-    double GetRxSens (void) const;//
+    void SetRxSens (double sens_dBm);
+    double GetRxSens (void) const;
     
-    void SetTxFreq (double freq_MHz);//
-    double GetTxFreq (void) const;//
+    void SetTxFreq (double freq_MHz);
+    double GetTxFreq (void) const;
     
-    void SetRxFreq (double freq_MHz);//
-    double GetRxFreq (void) const;//
+    void SetRxFreq (double freq_MHz);
+    double GetRxFreq (void) const;
     
-    void SetTxSF (uint8_t sf);//
-    uint8_t GetTxSF (void) const;//
+    void SetTxSF (uint8_t sf);
+    uint8_t GetTxSF (void) const;
     
-    void SetRxSF (uint8_t sf);//
-    uint8_t GetRxSF (void) const;//
+    void SetRxSF (uint8_t sf);
+    uint8_t GetRxSF (void) const;
+    
+    void SetState (PHYState new_state);
+    PHYState GetState (void) const;
     
     /*  sending and receiving */
-//     void Send ();       //add in parameters for these
-//     void Receive ();    //
+    void Send (Ptr<Packet> packet); /*  send/receive using current transmit/receive parameters  */
+    void Receive (Ptr<Packet> packet);
     
 private:
+    PHYState m_state;
+    
     /*  the net device and channel attached to this node    */
     Ptr<LoRaNetDevice> m_device;
     Ptr<LoRaMeshChannel> m_channel;
