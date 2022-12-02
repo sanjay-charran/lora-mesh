@@ -1,6 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 
 #include "ns3/log.h"
+#include "ns3/simulator.h"
 
 #include "ns3/lora-phy.h"
 
@@ -12,7 +13,41 @@ LoRaPHY::GetTypeId (void)
 {
     static tid = TypeId ("ns3::LoRaPHY")
         .SetParent<Object> ()
-        .SetGroupName ("lora_mesh");
+        .SetGroupName ("lora_mesh")
+        .AddTraceSource ("StartSending",
+                        "Trace source indicating the PHY layer"
+                        "has begun the sending process for a packet",
+                        MakeTraceSourceAccessor (&LoraPhy::m_startSending),
+                        "ns3::Packet::TracedCallback")
+        .AddTraceSource ("PhyRxBegin",
+                        "Trace source indicating a packet "
+                        "is now being received from the channel medium "
+                        "by the device",
+                        MakeTraceSourceAccessor (&LoraPhy::m_phyRxBeginTrace),
+                        "ns3::Packet::TracedCallback")
+        .AddTraceSource ("PhyRxEnd",
+                        "Trace source indicating the PHY has finished "
+                        "the reception process for a packet",
+                        MakeTraceSourceAccessor (&LoraPhy::m_phyRxEndTrace),
+                        "ns3::Packet::TracedCallback")
+        .AddTraceSource ("ReceivedPacket",
+                        "Trace source indicating a packet "
+                        "was correctly received",
+                        MakeTraceSourceAccessor
+                        (&LoraPhy::m_successfullyReceivedPacket),
+                        "ns3::Packet::TracedCallback")
+        .AddTraceSource ("LostPacketBecauseInterference",
+                        "Trace source indicating a packet "
+                        "could not be correctly decoded because of interfering"
+                        "signals",
+                        MakeTraceSourceAccessor (&LoraPhy::m_interferedPacket),
+                        "ns3::Packet::TracedCallback")
+        .AddTraceSource ("LostPacketBecauseUnderSensitivity",
+                        "Trace source indicating a packet "
+                        "could not be correctly received because"
+                        "its received power is below the sensitivity of the receiver",
+                        MakeTraceSourceAccessor (&LoraPhy::m_underSensitivity),
+                        "ns3::Packet::TracedCallback");
         
     return tid;
 }
@@ -138,9 +173,27 @@ LoRaPHY::GetRxSF (void) const
 }
 
 void
-LoRaPHY::SetState (PHYState new_state)
+LoRaPHY::SwitchStateTX (void)
 {
-    m_state = new_state;
+    m_state = TX;
+}
+
+void
+LoRaPHY::SwitchStateRX (void)
+{
+    m_state = RX;
+}
+
+void
+LoRaPHY::SwitchStateSTANDBY (void)
+{
+    m_state = STANDBY;
+}
+
+void
+LoRaPHY::SwitchStateSLEEP (void)
+{
+    m_state = SLEEP;
 }
 
 PHYState
@@ -157,23 +210,47 @@ LoRaPHY::Send (Ptr<Packet> packet)
         return; /*  phy layer busy  */
     }
     
-    SetState (TX);
+    dur = GetOnAirTime (packet);
+    
+    SwitchStateTX ();
+    
+    //not sure about tag bit need to dbl check
     
     m_channel->Send (this, packet, m_tx_power_dBm, m_tx_freq_MHz, m_tx_sf);
     
-    //wait for tx to finish implement callback
+    Simulator::Scedule (dur, &SwitchStateSTANDBY, this);
+    
+    if (m_device)
+    {
+        m_startSending (packet, m_device->GetNode()->GetId());
+    }
+    else
+    {
+        m_startSending (packet, 0);
+    }
     
     return;
 }
 
-void
-LoRaPHY::Receive (Ptr<Packet> packet)
+Time
+LoRaPHY::GetOnAirTime (Ptr<Packet> packet)
 {
-    if (m_state != STANDBY)
-    {
-        return;
-    }
+    double Ts = pow(2, m_tx_sf) / m_tx_bandwidth_Hz;    /*  in seconds  */
+    double Tpreamble = (m_tx_numPreambles + 4.25) * Ts;
+    uint32_t pl = packet->GetSize ();
+    
+    double de = m_lowDataRateOpt ? 1 : 0;
+    double h = m_tx_headerDisabled? 1 : 0;
+    double crc = m_crcEnabled? 1 : 0;
+    
+    double payloadSymNb = 8 + std::max((std::ceil((8*pl - 4*m_tx_sf + 28 + 16*crc - 20*h) / (4*(m_tx_sf - 2*de)))) *
+                            (m_tx_codingRate + 4), (double)0.0);
+    
+    double Tpayload = payloadSymNb * Ts;
+    
+    return Seconds(Tpayload + Tpreamble);
 }
+
 
 }
 }
