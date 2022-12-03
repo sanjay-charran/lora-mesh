@@ -176,30 +176,111 @@ void
 LoRaPHY::SwitchStateTX (void)
 {
     m_state = TX;
+    return;
 }
 
 void
 LoRaPHY::SwitchStateRX (void)
 {
     m_state = RX;
+    return;
 }
 
 void
 LoRaPHY::SwitchStateSTANDBY (void)
 {
     m_state = STANDBY;
+    return;
 }
 
 void
 LoRaPHY::SwitchStateSLEEP (void)
 {
     m_state = SLEEP;
+    return;
 }
 
 PHYState
 LoRaPHY::GetState (void) const
 {
     return m_state;
+}
+
+void
+LoRaPHY::SetTxBW (double bw_Hz)
+{
+    m_tx_bandwidth_Hz = bw_Hz;
+    return;
+}
+
+double
+LoRaPHY::GetTxBW (void) const
+{
+    return m_tx_bandwidth_Hz;
+}
+
+void
+LoRaPHY::SetTxPreamples (uint32_t num_preamples)
+{
+    m_tx_numPreambles = num_preamples;
+    return;
+}
+
+uint32_t
+LoRaPHY::GetTxPreamples (void) const
+{
+    return m_tx_numPreambles;
+}
+
+void
+LoRaPHY::SetTxCodingRate (uint8_t coding_rate)
+{
+    m_tx_codingRate = coding_rate;
+    return;
+}
+
+uint8_t
+LoRaPHY::GetCodingRate (void) const
+{
+    return m_tx_codingRate;
+}
+
+void
+LoRaPHY::ToggleHeader (void)
+{
+    m_tx_headerDisabled = !m_tx_headerDisabled;
+    return;
+}
+
+bool
+LoRaPHY::IsHeaderDisabled (void) const
+{
+    return m_tx_headerDisabled;
+}
+
+void
+LoRaPHY::ToggleCRC (void)
+{
+    m_crcEnabled = !m_crcEnabled;
+    return;
+}
+
+bool
+LoRaPHY::IsCRCEnabled (void) const
+{
+    return m_crcEnabled;
+}
+
+void
+LoRaPHY::ToggleLowDataRateOpt (void)
+{
+    m_lowDataRateOpt = !m_lowDataRateOpt;
+    return;
+}
+
+bool IsLowDataRateOptEnabled (void) const
+{
+    return m_lowDataRateOpt;
 }
 
 void

@@ -54,11 +54,23 @@ pubilc:
     void SetTxSF (uint8_t sf);
     uint8_t GetTxSF (void) const;
     
-    void SetTxBW (double bw_Hz);//
-    double GetTxBW (void) const;//
+    void SetTxBW (double bw_Hz);
+    double GetTxBW (void) const;
     
-    void SetTxPreamples (uint32_t num_preamples);//
-    uint32_t GetTxPreamples (void) const;//
+    void SetTxPreamples (uint32_t num_preamples);
+    uint32_t GetTxPreamples (void) const;
+    
+    void SetTxCodingRate (uint8_t coding_rate);
+    uint8_t GetCodingRate (void) const;
+    
+    void ToggleHeader (void);
+    bool IsHeaderDisabled (void) const;
+    
+    void ToggleCRC (void);
+    bool IsCRCEnabled (void) const;
+    
+    void ToggleLowDataRateOpt (void);
+    bool IsLowDataRateOptEnabled (void) const;
     
     void SetRxSens (double sens_dBm);
     double GetRxSens (void) const;
