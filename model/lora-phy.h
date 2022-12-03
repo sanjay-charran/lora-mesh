@@ -75,7 +75,8 @@ pubilc:
     
     /*  sending and receiving */
     void Send (Ptr<Packet> packet); /*  send/receive using current transmit/receive parameters  */
-    void Receive (Ptr<Packet> packet);//
+    void StartReceive (Ptr<Packet> packet, Time duration, uint8_t sf, double rx_power_dBm, double freq_MHz);//
+    void EndReceive (Ptr<packet> packet);
     
     Time GetOnAirTime (Ptr<Packet> packet);
     

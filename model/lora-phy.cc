@@ -251,6 +251,57 @@ LoRaPHY::GetOnAirTime (Ptr<Packet> packet)
     return Seconds(Tpayload + Tpreamble);
 }
 
+void
+LoRaPHY::StartReceive (Ptr<Packet> packet, Time duration, uint8_t sf, double rx_power_dBm, double freq_MHz)
+{
+    bool canLockOn = true;
+    
+    if (m_state == STANDBY)
+    {
+        if (freq_MHz != m_rx_freq_MHz)
+        {
+            canLockOn = false;
+        }
+        
+        if (sf != m_tx_sf)
+        {
+            canLockOn = false;
+        }
+        
+        if (rx_power_dBm < m_rx_sens_dBm)
+        {
+            canLockOn = false;
+        }
+        
+        if (canLockOn)
+        {
+            SwitchStateRX();
+            
+            Simulator::Scedule (duration, &LoRaPHY::EndReceive, this, packet);
+            
+            m_phyRxBeginTrace (packet);
+        }
+    }
+    
+    return;
+}
+
+void
+LoRaPHY::EndReceive (Ptr<packet> packet)
+{
+    SwitchStateSTANDBY ();
+    
+    m_phyRxEndTrace (packet);
+    
+    if (m_device)
+    {
+        m_successfullyReceivedPacket (packet, m_device->GetNode()->GetId());
+    }
+    else
+    {
+        m_successfullyReceivedPacket (packet, 0);
+    }
+}
 
 }
 }
