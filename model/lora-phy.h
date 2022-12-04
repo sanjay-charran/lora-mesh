@@ -8,7 +8,7 @@
 #include "ns3/callback.h"
 #include "ns3/nstime.h
 
-#include "ns3/lora-mesh-channel.h"   //to be written
+#include "ns3/lora-mesh-channel.h"
 #include "ns3/lora-net-device.h"
 
 #define MINIMUM_LORA_SPREADING_FACTOR   7
