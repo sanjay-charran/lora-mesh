@@ -74,13 +74,13 @@ LoRaPHY::GetNetDevice (void) const
 }
 
 void 
-LoRaPHY::SetChannel (Ptr<LoRaMeshChannel> c)
+LoRaPHY::SetChannel (Ptr<LoRaChannel> c)
 {
     m_channel = c;
     return;
 }
 
-Ptr<LoRaMeshChannel> 
+Ptr<LoRaChannel> 
 LoRaPHY::GetChannel (void) const
 {
     return m_channel;

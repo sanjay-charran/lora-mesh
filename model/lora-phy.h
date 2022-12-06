@@ -8,7 +8,7 @@
 #include "ns3/callback.h"
 #include "ns3/nstime.h
 
-#include "ns3/lora-mesh-channel.h"
+#include "ns3/lora-channel.h"
 #include "ns3/lora-net-device.h"
 
 #define MINIMUM_LORA_SPREADING_FACTOR   7
@@ -41,8 +41,8 @@ pubilc:
     Ptr<LoRaNetDevice> GetNetDevice (void) const;
     
     /*  setter and getter for channel   */
-    void SetChannel (Ptr<LoRaMeshChannel> c);
-    Ptr<LoRaMeshChannel> GetChannel (void) const;
+    void SetChannel (Ptr<LoRaChannel> c);
+    Ptr<LoRaChannel> GetChannel (void) const;
     
     /*  setter and getters for tx/rx params */
     void SetTxPower (double power_dBm);
