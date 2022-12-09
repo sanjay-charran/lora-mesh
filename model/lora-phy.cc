@@ -291,13 +291,13 @@ LoRaPHY::Send (Ptr<Packet> packet)
         return; /*  phy layer busy  */
     }
     
-    dur = GetOnAirTime (packet);
+    Time dur = GetOnAirTime (packet);
     
     SwitchStateTX ();
     
     //not sure about tag bit need to dbl check
     
-    m_channel->Send (this, packet, m_tx_power_dBm, m_tx_freq_MHz, m_tx_sf);
+    m_channel->Send (this, packet, m_tx_power_dBm, m_tx_freq_MHz, m_tx_sf, dur);
     
     Simulator::Scedule (dur, &SwitchStateSTANDBY, this);
     
