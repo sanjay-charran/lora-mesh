@@ -44,6 +44,9 @@ pubilc:
     void SetChannel (Ptr<LoRaChannel> c);
     Ptr<LoRaChannel> GetChannel (void) const;
     
+    void SetMobility (Ptr<MobilityModel> mobility);
+    Ptr<MobilityModel> GetMobility (void) const;
+    
     /*  setter and getters for tx/rx params */
     void SetTxPower (double power_dBm);
     double GetTxPower (void) const;
@@ -101,6 +104,8 @@ protected:
     /*  the net device and channel attached to this node    */
     Ptr<LoRaNetDevice> m_device;
     Ptr<LoRaMeshChannel> m_channel;
+    
+    Ptr<MobilityModel> m_mobility;
     
     /*  transmit parameters */
     double      m_tx_power_dBm;

@@ -86,6 +86,19 @@ LoRaPHY::GetChannel (void) const
     return m_channel;
 }
 
+void
+LoRaPHY::SetMobility (Ptr<MobilityModel> mobility)
+{
+    m_mobility = mobility;
+    return;
+}
+
+Ptr<MobilityModel> 
+LoRaPHY::GetMobility (void) const
+{
+    return m_mobility;
+}
+
 void 
 LoRaPHY::SetTxPower (double power_dBm)
 {

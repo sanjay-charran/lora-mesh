@@ -13,7 +13,11 @@ LoRaChannel::GetTypeId (void)
 {
     static tid = TypeId ("ns3::LoRaChannel")
         .SetParent<Channel> ()
-        .SetGroupName ("lora_mesh");
+        .SetGroupName ("lora_mesh")
+        .AddTraceSource("PacketSent",
+                        "Trace source fired whenever a packet goes out on the channel",
+                        MakeTraceSourceAccessor (&LoraChannel::m_packetSent),
+                        "ns3::Packet::TracedCallback");
         
     return tid;
 }
@@ -119,7 +123,56 @@ LoRaChannel::GetDelayModel (void) const
     return m_delayModel;
 }
 
+void
+LoRaChannel::Send (Ptr<LoRaPHY> sender, Ptr<Packet> packet, double tx_power_dBm, double tx_freq_MHz, uint8_t tx_sf, Time dur)
+{
+    Ptr<MobilityModel> sender_mobility = sender->GetMobility();
+    Ptr<MobilityModel> receiver_mobility;
+    Time delay;
+    double rx_power_dBm;
+    uint32_t dst_id;
+    
+    std::list<Ptr<LoRaPHY>>::iterator i;
+    
+    for (i = m_phyList.begin();i != m_phyList.end();i++)
+    {
+        if (sender != (*i))
+        {
+            receiver_mobility = (*i)->GetMobility();
+            delay = m_delayModel->GetDelay(sender_mobility, receiver_mobility);
+            rx_power_dBm = GetRxPower (tx_power_dBm, sender_mobility, receiver_mobility);
+            
+            if ((*i)->GetDevice() != 0)
+            {
+                dst_id = (*i)->GetDevice()->GetNode()->GetId();
+            }
+            else
+            {
+                dst_id = 0;
+            }
+            
+            Simulator::ScheduleWithContext (dst_id, delay, &LoRaChannel::Receive, this, (*i), packet, rx_power_dBm, tx_freq_MHz, tx_sf, dur);
+        
+            m_packetSent(packet);
+        }
+    }
+    
+    return;
+}
 
+void
+LoRaChannel::Receive (Ptr<LoRaPHY> receiver, Ptr<Packet> packet, double rx_power_dBm, double rx_freq_MHz, uint8_t rx_sf, Time dur)
+{
+    receiver->StartReceive(packet, dur, rx_sf, rx_power_dBm, rx_freq_MHz);
+    
+    return;
+}
+
+double 
+LoRaChannel::GetRxPower (double tx_power_dBm, Ptr<MobilityModel> sender_mobility, Ptr<MobilityModel> receiver_mobility)
+{
+    return m_lossModel->CalcRxPower(tx_power_dBm, sender_mobility, receiver_mobility);
+}
 
 }
 }
