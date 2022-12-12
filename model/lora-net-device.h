@@ -29,6 +29,9 @@ public:
     void SetPHY (Ptr<LoRaPHY> phy);
     Ptr<LoRaPHY> GetPHY(void) const;
     
+    void Send (Ptr<Packet> packet);
+    void Receive (Ptr<Packet> packet);
+    
     /*  virtual funcs from NetDevice    */
     void SetNode (Ptr<Node> node);
     Ptr<Node> GetNode (void) const;
@@ -61,13 +64,12 @@ public:
     void AddLinkChangeCallback (Callback<void> callback);
     
 private:
-    void Forward (Ptr<Packet> packet, Mac48Address from, Mac48Address to);    //consider changing addr type
     
     Ptr<Node> m_node;
     Ptr<LoRaPHY> m_phy;
     Ptr<LoRaMAC> m_mac;
     
-    
+    NetDevice::ReceiveCallback m_receiveCallback;
 };
 
 }
