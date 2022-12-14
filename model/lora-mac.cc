@@ -7,7 +7,8 @@
 namespace ns3 {
 namespace lora_mesh {
  
-TypeId LoRaMAC::GetTypeId (void)
+TypeId 
+LoRaMAC::GetTypeId (void)
 {
     static tid = TypeId ("ns3::LoRaMAC")
         .SetParent<Object> ()
@@ -50,7 +51,8 @@ LoRaMAC::GetDevice(void) const
     return m_device;
 }
 
-uint32_t GetId (void) const
+uint32_t 
+LoRaMAC::GetId (void) const
 {
     if (m_device)
     {
@@ -60,7 +62,8 @@ uint32_t GetId (void) const
     return 0;
 }
 
-void LoRaMAC::AddTableEntry (RoutingTableEntry entry)
+void 
+LoRaMAC::AddTableEntry (RoutingTableEntry entry)
 {
     list<RoutingTableEntry>::iterator it = m_table.begin();
     
@@ -93,7 +96,8 @@ void LoRaMAC::AddTableEntry (RoutingTableEntry entry)
     return;
 }
 
-void LoRaMAC::RemoveTableEntry (utin16_t s, uint16_t r)
+void 
+LoRaMAC::RemoveTableEntry (utin16_t s, uint16_t r)
 {
     list<RoutingTableEntry>::iterator it = m_table.begin();
     
@@ -117,7 +121,8 @@ void LoRaMAC::RemoveTableEntry (utin16_t s, uint16_t r)
     return;
 }
 
-void LoRaMAC::UpdateTableEntry (RoutingTableEntry entry)
+void 
+LoRaMAC::UpdateTableEntry (RoutingTableEntry entry)
 {
     list<RoutingTableEntry>::iterator it = m_table.begin();
     
@@ -155,7 +160,8 @@ LoRaMAC::IsErrEntry (RoutingTableEntry entry)
     return false;
 }
 
-RoutingTableEntry LoRaMAC::TableLookup (uint16_t s, uint16_t r) const
+RoutingTableEntry 
+LoRaMAC::TableLookup (uint16_t s, uint16_t r) const
 {
     RoutingTableEntry err = {GetId(), GetId(), 1, 0}; /*  an error return since it ought to be 0 etx for node to transmit to itself   */
     list<RoutingTableEntry>::iterator it = m_table.begin();
@@ -171,7 +177,8 @@ RoutingTableEntry LoRaMAC::TableLookup (uint16_t s, uint16_t r) const
     return err; /*  returns initialised val */
 }
 
-RoutingTableEntry LoRaMAC::TableLookup (uint64_t n) const
+RoutingTableEntry 
+LoRaMAC::TableLookup (uint64_t n) const
 {
     RoutingTableEntry err = {GetId(), GetId(), 1, 0}; /*  an error return since it ought to be 0 etx for node to transmit to itself   */
     list<RoutingTableEntry>::iterator it = m_table.begin();
@@ -187,18 +194,41 @@ RoutingTableEntry LoRaMAC::TableLookup (uint64_t n) const
 }
 
 void
-LoRaMAC::Send (Ptr<Packet> packet)
+LoRaMAC::Broadcast (Ptr<Packet> packet)
 {
-    /*  Assumes header is already setup */
+    LoRaMeshHeader header;
+    
     if (m_phy)
     {
+        header.SetType(BROADCAST);
+        header.SetSrc(GetId());
+        /*  broadcast doesnt have specific destination node so no need to set it    */
+        
+        packet->AddHeader(header);
         m_phy->Send(packet);
     }
     
     return;
 }
 
-
+void 
+LoRaMAC::SendTo (Ptr<Packet> packet, uint32_t dest)
+{
+    /*  send from attached node to dest node ID */
+    LoRaMeshHeader header;
+    
+    if (m_phy)
+    {
+        header.SetType(DIRECTED);
+        header.SetSrc(GetId());
+        header.SetDest(dest);
+        
+        packet->AddHeader(header);
+        m_phy->Send(packet);
+    }
+    
+    return;
+}
 
 }
 }

@@ -54,13 +54,13 @@ LoRaNetDevice::GetPHY(void) const
 {
     return m_phy;
 }
- 
+
 void
-LoRaNetDevice::Send (Ptr<Packet> packet)
+LoRaNetDevice::Broadcast (Ptr<Packet> packet)
 {
-    if (m_mac != 0)
+    if (m_mac)
     {
-        m_mac->Send(packet);
+        m_mac->Broadcast(packet);
     }
     
     return;
@@ -69,7 +69,7 @@ LoRaNetDevice::Send (Ptr<Packet> packet)
 void
 LoRaNetDevice::SendTo (Ptr<Packet> packet, uint32_t dest)
 {
-    if (m_mac != 0)
+    if (m_mac)
     {
         m_mac->SendTo(packet, dest);
     }

@@ -29,7 +29,7 @@ public:
     void SetPHY (Ptr<LoRaPHY> phy);
     Ptr<LoRaPHY> GetPHY(void) const;
     
-    void Send (Ptr<Packet> packet);
+    void Broadcast (Ptr<Packet> packet);
     void SendTo (Ptr<Packet> packet, uint32_t dest);
     void Receive (Ptr<Packet> packet);
     

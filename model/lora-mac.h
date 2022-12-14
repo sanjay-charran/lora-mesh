@@ -7,7 +7,7 @@
 
 #include "ns3/lora-phy.h"
 #include "ns3/lora-net-device.h"
-
+#include "ns3/lora-mesh-header.h"
 
 #include <list>
 #include <iterator>
@@ -53,10 +53,9 @@ public:
     RoutingTableEntry TableLookup (uint64_t n) const;
     
     void ForwardPacket (Ptr<Packet> packet);//
-    void Send (Ptr<Packet> packet);
-    void SendTo (Ptr<Packet> packet, uint32_t dest);//
-    //add in forwarding logic and feedback (need headers)
-    
+    void Broadcast (Ptr<Packet> packet);
+    void SendTo (Ptr<Packet> packet, uint32_t dest);
+    //  need to add scheduling for timeslots at this layer
 private:
     
     Ptr<LoRaPHY> m_phy;
