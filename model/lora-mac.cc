@@ -24,15 +24,40 @@ LoRaMAC::~LoRaMAC ()
 {
 }
 
-void LoRaMAC::SetID (uint16_t id)
+void
+LoRaMAC::SetPHY (Ptr<LoRaPHY> phy)
 {
-    m_id = id;
+    m_phy = phy;
     return;
 }
 
-uint16_t LoRaMAC::GetID (void) const
+Ptr<LoRaPHY>
+LoRaMAC::GetPHY (void) const
 {
-    return m_id;
+    return m_phy;
+}
+
+void
+LoRaMAC::SetDevice (Ptr<LoRaNetDevice> device)
+{
+    m_device = device;
+    return;
+}
+
+Ptr<LoRaNetDevice> 
+LoRaMAC::GetDevice(void) const
+{
+    return m_device;
+}
+
+uint32_t GetId (void) const
+{
+    if (m_device)
+    {
+        return m_device->GetNode()->GetId();
+    }
+    
+    return 0;
 }
 
 void LoRaMAC::AddTableEntry (RoutingTableEntry entry)
@@ -119,9 +144,20 @@ void LoRaMAC::UpdateTableEntry (RoutingTableEntry entry)
     return;
 }
 
+bool
+LoRaMAC::IsErrEntry (RoutingTableEntry entry)
+{
+    if (entry.s == entry.r && entry.etx != 0)
+    {
+        return true;
+    }
+    
+    return false;
+}
+
 RoutingTableEntry LoRaMAC::TableLookup (uint16_t s, uint16_t r) const
 {
-    RoutingTableEntry err = {m_id, m_id, 1, 0}; /*  an error return since it ought to be 0 etx for node to transmit to itself   */
+    RoutingTableEntry err = {GetId(), GetId(), 1, 0}; /*  an error return since it ought to be 0 etx for node to transmit to itself   */
     list<RoutingTableEntry>::iterator it = m_table.begin();
     
     for (;it != m_table.end();++it)
@@ -137,7 +173,7 @@ RoutingTableEntry LoRaMAC::TableLookup (uint16_t s, uint16_t r) const
 
 RoutingTableEntry LoRaMAC::TableLookup (uint64_t n) const
 {
-    RoutingTableEntry err = {m_id, m_id, 1, 0}; /*  an error return since it ought to be 0 etx for node to transmit to itself   */
+    RoutingTableEntry err = {GetId(), GetId(), 1, 0}; /*  an error return since it ought to be 0 etx for node to transmit to itself   */
     list<RoutingTableEntry>::iterator it = m_table.begin();
     
     if (m_table.size() <= n)

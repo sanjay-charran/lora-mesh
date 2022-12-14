@@ -66,6 +66,17 @@ LoRaNetDevice::Send (Ptr<Packet> packet)
     return;
 }
 
+void
+LoRaNetDevice::SendTo (Ptr<Packet> packet, uint32_t dest)
+{
+    if (m_mac != 0)
+    {
+        m_mac->SendTo(packet, dest);
+    }
+    
+    return;
+}
+
 void Receive (Ptr<Packet> packet)
 {
     m_receiveCallback (this, packet, 0, Address());

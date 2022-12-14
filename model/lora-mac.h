@@ -5,6 +5,10 @@
 #include "ns3/object.h"
 #include "ns3/ptr.h"
 
+#include "ns3/lora-phy.h"
+#include "ns3/lora-net-device.h"
+
+
 #include <list>
 #include <iterator>
 
@@ -13,8 +17,8 @@ namespace lora_mesh {
  
 struct RoutingTableEntry
 {
-    uint16_t    s;      /*  id's for sender and receiver    */
-    uint16_t    r;
+    uint32_t    s;      /*  id's for sender and receiver    */
+    uint32_t    r;
     float       etx;
     uint8_t     last;    
 };
@@ -30,25 +34,33 @@ public:
     /*  TypeId  */
     static TypeId GetTypeId (void);
     
-    /*  setter and getter for unique id    */
-    void SetID (uint16_t id);
-    uint16_t GetID (void) const;
+    void SetPHY (Ptr<LoRaPHY> phy);
+    Ptr<LoRaPHY> GetPHY (void) const;
+    
+    void SetDevice (Ptr<LoRaNetDevice> device);
+    Ptr<LoRaNetDevice> GetDevice(void) const;
+    
+    uint32_t GetId (void) const;
     
     /*  add, update, and remove entry for routing table  */
     void AddTableEntry (RoutingTableEntry entry);
-    void RemoveTableEntry (utin16_t s, uint16_t r);
+    void RemoveTableEntry (uint32_t s, uint32_t r);
     void UpdateTableEntry (RoutingTableEntry entry);
+    bool IsErrEntry (RoutingTableEntry entry);
     
     /*  routing table lookup    */
-    RoutingTableEntry TableLookup (uint16_t s, uint16_t r) const;
+    RoutingTableEntry TableLookup (uint32_t s, uint32_t r) const;
     RoutingTableEntry TableLookup (uint64_t n) const;
     
-    //add in forwarding logic and feedback
+    void ForwardPacket (Ptr<Packet> packet);
+    void Send (Ptr<Packet> packet);
+    void SendTo (Ptr<Packet> packet, uint32_t dest);
+    //add in forwarding logic and feedback (need headers)
     
 private:
     
-    /*  unique id for */
-    uint16_t m_id;
+    Ptr<LoRaPHY> m_phy;
+    Ptr<LoRaNetDevice> m_device;
     
     /*  routing table containing info the end device is aware of    */
     list<RoutingTableEntry> m_table;
