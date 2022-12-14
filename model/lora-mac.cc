@@ -186,5 +186,19 @@ RoutingTableEntry LoRaMAC::TableLookup (uint64_t n) const
     return (*it);
 }
 
+void
+LoRaMAC::Send (Ptr<Packet> packet)
+{
+    /*  Assumes header is already setup */
+    if (m_phy)
+    {
+        m_phy->Send(packet);
+    }
+    
+    return;
+}
+
+
+
 }
 }

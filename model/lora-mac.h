@@ -52,9 +52,9 @@ public:
     RoutingTableEntry TableLookup (uint32_t s, uint32_t r) const;
     RoutingTableEntry TableLookup (uint64_t n) const;
     
-    void ForwardPacket (Ptr<Packet> packet);
+    void ForwardPacket (Ptr<Packet> packet);//
     void Send (Ptr<Packet> packet);
-    void SendTo (Ptr<Packet> packet, uint32_t dest);
+    void SendTo (Ptr<Packet> packet, uint32_t dest);//
     //add in forwarding logic and feedback (need headers)
     
 private:
