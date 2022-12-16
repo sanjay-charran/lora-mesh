@@ -12,7 +12,9 @@ eunm MsgType
     
     BROADCAST = 1,          /*  regular broadcasting to all nodes in transmission range */
     
-    DIRECTED = 2            /*  packet being sent to only a specific node   */
+    DIRECTED = 2,           /*  packet being sent to only a specific node   */
+
+    FEEDBACK = 3            /*  feedback for packet reception   */
 };
     
 class LoRaMeshHeader : public Header

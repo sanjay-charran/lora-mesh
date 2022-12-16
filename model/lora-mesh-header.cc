@@ -72,7 +72,7 @@ uint32_t
 LoRaMeshHeader::GetSerializedSize (void) const
 {
     /*  4(src) + 4(dest) + 1(type)  = 9 */
-    /*  type is 1 since only 3 options in enum  */
+    /*  type is 1 byte since only 4 options in enum  */
     return (uint32_t)9;
 }
 
@@ -99,7 +99,7 @@ LoRaMeshHeader::Deserialize (Buffer::Iterator start)
 void 
 LoRaMeshHeader::Print (std::ostream &os) const
 {
-    os << "Message Type: " << ((m_type == ROUTING_UPDATE)?"ROUTING_UPDATE":((m_type == BROADCAST)?"BROADCAST":"DIRECTED")) << std::endl;
+    os << "Message Type: " << ((m_type == ROUTING_UPDATE)?"ROUTING_UPDATE":((m_type == BROADCAST)?"BROADCAST":(m_type == DIRECTED?"DIRECTED":"FEEDBACK"))) << std::endl;
     os << "Source ID: " << m_src << std::endl;
     os << "Destination ID: " << m_dest << std::endl;
     

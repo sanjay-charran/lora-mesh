@@ -11,6 +11,10 @@
 
 #include <list>
 #include <iterator>
+#include <queue>
+#include <deque>
+
+#define MAX_NUMEL_LAST_PACKETS_LIST 10
 
 namespace ns3 {
 namespace lora_mesh {
@@ -56,13 +60,26 @@ public:
     void Broadcast (Ptr<Packet> packet);
     void SendTo (Ptr<Packet> packet, uint32_t dest);
     //  need to add scheduling for timeslots at this layer
+    
 private:
+    
+    /*  packet queue funcs  */
+    void AddPacketToQueue (Ptr<Packet> packet);
+    Ptr<Packet> RemovePacketFromQueue (void);
+    Ptr<Packet> GetNexPacketFromQueue (void);
+    
+    /*  handled packet list */
+    void AddToLastPacketList (Ptr<Packet> packet);
+    bool SearchLastPacketList (Ptr<Packet> packet);
     
     Ptr<LoRaPHY> m_phy;
     Ptr<LoRaNetDevice> m_device;
     
     /*  routing table containing info the end device is aware of    */
-    list<RoutingTableEntry> m_table;
+    std::list<RoutingTableEntry> m_table;
+    
+    std::queue<Ptr<Packet>> m_packet_queue;
+    std::deque<uint64_t> m_last_packets;
 };
 
 }

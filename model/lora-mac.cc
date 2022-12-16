@@ -65,7 +65,7 @@ LoRaMAC::GetId (void) const
 void 
 LoRaMAC::AddTableEntry (RoutingTableEntry entry)
 {
-    list<RoutingTableEntry>::iterator it = m_table.begin();
+    std::list<RoutingTableEntry>::iterator it = m_table.begin();
     
     if (m_table.empty())
     {
@@ -99,7 +99,7 @@ LoRaMAC::AddTableEntry (RoutingTableEntry entry)
 void 
 LoRaMAC::RemoveTableEntry (utin16_t s, uint16_t r)
 {
-    list<RoutingTableEntry>::iterator it = m_table.begin();
+    std::list<RoutingTableEntry>::iterator it = m_table.begin();
     
     if (m_table.empty())
     {
@@ -124,7 +124,7 @@ LoRaMAC::RemoveTableEntry (utin16_t s, uint16_t r)
 void 
 LoRaMAC::UpdateTableEntry (RoutingTableEntry entry)
 {
-    list<RoutingTableEntry>::iterator it = m_table.begin();
+    std::list<RoutingTableEntry>::iterator it = m_table.begin();
     
     if (m_table.empty())
     {
@@ -164,7 +164,7 @@ RoutingTableEntry
 LoRaMAC::TableLookup (uint16_t s, uint16_t r) const
 {
     RoutingTableEntry err = {GetId(), GetId(), 1, 0}; /*  an error return since it ought to be 0 etx for node to transmit to itself   */
-    list<RoutingTableEntry>::iterator it = m_table.begin();
+    std::list<RoutingTableEntry>::iterator it = m_table.begin();
     
     for (;it != m_table.end();++it)
     {
@@ -181,7 +181,7 @@ RoutingTableEntry
 LoRaMAC::TableLookup (uint64_t n) const
 {
     RoutingTableEntry err = {GetId(), GetId(), 1, 0}; /*  an error return since it ought to be 0 etx for node to transmit to itself   */
-    list<RoutingTableEntry>::iterator it = m_table.begin();
+    std::list<RoutingTableEntry>::iterator it = m_table.begin();
     
     if (m_table.size() <= n)
     {
@@ -228,6 +228,56 @@ LoRaMAC::SendTo (Ptr<Packet> packet, uint32_t dest)
     }
     
     return;
+}
+
+void
+LoRaMAC::AddPacketToQueue (Ptr<Packet> packet)
+{
+    m_packet_queue.push(packet);
+    return;
+}
+
+Ptr<Packet>
+LoRaMAC::RemovePacketFromQueue (void)
+{
+    Ptr<Packet> popped = m_packet_queue.pop();
+    return popped;
+}
+
+Ptr<Packet>
+LoRaMAC::GetNexPacketFromQueue (void);
+{
+    return m_packet_queue.front();
+}
+
+void 
+LoRaMAC::AddToLastPacketList (Ptr<Packet> packet)
+{
+    m_last_packets.push_back(packet->GetUid());
+    
+    if (m_last_packets.size() > MAX_NUMEL_LAST_PACKETS_LIST)
+    {
+        m_last_packets.pop_front();
+    }
+    
+    return;
+}
+
+bool 
+LoRaMAC::SearchLastPacketList (Ptr<Packet> packet);
+{
+    unsigned int i;
+    uint64_t id = packet->GetUid();
+    
+    for (i = 0;i < MAX_NUMEL_LAST_PACKETS_LIST;i++)
+    {
+        if (m_last_packets[i] == id)
+        {
+            return true;
+        }
+    }
+    
+    return false;
 }
 
 }
