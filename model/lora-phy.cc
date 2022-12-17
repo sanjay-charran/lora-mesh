@@ -87,6 +87,19 @@ LoRaPHY::GetChannel (void) const
 }
 
 void
+LoRaPHY::SetMAC (Ptr<LoRaMAC> mac)
+{
+    m_mac = mac;
+    return;
+}
+
+Ptr<LoRaMAC> 
+LoRaPHY::GetMAC (void) const
+{
+    return m_mac;
+}
+
+void
 LoRaPHY::SetMobility (Ptr<MobilityModel> mobility)
 {
     m_mobility = mobility;
@@ -386,6 +399,11 @@ LoRaPHY::EndReceive (Ptr<packet> packet)
     SwitchStateSTANDBY ();
     
     m_phyRxEndTrace (packet);
+    
+    if (m_mac)
+    {
+        m_mac->Receive(packet);
+    }
     
     if (m_device)
     {

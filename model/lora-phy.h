@@ -10,6 +10,7 @@
 
 #include "ns3/lora-channel.h"
 #include "ns3/lora-net-device.h"
+#include "ns3/lora-mac.h"
 
 #define MINIMUM_LORA_SPREADING_FACTOR   7
 #define MAXIMUM_LORA_SPREADING_FACTOR   12
@@ -43,6 +44,9 @@ pubilc:
     /*  setter and getter for channel   */
     void SetChannel (Ptr<LoRaChannel> c);
     Ptr<LoRaChannel> GetChannel (void) const;
+    
+    void SetMAC (Ptr<LoRaMAC> mac);
+    Ptr<LoRaMAC> GetMAC (void) const;
     
     void SetMobility (Ptr<MobilityModel> mobility);
     Ptr<MobilityModel> GetMobility (void) const;
@@ -101,9 +105,9 @@ protected:
     
     PHYState m_state;
     
-    /*  the net device and channel attached to this node    */
     Ptr<LoRaNetDevice> m_device;
     Ptr<LoRaMeshChannel> m_channel;
+    Ptr<LoRaMAC> m_mac;
     
     Ptr<MobilityModel> m_mobility;
     

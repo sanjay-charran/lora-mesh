@@ -193,6 +193,38 @@ LoRaMAC::TableLookup (uint64_t n) const
     return (*it);
 }
 
+void 
+LoRaMAC::Receive (Ptr<Packet> packet)
+{
+    LoRaMeshHeader header;
+    packet->PeekHeader(header);
+    
+    switch (header.GetType())
+    {
+        case ROUTING_UPDATE:
+            //update routing table
+            break;
+        case BROADCAST:
+            //unsure if to implement
+            break;
+        case DIRECTED:
+            
+            if (header.GetDest() == GetId())
+            {
+                packet->RemoveHeader(header);
+                m_device->Receive(packet);
+            }
+            
+            /*  forward if not recipient    */
+            AddPacketToQueue (packet);
+            //add feedback
+            
+            break;
+        case FEEDBACK:
+            break;
+    }
+}
+
 void
 LoRaMAC::Broadcast (Ptr<Packet> packet)
 {

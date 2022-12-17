@@ -56,7 +56,7 @@ public:
     RoutingTableEntry TableLookup (uint32_t s, uint32_t r) const;
     RoutingTableEntry TableLookup (uint64_t n) const;
     
-    void ForwardPacket (Ptr<Packet> packet);//
+    void Receive(Ptr<Packet> packet);
     void Broadcast (Ptr<Packet> packet);
     void SendTo (Ptr<Packet> packet, uint32_t dest);
     //  need to add scheduling for timeslots at this layer
