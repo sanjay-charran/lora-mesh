@@ -70,7 +70,7 @@ uint32_t
 LoRaMeshRoutingHeader::Deserialize (Buffer::Iterator start)
 {
     start.Read ((uint8_t *)&m_etx, sizeof(float));
-    start.ReadU8 (m_last);
+    m_last = start.ReadU8 ();
     
     return GetSerializedSize ();
 }
