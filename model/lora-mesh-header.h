@@ -34,6 +34,9 @@ public:
     void SetType (MsgType type);
     MsgType GetType (void) const;
     
+    void SetFwd (uint32_t fwd);
+    uint32_t GetFwd (void) const;
+    
     uint32_t GetSerializedSize (void) const;
     
     uint32_t Deserialize (Buffer::Iterator start);
@@ -45,6 +48,7 @@ private:
     MsgType m_type;
     uint32_t m_src;
     uint32_t m_dest;
+    uint32_t m_fwd;
 };
 
 }

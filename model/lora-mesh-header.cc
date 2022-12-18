@@ -12,6 +12,7 @@ LoRaMeshHeader::LoRaMeshHeader ()
     /*  init to irrational value if received by another node    */
     m_src = 0;
     m_dest = 0;
+    m_fwd = 0;
     m_type = DIRECTED;
 }
     
@@ -68,12 +69,25 @@ LoRaMeshHeader::GetType (void) const
     return m_type;
 }
 
+void
+LoRaMeshHeader::SetFwd (uint32_t fwd)
+{
+    m_fwd = fwd;
+    return;
+}
+
+uint32_t
+LoRaMeshHeader::GetFwd (void) const
+{
+    return m_fwd;
+}
+
 uint32_t
 LoRaMeshHeader::GetSerializedSize (void) const
 {
-    /*  4(src) + 4(dest) + 1(type)  = 9 */
+    /*  4(src) + 4(dest) + 4(fwd) + 1(type)  = 13 */
     /*  type is 1 byte since only 4 options in enum  */
-    return (uint32_t)9;
+    return (uint32_t)13;
 }
 
 void
@@ -82,6 +96,7 @@ LoRaMeshHeader::Serialize (Buffer::Iterator start) const
     start.WriteU8 ((uint8_t)m_type);
     start.WriteU32 (m_src);
     start.WriteU32 (m_dest);
+    start.WriteU32 (m_fwd);
     
     return;
 }
@@ -92,6 +107,7 @@ LoRaMeshHeader::Deserialize (Buffer::Iterator start)
     m_type = (MsgType)start.ReadU8 ();
     m_src = start.ReadU32 ();
     m_dest = start.ReadU32 ();
+    m_fwd = start.ReadU32 ();
     
     return GetSerializedSize ();
 }
@@ -102,6 +118,7 @@ LoRaMeshHeader::Print (std::ostream &os) const
     os << "Message Type: " << ((m_type == ROUTING_UPDATE)?"ROUTING_UPDATE":((m_type == BROADCAST)?"BROADCAST":(m_type == DIRECTED?"DIRECTED":"FEEDBACK"))) << std::endl;
     os << "Source ID: " << m_src << std::endl;
     os << "Destination ID: " << m_dest << std::endl;
+    os << "Last Forwarder: " << m_fwd << std::endl;
     
     return;
 }

@@ -50,8 +50,11 @@ public:
     void AddTableEntry (RoutingTableEntry entry);
     void RemoveTableEntry (uint32_t s, uint32_t r);
     void UpdateTableEntry (RoutingTableEntry entry);
+    bool EntryExists (RoutingTableEntry entry);
     bool IsErrEntry (RoutingTableEntry entry);
     
+    float CalcETX (uint32_t src, uint32_t dest);//figure this out somehow
+  
     /*  routing table lookup    */
     RoutingTableEntry TableLookup (uint32_t s, uint32_t r) const;
     RoutingTableEntry TableLookup (uint64_t n) const;
@@ -59,6 +62,8 @@ public:
     void Receive(Ptr<Packet> packet);
     void Broadcast (Ptr<Packet> packet);
     void SendTo (Ptr<Packet> packet, uint32_t dest);
+    
+    Ptr<Packet> MakeFeedback (Ptr<Packet> packet);//
     //  need to add scheduling for timeslots at this layer
     
 private:
@@ -71,6 +76,7 @@ private:
     /*  handled packet list */
     void AddToLastPacketList (Ptr<Packet> packet);
     bool SearchLastPacketList (Ptr<Packet> packet);
+    bool SearchLastPacketList (uint64_t uid);//
     
     Ptr<LoRaPHY> m_phy;
     Ptr<LoRaNetDevice> m_device;

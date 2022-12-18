@@ -150,6 +150,28 @@ LoRaMAC::UpdateTableEntry (RoutingTableEntry entry)
 }
 
 bool
+LoRaMAC::EntryExists (RoutingTableEntry entry)
+{
+    std::list<RoutingTableEntry>::iterator it = m_table.begin();
+    
+    if (m_table.empty())
+    {
+        return false;
+    }
+    
+    for (;it != m_table.end();++it)
+    {
+        if (it->s == entry.s && it->r == entry.r)
+        {
+            /*  only checks src and dest equality   */
+            return true;
+        }
+    }
+    
+    return false;
+}
+
+bool
 LoRaMAC::IsErrEntry (RoutingTableEntry entry)
 {
     if (entry.s == entry.r && entry.etx != 0)
@@ -197,12 +219,43 @@ void
 LoRaMAC::Receive (Ptr<Packet> packet)
 {
     LoRaMeshHeader header;
+    LoRaRoutingHeader rheader;
+    LoRaFeedbackHeader fheader;
+    Ptr<Packet> feedback;
     packet->PeekHeader(header);
+    RoutingTableEntry entry, temp;
     
     switch (header.GetType())
     {
         case ROUTING_UPDATE:
-            //update routing table
+            packet->RemoveHeader(header);
+            packet->RemoveHeader(rheader);
+            
+            entry.s = header.GetSrc();
+            entry.r = header.GetDest();
+            entry.etx = rheader.GetETX();
+            entry.last = rheader.GetLast();
+            
+            if (EntryExists(entry))
+            {
+                temp = TableLookup(entry.s, GetId());
+                UpdateTableEntry(entry);
+                
+                if (!IsErrEntry(temp))
+                {
+                    temp.etx = (entry.last > temp.last)?(1.0/(entry.last - temp.last)):(1.0/((255 - temp.last) + entry.last + 1));
+                    temp.last = entry.last;
+                    
+                    UpdateTableEntry(temp); /*  update etx and last  */
+                }
+                
+            }
+            else
+            {
+                AddTableEntry(entry);
+            }
+            
+            
             break;
         case BROADCAST:
             //unsure if to implement
@@ -211,16 +264,45 @@ LoRaMAC::Receive (Ptr<Packet> packet)
             
             if (header.GetDest() == GetId())
             {
+                feedback = MakeFeedback (packet);
+                AddPacketToQueue (feedback);
                 packet->RemoveHeader(header);
                 m_device->Receive(packet);
+                break;
             }
             
             /*  forward if not recipient    */
-            AddPacketToQueue (packet);
-            //add feedback
+            if (CalcETX(GetId(), header.GetDest()) < CalcETX(header.GetFwd(), header.GetDest()))
+            {
+                feedback = MakeFeedback (packet);
+                AddPacketToQueue (feedback);
+                packet->RemoveHeader(header);            
+                header.SetFwd(GetId());
+                packet->AddHeader(header);
+                AddPacketToQueue (packet);
+            }
             
             break;
         case FEEDBACK:
+            
+            packet->RemoveHeader(header);
+            packet->RemoveHeader(fheader);
+            
+            if (fheader.GetPacketId() == GetNexPacketFromQueue->GetUid() || /*  for feedback for packets    */
+                packet->GetUid() == GetNexPacketFromQueue->GetUid())    /*  for feedback for feedback */
+            {
+                RemovePacketFromQueue();
+            }
+            
+            if (CalcETX(header.GetFwd(), header.GetSrc()) > CalcETX(GetId(), header.GetSrc()) && 
+                header.GetSrc() != GetId())
+            {
+                packet->AddHeader(fheader);
+                header.SetFwd(GetId());
+                packet->AddHeader(header);
+                AddPacketToQueue(packet);
+            }
+            
             break;
     }
 }
