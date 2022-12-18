@@ -23,7 +23,7 @@ LoRaMeshHeader::~LoRaMeshHeader ()
 TypeId
 LoRaMeshHeader::GetTypeId (void)
 {
-    static tid = TypeId ("ns3::LoRaMeshHeader")
+    static TypeId tid = TypeId ("ns3::LoRaMeshHeader")
         .SetParent<Object> ()
         .SetGroupName ("lora_mesh");
         

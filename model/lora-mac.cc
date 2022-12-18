@@ -219,8 +219,8 @@ void
 LoRaMAC::Receive (Ptr<Packet> packet)
 {
     LoRaMeshHeader header;
-    LoRaRoutingHeader rheader;
-    LoRaFeedbackHeader fheader;
+    LoRaMeshRoutingHeader rheader;
+    LoRaMeshFeedbackHeader fheader;
     Ptr<Packet> feedback;
     packet->PeekHeader(header);
     RoutingTableEntry entry, temp;
