@@ -8,6 +8,8 @@
 #include "ns3/lora-phy.h"
 #include "ns3/lora-net-device.h"
 #include "ns3/lora-mesh-header.h"
+#include "ns3/lora-mesh-routing-header.h"
+#include "ns3/lora-mesh-feedback-header.h"
 
 #include <list>
 #include <iterator>
