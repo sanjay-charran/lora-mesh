@@ -55,7 +55,7 @@ public:
     bool EntryExists (RoutingTableEntry entry);
     bool IsErrEntry (RoutingTableEntry entry);
     
-    float CalcETX (uint32_t src, uint32_t dest);//figure this out somehow
+    float CalcETX (uint32_t src, uint32_t dest);
   
     /*  routing table lookup    */
     RoutingTableEntry TableLookup (uint32_t s, uint32_t r) const;
@@ -71,7 +71,7 @@ public:
 private:
     
     /*  packet queue funcs  */
-    void AddPacketToQueue (Ptr<Packet> packet);
+    void AddPacketToQueue (Ptr<Packet> packet, bool isFeedback);
     Ptr<Packet> RemovePacketFromQueue (void);
     Ptr<Packet> GetNexPacketFromQueue (void);
     
@@ -80,13 +80,15 @@ private:
     bool SearchLastPacketList (Ptr<Packet> packet);
     bool SearchLastPacketList (uint64_t uid);//
     
+    float CalcETX (uint32_t src, uint32_t dest, uint32_t last);//improve later
+    
     Ptr<LoRaPHY> m_phy;
     Ptr<LoRaNetDevice> m_device;
     
     /*  routing table containing info the end device is aware of    */
     std::list<RoutingTableEntry> m_table;
     
-    std::queue<Ptr<Packet>> m_packet_queue;
+    std::deque<Ptr<Packet>> m_packet_queue;
     std::deque<uint64_t> m_last_packets;
 };
 

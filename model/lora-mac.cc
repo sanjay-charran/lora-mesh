@@ -246,13 +246,28 @@ LoRaMAC::Receive (Ptr<Packet> packet)
                     temp.etx = (entry.last > temp.last)?(1.0/(entry.last - temp.last)):(1.0/((255 - temp.last) + entry.last + 1));
                     temp.last = entry.last;
                     
-                    UpdateTableEntry(temp); /*  update etx and last  */
+                    if (temp.etx > 10)
+                    {
+                        RemoveTableEntry(temp.s, temp.r);
+                    }
+                    else
+                    {
+                        UpdateTableEntry(temp); /*  update etx and last  */
+                    }
                 }
                 
             }
             else
             {
-                AddTableEntry(entry);
+                if (entry.s == entry.r)
+                {
+                    entry.etx = 1.0/(entry.last + 1);
+                }
+                
+                if (entry.etx <= 10)
+                {
+                    AddTableEntry(entry);
+                }
             }
             
             
@@ -265,7 +280,7 @@ LoRaMAC::Receive (Ptr<Packet> packet)
             if (header.GetDest() == GetId())
             {
                 feedback = MakeFeedback (packet);
-                AddPacketToQueue (feedback);
+                AddPacketToQueue (feedback, true);
                 packet->RemoveHeader(header);
                 m_device->Receive(packet);
                 break;
@@ -275,15 +290,15 @@ LoRaMAC::Receive (Ptr<Packet> packet)
             if (CalcETX(GetId(), header.GetDest()) < CalcETX(header.GetFwd(), header.GetDest()))
             {
                 feedback = MakeFeedback (packet);
-                AddPacketToQueue (feedback);
+                AddPacketToQueue (feedback, true);
                 packet->RemoveHeader(header);            
                 header.SetFwd(GetId());
                 packet->AddHeader(header);
-                AddPacketToQueue (packet);
+                AddPacketToQueue (packet, false);
             }
             
             break;
-        case FEEDBACK:
+        case FEEDBACK:  //need to fix feedback
             
             packet->RemoveHeader(header);
             packet->RemoveHeader(fheader);
@@ -300,7 +315,7 @@ LoRaMAC::Receive (Ptr<Packet> packet)
                 packet->AddHeader(fheader);
                 header.SetFwd(GetId());
                 packet->AddHeader(header);
-                AddPacketToQueue(packet);
+                AddPacketToQueue(packet, true);
             }
             
             break;
@@ -345,17 +360,46 @@ LoRaMAC::SendTo (Ptr<Packet> packet, uint32_t dest)
 }
 
 void
-LoRaMAC::AddPacketToQueue (Ptr<Packet> packet)
+LoRaMAC::AddPacketToQueue (Ptr<Packet> packet, bool isFeedback)
 {
-    m_packet_queue.push(packet);
+    std::deque<Ptr<Packet>>::iterator it;
+    LoRaMeshHeader header;
+    
+    if (isFeedback)
+    {
+        for (it = m_packet_queue.begin();it != m_packet_queue.end();++it)
+        {
+            it->PeekHeader(header);
+            
+            if (header->GetType() != FEEDBACK)
+            {
+                m_packet_queue.insert(it, packet);
+            }
+        }
+        
+        m_packet_queue.push_back(packet); /*    only feeedback or empty queue   */
+    }
+    else
+    {
+        m_packet_queue.push_back(packet);
+    }
+    
     return;
 }
 
 Ptr<Packet>
 LoRaMAC::RemovePacketFromQueue (void)
 {
-    Ptr<Packet> popped = m_packet_queue.pop();
-    return popped;
+    Ptr<Packet> popped;
+    if (!m_packet_queue.empty())
+    {
+       popped = m_packet_queue.pop_front();
+       return popped;
+    }
+    else
+    {
+        return Ptr<Packet>();
+    }
 }
 
 Ptr<Packet>
@@ -392,6 +436,73 @@ LoRaMAC::SearchLastPacketList (Ptr<Packet> packet);
     }
     
     return false;
+}
+
+float
+LoRaMAC::CalcETX (uint32_t src, uint32_t dest)
+{
+    return CalcETX(src, dest, src);
+}
+
+/*  routing algorithm -- improve later  */
+float
+LoRaMAC::CalcETX (uint32_t src, uint32_t dest, uint32_t last)
+{
+    float etx, min;
+    std::list<RoutingTableEntry>::iterator it;
+    
+    if (src == dest)
+    {
+        return 0.0;
+    }
+    
+    
+    for (it = m_table.begin();it != m_table.end();++it)
+    {
+        if (it->s == src && it->r == dest)
+        {
+            return it->etx;
+        }
+        
+        if (it->s > src)
+        {
+            /*  beyond where the entry ought to be  */
+            break;
+        }
+    }
+    
+    for (it = m_table.begin(), min = 0;it != m_table.end();++it)
+    {
+        if (it->s == src && (!EntryExists(last, it->r) || src == last))
+        {
+            etx = CalcETX(it->r, dest, src) + it->etx;
+            
+            if (etx < min || min == 0)
+            {
+                min = etx;
+            }
+        }
+    }
+    
+    return min;
+}
+
+Ptr<Packet>
+LoRaMAC::MakeFeedback (Ptr<Packet> packet, uint32_t fwd)
+{
+    Ptr<Packet> feedback = Create<Packet>;
+    LoRaMeshFeedbackHeader fheader;
+    LoRaMeshHeader header;
+    
+    fheader.SetPacketId(packet->GetUid());
+    feedback->AddHeader(fheader);
+    
+    header.SetSrc(GetId());
+    header.SetDest(fwd);
+    header.SetType(FEEDBACK);
+    feedback->AddHeader(header);
+    
+    return feedback;
 }
 
 }
