@@ -279,7 +279,7 @@ LoRaMAC::Receive (Ptr<Packet> packet)
             
             if (header.GetDest() == GetId())
             {
-                feedback = MakeFeedback (packet);
+                feedback = MakeFeedback (packet, header.GetFwd());
                 AddPacketToQueue (feedback, true);
                 packet->RemoveHeader(header);
                 m_device->Receive(packet);
@@ -289,7 +289,7 @@ LoRaMAC::Receive (Ptr<Packet> packet)
             /*  forward if not recipient    */
             if (CalcETX(GetId(), header.GetDest()) < CalcETX(header.GetFwd(), header.GetDest()))
             {
-                feedback = MakeFeedback (packet);
+                feedback = MakeFeedback (packet, header.GetFwd());
                 AddPacketToQueue (feedback, true);
                 packet->RemoveHeader(header);            
                 header.SetFwd(GetId());
@@ -303,14 +303,16 @@ LoRaMAC::Receive (Ptr<Packet> packet)
             packet->RemoveHeader(header);
             packet->RemoveHeader(fheader);
             
-            if (fheader.GetPacketId() == GetNexPacketFromQueue->GetUid() || /*  for feedback for packets    */
-                packet->GetUid() == GetNexPacketFromQueue->GetUid())    /*  for feedback for feedback */
+            if (header.GetDest() == GetId())
             {
-                RemovePacketFromQueue();
+                if (fheader.GetPacketId() == GetNexPacketFromQueue->GetUid() || /*  for feedback for packets    */
+                    packet->GetUid() == GetNexPacketFromQueue->GetUid())        /*  for feedback for feedback */
+                {
+                    RemovePacketFromQueue();
+                }
             }
             
-            if (CalcETX(header.GetFwd(), header.GetSrc()) > CalcETX(GetId(), header.GetSrc()) && 
-                header.GetSrc() != GetId())
+            if (CalcETX(header.GetFwd(), header.GetDest()) > CalcETX(GetId(), header.GetDest()))
             {
                 packet->AddHeader(fheader);
                 header.SetFwd(GetId());

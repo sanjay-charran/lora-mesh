@@ -65,7 +65,7 @@ public:
     void Broadcast (Ptr<Packet> packet);
     void SendTo (Ptr<Packet> packet, uint32_t dest);
     
-    Ptr<Packet> MakeFeedback (Ptr<Packet> packet);//
+    Ptr<Packet> MakeFeedback (Ptr<Packet> packet);
     //  need to add scheduling for timeslots at this layer
     
 private:
