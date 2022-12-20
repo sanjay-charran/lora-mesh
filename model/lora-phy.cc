@@ -325,7 +325,7 @@ LoRaPHY::Send (Ptr<Packet> packet)
     
     m_channel->Send (this, packet, m_tx_power_dBm, m_tx_freq_MHz, m_tx_sf, dur);
     
-    Simulator::Scedule (dur, &SwitchStateSTANDBY, this);
+    Simulator::Schedule (dur, &SwitchStateSTANDBY, this);
     
     if (m_device)
     {
@@ -384,7 +384,7 @@ LoRaPHY::StartReceive (Ptr<Packet> packet, Time duration, uint8_t sf, double rx_
         {
             SwitchStateRX();
             
-            Simulator::Scedule (duration, &LoRaPHY::EndReceive, this, packet);
+            Simulator::Schedule (duration, &LoRaPHY::EndReceive, this, packet);
             
             m_phyRxBeginTrace (packet);
         }

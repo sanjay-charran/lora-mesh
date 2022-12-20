@@ -58,7 +58,7 @@ LoRaChannel::GetNDevices (void) const
 void
 LoRaChannel::AddPHY (Ptr<LoRaPHY> phy)
 {
-    list<Ptr<LoRaPHY>>::iterator iter;
+    std::list<Ptr<LoRaPHY>>::iterator iter;
     uint32_t id;
     
     if (phy->GetNetDevice() && phy->GetNetDevice()->GetNode())

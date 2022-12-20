@@ -1,6 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 
 #include "ns3/log.h"
+#include "ns3/simulator.h"
 
 #include "ns3/lora-mac.h"
 
@@ -19,6 +20,15 @@ LoRaMAC::GetTypeId (void)
 
 LoRaMAC::LoRaMAC ()
 {
+    m_last_counter = 0;
+    
+    //calculate max size of packets and and define their onairtime and scedule based on id 
+    Time dur_packet, dur_routing;
+    
+    //duration calc
+    
+    Simulator::Schedule (duration, &PacketTimeslot, this);
+    Simulator::Schedule (duration, &RoutingTimeslot, this);
 }
 
 LoRaMAC::~LoRaMAC ()
@@ -298,7 +308,7 @@ LoRaMAC::Receive (Ptr<Packet> packet)
             }
             
             break;
-        case FEEDBACK:  //need to fix feedback
+        case FEEDBACK:
             
             packet->RemoveHeader(header);
             packet->RemoveHeader(fheader);
@@ -336,7 +346,7 @@ LoRaMAC::Broadcast (Ptr<Packet> packet)
         /*  broadcast doesnt have specific destination node so no need to set it    */
         
         packet->AddHeader(header);
-        m_phy->Send(packet);
+        AddPacketToQueue (packet);
     }
     
     return;
@@ -355,7 +365,7 @@ LoRaMAC::SendTo (Ptr<Packet> packet, uint32_t dest)
         header.SetDest(dest);
         
         packet->AddHeader(header);
-        m_phy->Send(packet);
+        AddPacketToQueue (packet);
     }
     
     return;
@@ -505,6 +515,49 @@ LoRaMAC::MakeFeedback (Ptr<Packet> packet, uint32_t fwd)
     feedback->AddHeader(header);
     
     return feedback;
+}
+
+void
+LoRaMAC::PacketTimeslot (void)
+{
+    Ptr<Packet> next;
+    int i;
+    unsigned int count;
+    
+    if (!m_packet_queue.empty())
+    {
+        next = GetNexPacketFromQueue();
+        
+        for (i = MAX_NUMEL_LAST_PACKETS_LIST - 1, count = 0;i >= 0;i--)
+        {
+            if (m_last_packets[i] == packet->GetUid())
+            {
+                count++;
+            }
+        }
+        
+        m_phy->Send(packet);
+        AddToLastPacketList (packet);
+        
+        if (count == 9)
+        {
+            /*  remove if it is on tenth send   */
+            RemovePacketFromQueue();
+        }
+    }
+    else
+    {
+        //routing instead
+    }
+    
+    return;
+}
+
+void
+LoRaMAC::RoutingTimeslot (void)
+{
+    //routing
+    return;
 }
 
 }

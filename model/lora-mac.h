@@ -4,6 +4,7 @@
 
 #include "ns3/object.h"
 #include "ns3/ptr.h"
+#include "ns3/nstime.h"
 
 #include "ns3/lora-phy.h"
 #include "ns3/lora-net-device.h"
@@ -16,7 +17,7 @@
 #include <queue>
 #include <deque>
 
-#define MAX_NUMEL_LAST_PACKETS_LIST 10
+#define MAX_NUMEL_LAST_PACKETS_LIST 25
 
 namespace ns3 {
 namespace lora_mesh {
@@ -61,12 +62,15 @@ public:
     RoutingTableEntry TableLookup (uint32_t s, uint32_t r) const;
     RoutingTableEntry TableLookup (uint64_t n) const;
     
-    void Receive(Ptr<Packet> packet);
+    void Receive (Ptr<Packet> packet);
+    
     void Broadcast (Ptr<Packet> packet);
     void SendTo (Ptr<Packet> packet, uint32_t dest);
     
     Ptr<Packet> MakeFeedback (Ptr<Packet> packet);
-    //  need to add scheduling for timeslots at this layer
+    
+    void PacketTimeslot (void);
+    void RoutingTimeslot (void);
     
 private:
     
@@ -90,6 +94,7 @@ private:
     
     std::deque<Ptr<Packet>> m_packet_queue;
     std::deque<uint64_t> m_last_packets;
+    uint8_t m_last_counter;
 };
 
 }
