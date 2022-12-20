@@ -19,6 +19,8 @@
 
 #define MAX_NUMEL_LAST_PACKETS_LIST 25
 
+#define MAX_PACKET_MSG_LENGTH_BYTES 50
+
 namespace ns3 {
 namespace lora_mesh {
  
@@ -91,10 +93,14 @@ private:
     
     /*  routing table containing info the end device is aware of    */
     std::list<RoutingTableEntry> m_table;
+    std::list<RoutingTableEntry>::iterator m_cur; /*  used for deciding next routing update to send   */
     
     std::deque<Ptr<Packet>> m_packet_queue;
     std::deque<uint64_t> m_last_packets;
     uint8_t m_last_counter;
+    
+    double m_max_packet_time;
+    double m_max_routing_time;
 };
 
 }

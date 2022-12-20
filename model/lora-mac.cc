@@ -20,15 +20,11 @@ LoRaMAC::GetTypeId (void)
 
 LoRaMAC::LoRaMAC ()
 {
+    RoutingTableEntry first_entry = {GetId(), GetId(), 0, 0};
+    AddTableEntry(first_entry);
+    
+    m_cur = m_table.begin();
     m_last_counter = 0;
-    
-    //calculate max size of packets and and define their onairtime and scedule based on id 
-    Time dur_packet, dur_routing;
-    
-    //duration calc
-    
-    Simulator::Schedule (duration, &PacketTimeslot, this);
-    Simulator::Schedule (duration, &RoutingTimeslot, this);
 }
 
 LoRaMAC::~LoRaMAC ()
@@ -38,7 +34,34 @@ LoRaMAC::~LoRaMAC ()
 void
 LoRaMAC::SetPHY (Ptr<LoRaPHY> phy)
 {
-    m_phy = phy;
+    /*  only allow attaching phy once to prevent any scheduling issues  */
+    if (m_phy)
+    {
+        m_phy = phy;
+        
+        Time dur_packet, dur_routing;
+        Ptr<Packet> max_packet = Create<Packet>(MAX_PACKET_MSG_LENGTH_BYTES);
+        LoRaMeshHeader header;  /*  dummy header    */
+        
+        max_packet->AddHeader(header);
+        dur_packet = m_phy->GetOnAirTime(max_packet);
+        
+        Ptr<Packet> routing_packet = Create<Packet>;
+        LoRaMeshRoutingHeader rheader;
+        
+        routing_packet->AddHeader(rheader);
+        dur_routing = m_phy->GetOnAirTime(routing_packet);
+        
+        m_max_packet_time = dur_packet.GetSeconds();
+        m_max_routing_time = dur_routing.GetSeconds();
+        
+        dur_packet = Seconds((m_max_packet_time + m_max_routing_time) * GetId());
+        dur_routing = Seconds((m_max_packet_time + m_max_routing_time) * GetId() + m_max_packet_time);  /*  packet timeslot then routing timeslot   */
+    
+        Simulator::Schedule (dur_packet, &PacketTimeslot, this);
+        Simulator::Schedule (dur_routing, &RoutingTimeslot, this);
+    }
+    
     return;
 }
 
@@ -248,7 +271,7 @@ LoRaMAC::Receive (Ptr<Packet> packet)
             
             if (EntryExists(entry))
             {
-                temp = TableLookup(entry.s, GetId());
+                temp = TableLookup(header.GetFwd(), GetId());
                 UpdateTableEntry(entry);
                 
                 if (!IsErrEntry(temp))
@@ -272,6 +295,7 @@ LoRaMAC::Receive (Ptr<Packet> packet)
                 if (entry.s == entry.r)
                 {
                     entry.etx = 1.0/(entry.last + 1);
+                    entry.r = GetId();  /*  node broadcasting itself was received so adds that as the entry     */
                 }
                 
                 if (entry.etx <= 10)
@@ -523,6 +547,7 @@ LoRaMAC::PacketTimeslot (void)
     Ptr<Packet> next;
     int i;
     unsigned int count;
+    Time dur;
     
     if (!m_packet_queue.empty())
     {
@@ -547,8 +572,15 @@ LoRaMAC::PacketTimeslot (void)
     }
     else
     {
-        //routing instead
+        /*  use timeslot for routing if packet queue is empty   */
+        RoutingTimeslot();
     }
+    
+    /*  next timeslot will be after the routing timeslot for this device and the packet and routing slots for all other devices */
+    dur = Seconds((m_max_packet_time + m_max_routing_time) * (m_phy->GetChannel()->GetNDevices() - 1) + m_max_routing_time);
+    
+    /*  schedule next slot  */
+    Simulator::Schedule(dur, &PacketTimeslot, this);
     
     return;
 }
@@ -556,7 +588,49 @@ LoRaMAC::PacketTimeslot (void)
 void
 LoRaMAC::RoutingTimeslot (void)
 {
-    //routing
+    Time dur;
+    
+    Ptr<Packet> packet = Create<Packet>;
+    LoRaMeshRoutingHeader rheader;
+    LoRaMeshHeader header;
+    
+    header.SetType(ROUTING_UPDATE);
+    header.SetSrc(m_cur->s);
+    header.SetDest(m_cur->r);
+    header.SetFwd(GetId());
+    
+    rheader.SetETX(m_cur->etx);
+    rheader.SetLast(m_last_counter);
+    
+    packet->AddHeader(rheader);
+    packet->AddHeader(header);
+    
+    m_phy->Send(packet);
+    
+    
+    /*  move entry iterator by one  */
+    m_cur++;
+    
+    if (m_cur == m_table.end())
+    {
+        m_cur = m_table.begin();
+    }
+    
+    /*  increment last counter  */
+    if (m_last_counter == 255)  /*  max for uint8_t */
+    {
+        m_last_counter = 0;
+    }
+    else
+    {
+        m_last_counter++;
+    }
+    
+    /*  every other nodes timeslots and the next packet timeslot for this node */
+    dur = Seconds((m_max_packet_time + m_max_routing_time) * (m_phy->GetChannel()->GetNDevices() - 1) + m_max_packet_time);
+    
+    Simulator::Schedule(dur, &RoutingTimeslot, this);
+    
     return;
 }
 
