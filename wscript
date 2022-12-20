@@ -10,6 +10,13 @@ def build(bld):
     module = bld.create_ns3_module('lora-mesh', ['core'])
     module.source = [
         'model/lora-mesh.cc',
+        'model/lora-channel.cc',
+        'model/lora-mac.cc',
+        'model/lora-mesh-feedback-header.cc',
+        'model/lora-mesh-header.cc',
+        'model/lora-mesh-routing-header.cc',
+        'model/lora-net-device.cc',
+        'model/lora-phy.cc',
         'helper/lora-mesh-helper.cc',
         ]
 
@@ -22,6 +29,13 @@ def build(bld):
     headers.module = 'lora-mesh'
     headers.source = [
         'model/lora-mesh.h',
+        'model/lora-channel.h',
+        'model/lora-mac.h',
+        'model/lora-mesh-feedback-header.h',
+        'model/lora-mesh-header.h',
+        'model/lora-mesh-routing-header.h',
+        'model/lora-net-device.h',
+        'model/lora-phy.h',
         'helper/lora-mesh-helper.h',
         ]
 
