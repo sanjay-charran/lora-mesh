@@ -4,6 +4,7 @@
 #include <list>
 #include <iterator>
 
+#include "ns3/log.h"
 #include "ns3/channel.h"
 #include "ns3/ptr.h"
 #include "ns3/packet.h"
@@ -31,7 +32,7 @@ public:
     
     static TypeId GetTypeId (void);
     
-    Ptr<NetDevice> GetDevice (std::size_t i);
+    Ptr<NetDevice> GetDevice (std::size_t i) const;
     std::size_t GetNDevices (void) const;
     void AddPHY (Ptr<LoRaPHY> phy);
     void RemovePHY (Ptr<LoRaPHY> phy);

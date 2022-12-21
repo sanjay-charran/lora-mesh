@@ -2,6 +2,7 @@
 #ifndef __LORA_PHY_H__
 #define __LORA_PHY_H__
 
+#include "ns3/log.h"
 #include "ns3/object.h"
 #include "ns3/ptr.h"
 #include "ns3/packet.h"

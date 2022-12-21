@@ -1,6 +1,7 @@
 #ifndef __LORA_NET_DEVICE_H__
 #define __LORA_NET_DEVICE_H__
 
+#include "ns3/log.h"
 #include "ns3/node.h"
 #include "ns3/address.h"
 #include "ns3/mac48-address.h"

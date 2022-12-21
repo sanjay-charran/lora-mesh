@@ -1,6 +1,5 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 
-#include "ns3/log.h"
 #include "ns3/simulator.h"
 
 #include "ns3/lora-mac.h"
@@ -8,6 +7,8 @@
 namespace ns3 {
 namespace lora_mesh {
  
+NS_LOG_COMPONENT_DEFINE ("LoRaMAC");
+    
 TypeId 
 LoRaMAC::GetTypeId (void)
 {
@@ -23,9 +24,7 @@ LoRaMAC::LoRaMAC ()
     RoutingTableEntry first_entry = {GetId(), GetId(), 0, 0};
     AddTableEntry(first_entry);
     
-    //std::deque<RoutingTableEntry>::const_iterator ci = m_table.begin();
-    
-    m_cur = m_table.begin();// + std::distance<std::const_iterator>(m_cur, ci);
+    m_cur = m_table.begin();
     m_last_counter = 0;
 }
 
@@ -102,8 +101,9 @@ LoRaMAC::GetId (void) const
 void 
 LoRaMAC::AddTableEntry (RoutingTableEntry entry)
 {
-    //std::deque<RoutingTableEntry>::const_iterator ci = m_table.begin();
-    std::deque<RoutingTableEntry>::iterator it = m_table.begin();// + std::distance<std::deque<RoutingTableEntry>::const_iterator>(it, ci);
+    NS_LOG_FUNCTION (this << entry.s << entry.r);
+    
+    std::deque<RoutingTableEntry>::iterator it = m_table.begin();
     
     if (m_table.empty())
     {
@@ -137,8 +137,9 @@ LoRaMAC::AddTableEntry (RoutingTableEntry entry)
 void 
 LoRaMAC::RemoveTableEntry (uint32_t s, uint32_t r)
 {
-    //std::deque<RoutingTableEntry>::const_iterator ci = m_table.begin();
-    std::deque<RoutingTableEntry>::iterator it = m_table.begin();// + std::distance<std::deque<RoutingTableEntry>::const_iterator>(it, ci);
+    NS_LOG_FUNCTION (this << s << r);
+    
+    std::deque<RoutingTableEntry>::iterator it = m_table.begin();
     
     if (m_table.empty())
     {
@@ -163,8 +164,9 @@ LoRaMAC::RemoveTableEntry (uint32_t s, uint32_t r)
 void 
 LoRaMAC::UpdateTableEntry (RoutingTableEntry entry)
 {
-    //std::deque<RoutingTableEntry>::const_iterator ci = m_table.begin();
-    std::deque<RoutingTableEntry>::iterator it = m_table.begin();// + std::distance<std::deque<RoutingTableEntry>::const_iterator>(it, ci);
+    NS_LOG_FUNCTION (this << entry.s << entry.r);
+    
+    std::deque<RoutingTableEntry>::iterator it = m_table.begin();
     
     if (m_table.empty())
     {
@@ -192,8 +194,7 @@ LoRaMAC::UpdateTableEntry (RoutingTableEntry entry)
 bool
 LoRaMAC::EntryExists (RoutingTableEntry entry)
 {
-    //std::deque<RoutingTableEntry>::const_iterator ci = m_table.begin();
-    std::deque<RoutingTableEntry>::iterator it = m_table.begin();// + std::distance<std::deque<RoutingTableEntry>::const_iterator>(it, ci);
+    std::deque<RoutingTableEntry>::iterator it = m_table.begin();
     
     if (m_table.empty())
     {
@@ -227,8 +228,7 @@ RoutingTableEntry
 LoRaMAC::TableLookup (uint32_t s, uint32_t r)
 {
     RoutingTableEntry err = {GetId(), GetId(), 1, 0}; /*  an error return since it ought to be 0 etx for node to transmit to itself   */
-    //std::deque<RoutingTableEntry>::const_iterator ci = m_table.begin();
-    std::deque<RoutingTableEntry>::iterator it = m_table.begin();// + std::distance<std::deque<RoutingTableEntry>::const_iterator>(it, ci);
+    std::deque<RoutingTableEntry>::iterator it = m_table.begin();
     
     for (;it != m_table.end();++it)
     {
@@ -245,8 +245,7 @@ RoutingTableEntry
 LoRaMAC::TableLookup (uint64_t n)
 {
     RoutingTableEntry err = {GetId(), GetId(), 1, 0}; /*  an error return since it ought to be 0 etx for node to transmit to itself   */
-    //std::deque<RoutingTableEntry>::const_iterator ci = m_table.begin();
-    std::deque<RoutingTableEntry>::iterator it = m_table.begin();// + std::distance<std::deque<RoutingTableEntry>::const_iterator>(it, ci);
+    std::deque<RoutingTableEntry>::iterator it = m_table.begin();
     
     if (m_table.size() <= n)
     {
@@ -389,6 +388,8 @@ LoRaMAC::Broadcast (Ptr<Packet> packet)
 void 
 LoRaMAC::SendTo (Ptr<Packet> packet, uint32_t dest)
 {
+    NS_LOG_FUNCTION (this << packet << dest);
+    
     /*  send from attached node to dest node ID */
     LoRaMeshHeader header;
     
@@ -408,6 +409,8 @@ LoRaMAC::SendTo (Ptr<Packet> packet, uint32_t dest)
 void
 LoRaMAC::AddPacketToQueue (Ptr<Packet> packet, bool isFeedback)
 {
+    NS_LOG_FUNCTION (this << packet << isFeedback);
+    
     std::deque<Ptr<Packet>>::iterator it;
     LoRaMeshHeader header;
     
@@ -436,6 +439,8 @@ LoRaMAC::AddPacketToQueue (Ptr<Packet> packet, bool isFeedback)
 void
 LoRaMAC::RemovePacketFromQueue (void)
 {
+    NS_LOG_FUNCTION (this);
+    
     if (!m_packet_queue.empty())
     {
        m_packet_queue.pop_front();
@@ -550,6 +555,8 @@ LoRaMAC::MakeFeedback (Ptr<Packet> packet, uint32_t fwd)
 void
 LoRaMAC::PacketTimeslot (void)
 {
+    NS_LOG_FUNCTION (this);
+    
     Ptr<Packet> next;
     int i;
     unsigned int count;
@@ -594,9 +601,9 @@ LoRaMAC::PacketTimeslot (void)
 void
 LoRaMAC::RoutingTimeslot (void)
 {
+    NS_LOG_FUNCTION (this);
+    
     Time dur;
-    //std::deque<RoutingTableEntry>::const_iterator ci = m_table.begin();
-    //std::deque<RoutingTableEntry>::iterator it = m_table.begin();// + std::distance<std::deque<RoutingTableEntry>::const_iterator>(it, ci);
     
     Ptr<Packet> packet = Create<Packet>();
     LoRaMeshRoutingHeader rheader;

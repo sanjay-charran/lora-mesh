@@ -1,9 +1,10 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 
-#include "ns3/log.h"
 #include "ns3/simulator.h"
 
 #include "ns3/lora-phy.h"
+
+NS_LOG_COMPONENT_DEFINE ("LoRaPHY");
 
 namespace ns3 {
 namespace lora_mesh {
@@ -313,6 +314,8 @@ LoRaPHY::IsLowDataRateOptEnabled (void) const
 void
 LoRaPHY::Send (Ptr<Packet> packet)
 {
+    NS_LOG_FUNCTION (this << packet);
+    
     if (m_state != STANDBY)
     {
         return; /*  phy layer busy  */
@@ -397,6 +400,8 @@ LoRaPHY::StartReceive (Ptr<Packet> packet, Time duration, uint8_t sf, double rx_
 void
 LoRaPHY::EndReceive (Ptr<Packet> packet)
 {
+    NS_LOG_FUNCTION (this << packet);
+    
     SwitchStateSTANDBY ();
     
     //m_phyRxEndTrace (packet);

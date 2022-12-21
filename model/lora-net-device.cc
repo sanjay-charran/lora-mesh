@@ -1,13 +1,14 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 
 #include "ns3/simulator.h"
-#include "ns3/log.h"
 
 #include "ns3/lora-net-device.h"
 
 namespace ns3 {
 namespace lora_mesh {
  
+NS_LOG_COMPONENT_DEFINE ("LoRaNetDevice");  
+
 TypeId
 LoRaNetDevice::GetTypeId (void)
 {
@@ -58,6 +59,8 @@ LoRaNetDevice::GetPHY(void) const
 void
 LoRaNetDevice::SendTo (Ptr<Packet> packet, uint32_t dest)
 {
+     NS_LOG_FUNCTION (this << packet << dest);
+    
     if (m_mac)
     {
         m_mac->SendTo(packet, dest);
@@ -69,6 +72,8 @@ LoRaNetDevice::SendTo (Ptr<Packet> packet, uint32_t dest)
 void 
 LoRaNetDevice::Receive (Ptr<Packet> packet)
 {
+     NS_LOG_FUNCTION (this << packet);
+    
     //m_receiveCallback (this, packet, 0, Address());
     return;
 }

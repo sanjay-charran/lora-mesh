@@ -1,13 +1,14 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 
-#include "ns3/log.h"
 #include "ns3/simulator.h"
 
 #include "ns3/lora-channel.h"
 
 namespace ns3 {
 namespace lora_mesh {
- 
+
+NS_LOG_COMPONENT_DEFINE ("LoRaChannel");
+    
 TypeId
 LoRaChannel::GetTypeId (void)
 {
@@ -31,9 +32,9 @@ LoRaChannel::~LoRaChannel ()
 }
 
 Ptr<NetDevice> 
-LoRaChannel::GetDevice (std::size_t i)
+LoRaChannel::GetDevice (std::size_t i) const
 {
-    std::deque<Ptr<LoRaPHY>>::iterator iter;
+    std::deque<Ptr<LoRaPHY>>::const_iterator iter;
     
     /*  considering first device as 0th */
     if (m_phyList.size() >= i)
@@ -63,6 +64,8 @@ LoRaChannel::GetNDevices (void) const
 void
 LoRaChannel::AddPHY (Ptr<LoRaPHY> phy)
 {
+    NS_LOG_FUNCTION (this << phy);
+    
     //std::deque<Ptr<LoRaPHY>>::const_iterator c_iter = m_phyList.begin();
     std::deque<Ptr<LoRaPHY>>::iterator iter = m_phyList.begin();// + std::distance<std::deque<Ptr<LoRaPHY>>::const_iterator>(iter, c_iter);
     
@@ -100,6 +103,8 @@ LoRaChannel::AddPHY (Ptr<LoRaPHY> phy)
 void
 LoRaChannel::RemovePHY (Ptr<LoRaPHY> phy)
 {
+     NS_LOG_FUNCTION (this << phy);
+    
     std::deque<Ptr<LoRaPHY>>::iterator iter = m_phyList.begin();
     
     for (;iter != m_phyList.end();iter++)

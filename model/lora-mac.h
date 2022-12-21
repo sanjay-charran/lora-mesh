@@ -2,6 +2,7 @@
 #ifndef __LORA_MAC_H__
 #define __LORA_MAC_H__
 
+#include "ns3/log.h"
 #include "ns3/object.h"
 #include "ns3/ptr.h"
 #include "ns3/nstime.h"
@@ -12,7 +13,6 @@
 #include "ns3/lora-mesh-routing-header.h"
 #include "ns3/lora-mesh-feedback-header.h"
 
-//#include <list>
 #include <iterator>
 #include <queue>
 #include <deque>
