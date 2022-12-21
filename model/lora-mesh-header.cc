@@ -24,12 +24,18 @@ TypeId
 LoRaMeshHeader::GetTypeId (void)
 {
     static TypeId tid = TypeId ("ns3::LoRaMeshHeader")
-        .SetParent<Object> ()
+        .SetParent<Header> ()
         .SetGroupName ("lora_mesh");
         
     return tid;
 }
- 
+
+TypeId
+LoRaMeshHeader::GetInstanceTypeId (void) const
+{
+    return GetTypeId();
+}
+
 void
 LoRaMeshHeader::SetSrc (uint32_t src)
 {
@@ -40,7 +46,7 @@ LoRaMeshHeader::SetSrc (uint32_t src)
 uint32_t
 LoRaMeshHeader::GetSrc (void) const
 {
-    return m__src;
+    return m_src;
 }
  
 void
@@ -56,7 +62,7 @@ LoRaMeshHeader::GetDest (void) const
     return m_dest;
 }
  
-void
+void 
 LoRaMeshHeader::SetType (MsgType type)
 {
     m_type = type;

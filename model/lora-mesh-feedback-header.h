@@ -15,6 +15,7 @@ public:
     ~LoRaMeshFeedbackHeader ();
     
     static TypeId GetTypeId (void);
+    TypeId GetInstanceTypeId (void) const;
     
     void SetPacketId (uint64_t packet_id);
     uint64_t GetPacketId (void) const;

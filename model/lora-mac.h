@@ -12,7 +12,7 @@
 #include "ns3/lora-mesh-routing-header.h"
 #include "ns3/lora-mesh-feedback-header.h"
 
-#include <list>
+//#include <list>
 #include <iterator>
 #include <queue>
 #include <deque>
@@ -24,6 +24,12 @@
 namespace ns3 {
 namespace lora_mesh {
  
+class LoRaPHY;
+class LoRaNetDevice;
+class LoRaMeshHeader;
+class LoRaMeshRoutingHeader;
+class LoRaMeshFeedbackHeader;
+
 struct RoutingTableEntry
 {
     uint32_t    s;      /*  id's for sender and receiver    */
@@ -31,8 +37,8 @@ struct RoutingTableEntry
     float       etx;
     uint8_t     last;    
 };
-    
-class LoRaMAC : pulic Object
+
+class LoRaMAC : public Object
 {
 public:
     
@@ -61,15 +67,15 @@ public:
     float CalcETX (uint32_t src, uint32_t dest);
   
     /*  routing table lookup    */
-    RoutingTableEntry TableLookup (uint32_t s, uint32_t r) const;
-    RoutingTableEntry TableLookup (uint64_t n) const;
+    RoutingTableEntry TableLookup (uint32_t s, uint32_t r);
+    RoutingTableEntry TableLookup (uint64_t n);
     
     void Receive (Ptr<Packet> packet);
     
     void Broadcast (Ptr<Packet> packet);
     void SendTo (Ptr<Packet> packet, uint32_t dest);
     
-    Ptr<Packet> MakeFeedback (Ptr<Packet> packet);
+    Ptr<Packet> MakeFeedback (Ptr<Packet> packet, uint32_t fwd);
     
     void PacketTimeslot (void);
     void RoutingTimeslot (void);
@@ -78,13 +84,13 @@ private:
     
     /*  packet queue funcs  */
     void AddPacketToQueue (Ptr<Packet> packet, bool isFeedback);
-    Ptr<Packet> RemovePacketFromQueue (void);
-    Ptr<Packet> GetNexPacketFromQueue (void);
+    void RemovePacketFromQueue (void);
+    Ptr<Packet> GetNextPacketFromQueue (void);
     
     /*  handled packet list */
     void AddToLastPacketList (Ptr<Packet> packet);
     bool SearchLastPacketList (Ptr<Packet> packet);
-    bool SearchLastPacketList (uint64_t uid);//
+    //bool SearchLastPacketList (uint64_t uid);//
     
     float CalcETX (uint32_t src, uint32_t dest, uint32_t last);//improve later
     
@@ -92,8 +98,8 @@ private:
     Ptr<LoRaNetDevice> m_device;
     
     /*  routing table containing info the end device is aware of    */
-    std::list<RoutingTableEntry> m_table;
-    std::list<RoutingTableEntry>::iterator m_cur; /*  used for deciding next routing update to send   */
+    std::deque<RoutingTableEntry> m_table;
+    std::deque<RoutingTableEntry>::iterator m_cur; /*  used for deciding next routing update to send   */
     
     std::deque<Ptr<Packet>> m_packet_queue;
     std::deque<uint64_t> m_last_packets;

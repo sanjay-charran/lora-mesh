@@ -56,17 +56,6 @@ LoRaNetDevice::GetPHY(void) const
 }
 
 void
-LoRaNetDevice::Broadcast (Ptr<Packet> packet)
-{
-    if (m_mac)
-    {
-        m_mac->Broadcast(packet);
-    }
-    
-    return;
-}
-
-void
 LoRaNetDevice::SendTo (Ptr<Packet> packet, uint32_t dest)
 {
     if (m_mac)
@@ -77,9 +66,10 @@ LoRaNetDevice::SendTo (Ptr<Packet> packet, uint32_t dest)
     return;
 }
 
-void Receive (Ptr<Packet> packet)
+void 
+LoRaNetDevice::Receive (Ptr<Packet> packet)
 {
-    m_receiveCallback (this, packet, 0, Address());
+    //m_receiveCallback (this, packet, 0, Address());
     return;
 }
 
@@ -115,7 +105,8 @@ LoRaNetDevice::SetMtu (const uint16_t mtu)
     return false;
 }
 
-uint16_t GetMtu (void) const
+uint16_t 
+LoRaNetDevice::GetMtu (void) const
 {
     /*  unsupported */
     return 0;
@@ -195,16 +186,17 @@ LoRaNetDevice::GetMulticast (Ipv6Address addr) const
     return Address();
 }
 
-Address
-LoRaNetDevice::GetMulticast (Ipv6Address addr) const
+bool
+LoRaNetDevice::NeedsArp (void) const
 {
     return false;
 }
 
-bool Send (Ptr<Packet> packet, const Address &dest, uint16_t protocolNumber)
+bool 
+LoRaNetDevice::Send (Ptr<Packet> packet, const Address &dest, uint16_t protocolNumber)
 {
-    Send (packet);
-    return true;
+    //unsupported
+    return false;
 }
 
 bool
@@ -224,7 +216,7 @@ LoRaNetDevice::SetPromiscReceiveCallback (PromiscReceiveCallback cb)
 void
 LoRaNetDevice::SetReceiveCallback (ReceiveCallback cb)
 {
-    m_receiveCallback = cb;
+    //m_receiveCallback = cb;
     return;
 }
 

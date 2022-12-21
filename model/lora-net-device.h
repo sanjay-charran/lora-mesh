@@ -14,7 +14,10 @@
 
 namespace ns3 {
 namespace lora_mesh {
- 
+
+class LoRaPHY;
+class LoRaMAC;    
+
 class LoRaNetDevice : public NetDevice
 {
 public:
@@ -29,7 +32,6 @@ public:
     void SetPHY (Ptr<LoRaPHY> phy);
     Ptr<LoRaPHY> GetPHY(void) const;
     
-    void Broadcast (Ptr<Packet> packet);
     void SendTo (Ptr<Packet> packet, uint32_t dest);
     void Receive (Ptr<Packet> packet);
     
@@ -58,7 +60,7 @@ public:
     Address GetMulticast (Ipv6Address addr) const;
     bool NeedsArp (void) const;
     bool Send (Ptr<Packet> packet, const Address &dest, uint16_t protocolNumber);
-    bool SendFrom (Ptr<Packet> packet, const Address &source, const Address &dest, uint16_t protocolNumber)
+    bool SendFrom (Ptr<Packet> packet, const Address &source, const Address &dest, uint16_t protocolNumber);
     void SetPromiscReceiveCallback (PromiscReceiveCallback cb);
     void SetReceiveCallback (ReceiveCallback cb);
     bool SupportsSendFrom (void) const;
@@ -70,7 +72,7 @@ private:
     Ptr<LoRaPHY> m_phy;
     Ptr<LoRaMAC> m_mac;
     
-    NetDevice::ReceiveCallback m_receiveCallback;
+    //NetDevice::ReceiveCallback m_receiveCallback;
 };
 
 }

@@ -15,6 +15,7 @@ public:
     ~LoRaMeshRoutingHeader ();
     
     static TypeId GetTypeId (void);
+    TypeId GetInstanceTypeId (void) const;
     
     void SetETX (float etx);
     float GetETX (void) const;

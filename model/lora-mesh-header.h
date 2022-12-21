@@ -6,7 +6,7 @@
 namespace ns3 {
 namespace lora_mesh {
  
-eunm MsgType
+enum MsgType
 {
     ROUTING_UPDATE = 0,     /*  broadcasting changes to routing table   */ 
     
@@ -24,6 +24,7 @@ public:
     ~LoRaMeshHeader ();
     
     static TypeId GetTypeId (void);
+    TypeId GetInstanceTypeId (void) const;
     
     void SetSrc (uint32_t src);
     uint32_t GetSrc (void) const;

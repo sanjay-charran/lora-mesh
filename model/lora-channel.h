@@ -15,9 +15,14 @@
 #include "ns3/lora-phy.h"
 #include "ns3/lora-net-device.h"
 
+#include <deque>
+#include <iterator>
+
 namespace ns3 {
 namespace lora_mesh {
 
+class LoRaPHY;
+    
 class LoRaChannel : public Channel
 {
 public:
@@ -26,25 +31,25 @@ public:
     
     static TypeId GetTypeId (void);
     
-    Ptr<LoRaNetDevice> GetDevice (std::size_t i) const;
+    Ptr<NetDevice> GetDevice (std::size_t i);
     std::size_t GetNDevices (void) const;
     void AddPHY (Ptr<LoRaPHY> phy);
     void RemovePHY (Ptr<LoRaPHY> phy);
     
-    void SetLossModel (Ptr<PropogationLossModel> loss);
-    Ptr<PropogationLossModel> GetLossModel (void) const;
+    void SetLossModel (Ptr<PropagationLossModel> loss);
+    Ptr<PropagationLossModel> GetLossModel (void) const;
     
-    void SetDelayModel (Ptr<PropogationDelayModel> delay);
-    Ptr<PropogationDelayModel> GetDelayModel (void) const;
+    void SetDelayModel (Ptr<PropagationDelayModel> delay);
+    Ptr<PropagationDelayModel> GetDelayModel (void) const;
     
-    void Send (Ptr<LoRaNetDevice> sender, Ptr<Packet> packet, double tx_power_dBm, double tx_freq_MHz, uint8_t tx_sf, Time dur);
+    void Send (Ptr<LoRaPHY> sender, Ptr<Packet> packet, double tx_power_dBm, double tx_freq_MHz, uint8_t tx_sf, Time dur);
     double GetRxPower (double tx_power_dBm, Ptr<MobilityModel> sender_mobility, Ptr<MobilityModel> receiver_mobility); 
     
 private:
-    Ptr<PropogationLossModel> m_lossModel;
-    Ptr<PropogationDelayModel> m_delayModel;
+    Ptr<PropagationLossModel> m_lossModel;
+    Ptr<PropagationDelayModel> m_delayModel;
     
-    std::list<Ptr<LoRaPHY>> m_phyList;
+    std::deque<Ptr<LoRaPHY>> m_phyList;
     
     void Receive (Ptr<LoRaPHY> receiver, Ptr<Packet> packet, double rx_power_dBm, double rx_freq_MHz, uint8_t rx_sf, Time dur);
     

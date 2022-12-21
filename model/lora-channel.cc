@@ -1,7 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 
 #include "ns3/log.h"
-#include "ns3/simualator.h"
+#include "ns3/simulator.h"
 
 #include "ns3/lora-channel.h"
 
@@ -11,12 +11,12 @@ namespace lora_mesh {
 TypeId
 LoRaChannel::GetTypeId (void)
 {
-    static tid = TypeId ("ns3::LoRaChannel")
+    static TypeId tid = TypeId ("ns3::LoRaChannel")
         .SetParent<Channel> ()
         .SetGroupName ("lora_mesh")
         .AddTraceSource("PacketSent",
                         "Trace source fired whenever a packet goes out on the channel",
-                        MakeTraceSourceAccessor (&LoraChannel::m_packetSent),
+                        MakeTraceSourceAccessor (&LoRaChannel::m_packetSent),
                         "ns3::Packet::TracedCallback");
         
     return tid;
@@ -30,21 +30,26 @@ LoRaChannel::~LoRaChannel ()
 {
 }
 
-Ptr<LoRaNetDevice> 
-LoRaChannel::GetDevice (std::size_t i) const
+Ptr<NetDevice> 
+LoRaChannel::GetDevice (std::size_t i)
 {
-    list<Ptr<LoRaPHY>>::iterator iter;
+    std::deque<Ptr<LoRaPHY>>::iterator iter;
     
     /*  considering first device as 0th */
     if (m_phyList.size() >= i)
     {
         /*  outside of range of list    */
-        return Ptr<LoRaNetDevice>::Ptr(nullptr);
+        Ptr<LoRaNetDevice> err = Ptr<LoRaNetDevice>();
+        
+        return err;
     }
     else
     {
-        iter = m_phyList.begin();
-        advance(iter, i);
+        //std::deque<Ptr<LoRaPHY>>::const_iterator c_iter = m_phyList.begin();
+        
+        
+        iter = m_phyList.begin();// + std::distance<std::deque<Ptr<LoRaPHY>>::const_iterator>(iter, c_iter);
+        std::advance(iter, i);
         return (*iter)->GetNetDevice();
     }
 }
@@ -58,14 +63,16 @@ LoRaChannel::GetNDevices (void) const
 void
 LoRaChannel::AddPHY (Ptr<LoRaPHY> phy)
 {
-    std::list<Ptr<LoRaPHY>>::iterator iter;
+    //std::deque<Ptr<LoRaPHY>>::const_iterator c_iter = m_phyList.begin();
+    std::deque<Ptr<LoRaPHY>>::iterator iter = m_phyList.begin();// + std::distance<std::deque<Ptr<LoRaPHY>>::const_iterator>(iter, c_iter);
+    
     uint32_t id;
     
     if (phy->GetNetDevice() && phy->GetNetDevice()->GetNode())
     {
         id = phy->GetNetDevice()->GetNode()->GetId();
             
-        for (iter = m_phyList.begin();iter != m_phyList.end();iter++)
+        for (;iter != m_phyList.end();iter++)
         {
             if ((*iter)->GetNetDevice() && (*iter)->GetNetDevice()->GetNode())
             {
@@ -93,31 +100,42 @@ LoRaChannel::AddPHY (Ptr<LoRaPHY> phy)
 void
 LoRaChannel::RemovePHY (Ptr<LoRaPHY> phy)
 {
-    m_phyList.remove(phy);
+    std::deque<Ptr<LoRaPHY>>::iterator iter = m_phyList.begin();
+    
+    for (;iter != m_phyList.end();iter++)
+    {
+        if ((*iter) == phy)
+        {
+            m_phyList.erase(iter);
+            return;
+        }
+    }
+    
+    
     return;
 }
 
 void
-LoRaChannel::SetLossModel (Ptr<PropogationLossModel> loss)
+LoRaChannel::SetLossModel (Ptr<PropagationLossModel> loss)
 {
     m_lossModel = loss;
     return;
 }
 
-Ptr<PropogationLossModel> 
+Ptr<PropagationLossModel> 
 LoRaChannel::GetLossModel (void) const
 {
     return m_lossModel;
 }
 
 void
-LoRaChannel::SetDelayModel (Ptr<PropogationDelayModel> delay)
+LoRaChannel::SetDelayModel (Ptr<PropagationDelayModel> delay)
 {
     m_delayModel = delay;
     return;
 }
 
-Ptr<PropogationDelayModel>
+Ptr<PropagationDelayModel>
 LoRaChannel::GetDelayModel (void) const
 {
     return m_delayModel;
@@ -132,9 +150,10 @@ LoRaChannel::Send (Ptr<LoRaPHY> sender, Ptr<Packet> packet, double tx_power_dBm,
     double rx_power_dBm;
     uint32_t dst_id;
     
-    std::list<Ptr<LoRaPHY>>::iterator i;
+    //std::deque<Ptr<LoRaPHY>>::const_iterator ci = m_phyList.begin();
+    std::deque<Ptr<LoRaPHY>>::iterator i = m_phyList.begin();// + std::distance<std::deque<Ptr<LoRaPHY>>::const_iterator>(i, ci);
     
-    for (i = m_phyList.begin();i != m_phyList.end();i++)
+    for (;i != m_phyList.end();i++)
     {
         if (sender != (*i))
         {
@@ -142,9 +161,9 @@ LoRaChannel::Send (Ptr<LoRaPHY> sender, Ptr<Packet> packet, double tx_power_dBm,
             delay = m_delayModel->GetDelay(sender_mobility, receiver_mobility);
             rx_power_dBm = GetRxPower (tx_power_dBm, sender_mobility, receiver_mobility);
             
-            if ((*i)->GetDevice() != 0)
+            if ((*i)->GetNetDevice() != 0)
             {
-                dst_id = (*i)->GetDevice()->GetNode()->GetId();
+                dst_id = (*i)->GetNetDevice()->GetNode()->GetId();
             }
             else
             {

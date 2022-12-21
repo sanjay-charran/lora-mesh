@@ -11,7 +11,7 @@ namespace lora_mesh {
 TypeId 
 LoRaMAC::GetTypeId (void)
 {
-    static tid = TypeId ("ns3::LoRaMAC")
+    static TypeId tid = TypeId ("ns3::LoRaMAC")
         .SetParent<Object> ()
         .SetGroupName ("lora_mesh");
         
@@ -23,7 +23,9 @@ LoRaMAC::LoRaMAC ()
     RoutingTableEntry first_entry = {GetId(), GetId(), 0, 0};
     AddTableEntry(first_entry);
     
-    m_cur = m_table.begin();
+    //std::deque<RoutingTableEntry>::const_iterator ci = m_table.begin();
+    
+    m_cur = m_table.begin();// + std::distance<std::const_iterator>(m_cur, ci);
     m_last_counter = 0;
 }
 
@@ -34,6 +36,9 @@ LoRaMAC::~LoRaMAC ()
 void
 LoRaMAC::SetPHY (Ptr<LoRaPHY> phy)
 {
+    LoRaMeshHeader header;
+    LoRaMeshRoutingHeader rheader;
+    
     /*  only allow attaching phy once to prevent any scheduling issues  */
     if (m_phy)
     {
@@ -41,13 +46,12 @@ LoRaMAC::SetPHY (Ptr<LoRaPHY> phy)
         
         Time dur_packet, dur_routing;
         Ptr<Packet> max_packet = Create<Packet>(MAX_PACKET_MSG_LENGTH_BYTES);
-        LoRaMeshHeader header;  /*  dummy header    */
         
         max_packet->AddHeader(header);
         dur_packet = m_phy->GetOnAirTime(max_packet);
         
-        Ptr<Packet> routing_packet = Create<Packet>;
-        LoRaMeshRoutingHeader rheader;
+        Ptr<Packet> routing_packet = Create<Packet>(0);
+        
         
         routing_packet->AddHeader(rheader);
         dur_routing = m_phy->GetOnAirTime(routing_packet);
@@ -58,8 +62,8 @@ LoRaMAC::SetPHY (Ptr<LoRaPHY> phy)
         dur_packet = Seconds((m_max_packet_time + m_max_routing_time) * GetId());
         dur_routing = Seconds((m_max_packet_time + m_max_routing_time) * GetId() + m_max_packet_time);  /*  packet timeslot then routing timeslot   */
     
-        Simulator::Schedule (dur_packet, &PacketTimeslot, this);
-        Simulator::Schedule (dur_routing, &RoutingTimeslot, this);
+        Simulator::Schedule (dur_packet, &LoRaMAC::PacketTimeslot, this);
+        Simulator::Schedule (dur_routing, &LoRaMAC::RoutingTimeslot, this);
     }
     
     return;
@@ -98,7 +102,8 @@ LoRaMAC::GetId (void) const
 void 
 LoRaMAC::AddTableEntry (RoutingTableEntry entry)
 {
-    std::list<RoutingTableEntry>::iterator it = m_table.begin();
+    //std::deque<RoutingTableEntry>::const_iterator ci = m_table.begin();
+    std::deque<RoutingTableEntry>::iterator it = m_table.begin();// + std::distance<std::deque<RoutingTableEntry>::const_iterator>(it, ci);
     
     if (m_table.empty())
     {
@@ -130,9 +135,10 @@ LoRaMAC::AddTableEntry (RoutingTableEntry entry)
 }
 
 void 
-LoRaMAC::RemoveTableEntry (utin16_t s, uint16_t r)
+LoRaMAC::RemoveTableEntry (uint32_t s, uint32_t r)
 {
-    std::list<RoutingTableEntry>::iterator it = m_table.begin();
+    //std::deque<RoutingTableEntry>::const_iterator ci = m_table.begin();
+    std::deque<RoutingTableEntry>::iterator it = m_table.begin();// + std::distance<std::deque<RoutingTableEntry>::const_iterator>(it, ci);
     
     if (m_table.empty())
     {
@@ -157,7 +163,8 @@ LoRaMAC::RemoveTableEntry (utin16_t s, uint16_t r)
 void 
 LoRaMAC::UpdateTableEntry (RoutingTableEntry entry)
 {
-    std::list<RoutingTableEntry>::iterator it = m_table.begin();
+    //std::deque<RoutingTableEntry>::const_iterator ci = m_table.begin();
+    std::deque<RoutingTableEntry>::iterator it = m_table.begin();// + std::distance<std::deque<RoutingTableEntry>::const_iterator>(it, ci);
     
     if (m_table.empty())
     {
@@ -171,8 +178,8 @@ LoRaMAC::UpdateTableEntry (RoutingTableEntry entry)
         if (it->s == entry.s && it->r == entry.r)
         {
             /*  update  */
-            it->etx = entry->etx;
-            it->last = entry->last;
+            it->etx = entry.etx;
+            it->last = entry.last;
             return;
         }
     }
@@ -185,7 +192,8 @@ LoRaMAC::UpdateTableEntry (RoutingTableEntry entry)
 bool
 LoRaMAC::EntryExists (RoutingTableEntry entry)
 {
-    std::list<RoutingTableEntry>::iterator it = m_table.begin();
+    //std::deque<RoutingTableEntry>::const_iterator ci = m_table.begin();
+    std::deque<RoutingTableEntry>::iterator it = m_table.begin();// + std::distance<std::deque<RoutingTableEntry>::const_iterator>(it, ci);
     
     if (m_table.empty())
     {
@@ -216,10 +224,11 @@ LoRaMAC::IsErrEntry (RoutingTableEntry entry)
 }
 
 RoutingTableEntry 
-LoRaMAC::TableLookup (uint16_t s, uint16_t r) const
+LoRaMAC::TableLookup (uint32_t s, uint32_t r)
 {
     RoutingTableEntry err = {GetId(), GetId(), 1, 0}; /*  an error return since it ought to be 0 etx for node to transmit to itself   */
-    std::list<RoutingTableEntry>::iterator it = m_table.begin();
+    //std::deque<RoutingTableEntry>::const_iterator ci = m_table.begin();
+    std::deque<RoutingTableEntry>::iterator it = m_table.begin();// + std::distance<std::deque<RoutingTableEntry>::const_iterator>(it, ci);
     
     for (;it != m_table.end();++it)
     {
@@ -233,10 +242,11 @@ LoRaMAC::TableLookup (uint16_t s, uint16_t r) const
 }
 
 RoutingTableEntry 
-LoRaMAC::TableLookup (uint64_t n) const
+LoRaMAC::TableLookup (uint64_t n)
 {
     RoutingTableEntry err = {GetId(), GetId(), 1, 0}; /*  an error return since it ought to be 0 etx for node to transmit to itself   */
-    std::list<RoutingTableEntry>::iterator it = m_table.begin();
+    //std::deque<RoutingTableEntry>::const_iterator ci = m_table.begin();
+    std::deque<RoutingTableEntry>::iterator it = m_table.begin();// + std::distance<std::deque<RoutingTableEntry>::const_iterator>(it, ci);
     
     if (m_table.size() <= n)
     {
@@ -244,7 +254,7 @@ LoRaMAC::TableLookup (uint64_t n) const
         return err;
     }
     
-    advance (it, n);
+    std::advance (it, n);
     return (*it);
 }
 
@@ -339,8 +349,8 @@ LoRaMAC::Receive (Ptr<Packet> packet)
             
             if (header.GetDest() == GetId())
             {
-                if (fheader.GetPacketId() == GetNexPacketFromQueue->GetUid() || /*  for feedback for packets    */
-                    packet->GetUid() == GetNexPacketFromQueue->GetUid())        /*  for feedback for feedback */
+                if (fheader.GetPacketId() == GetNextPacketFromQueue()->GetUid() || /*  for feedback for packets    */
+                    packet->GetUid() == GetNextPacketFromQueue()->GetUid())        /*  for feedback for feedback */
                 {
                     RemovePacketFromQueue();
                 }
@@ -370,7 +380,7 @@ LoRaMAC::Broadcast (Ptr<Packet> packet)
         /*  broadcast doesnt have specific destination node so no need to set it    */
         
         packet->AddHeader(header);
-        AddPacketToQueue (packet);
+        AddPacketToQueue (packet, false);
     }
     
     return;
@@ -389,7 +399,7 @@ LoRaMAC::SendTo (Ptr<Packet> packet, uint32_t dest)
         header.SetDest(dest);
         
         packet->AddHeader(header);
-        AddPacketToQueue (packet);
+        AddPacketToQueue (packet, false);
     }
     
     return;
@@ -405,9 +415,9 @@ LoRaMAC::AddPacketToQueue (Ptr<Packet> packet, bool isFeedback)
     {
         for (it = m_packet_queue.begin();it != m_packet_queue.end();++it)
         {
-            it->PeekHeader(header);
+            (*it)->PeekHeader(header);
             
-            if (header->GetType() != FEEDBACK)
+            if (header.GetType() != FEEDBACK)
             {
                 m_packet_queue.insert(it, packet);
             }
@@ -423,23 +433,19 @@ LoRaMAC::AddPacketToQueue (Ptr<Packet> packet, bool isFeedback)
     return;
 }
 
-Ptr<Packet>
+void
 LoRaMAC::RemovePacketFromQueue (void)
 {
-    Ptr<Packet> popped;
     if (!m_packet_queue.empty())
     {
-       popped = m_packet_queue.pop_front();
-       return popped;
+       m_packet_queue.pop_front();
     }
-    else
-    {
-        return Ptr<Packet>();
-    }
+
+    return;
 }
 
-Ptr<Packet>
-LoRaMAC::GetNexPacketFromQueue (void);
+Ptr<Packet> 
+LoRaMAC::GetNextPacketFromQueue (void)
 {
     return m_packet_queue.front();
 }
@@ -458,7 +464,7 @@ LoRaMAC::AddToLastPacketList (Ptr<Packet> packet)
 }
 
 bool 
-LoRaMAC::SearchLastPacketList (Ptr<Packet> packet);
+LoRaMAC::SearchLastPacketList (Ptr<Packet> packet)
 {
     unsigned int i;
     uint64_t id = packet->GetUid();
@@ -485,7 +491,7 @@ float
 LoRaMAC::CalcETX (uint32_t src, uint32_t dest, uint32_t last)
 {
     float etx, min;
-    std::list<RoutingTableEntry>::iterator it;
+    std::deque<RoutingTableEntry>::iterator it;
     
     if (src == dest)
     {
@@ -509,7 +515,7 @@ LoRaMAC::CalcETX (uint32_t src, uint32_t dest, uint32_t last)
     
     for (it = m_table.begin(), min = 0;it != m_table.end();++it)
     {
-        if (it->s == src && (!EntryExists(last, it->r) || src == last))
+        if (it->s == src && (!EntryExists(TableLookup(last, it->r)) || src == last))
         {
             etx = CalcETX(it->r, dest, src) + it->etx;
             
@@ -526,7 +532,7 @@ LoRaMAC::CalcETX (uint32_t src, uint32_t dest, uint32_t last)
 Ptr<Packet>
 LoRaMAC::MakeFeedback (Ptr<Packet> packet, uint32_t fwd)
 {
-    Ptr<Packet> feedback = Create<Packet>;
+    Ptr<Packet> feedback = Create<Packet>();
     LoRaMeshFeedbackHeader fheader;
     LoRaMeshHeader header;
     
@@ -551,18 +557,18 @@ LoRaMAC::PacketTimeslot (void)
     
     if (!m_packet_queue.empty())
     {
-        next = GetNexPacketFromQueue();
+        next = GetNextPacketFromQueue();
         
         for (i = MAX_NUMEL_LAST_PACKETS_LIST - 1, count = 0;i >= 0;i--)
         {
-            if (m_last_packets[i] == packet->GetUid())
+            if (m_last_packets[i] == next->GetUid())
             {
                 count++;
             }
         }
         
-        m_phy->Send(packet);
-        AddToLastPacketList (packet);
+        m_phy->Send(next);
+        AddToLastPacketList (next);
         
         if (count == 9)
         {
@@ -580,7 +586,7 @@ LoRaMAC::PacketTimeslot (void)
     dur = Seconds((m_max_packet_time + m_max_routing_time) * (m_phy->GetChannel()->GetNDevices() - 1) + m_max_routing_time);
     
     /*  schedule next slot  */
-    Simulator::Schedule(dur, &PacketTimeslot, this);
+    Simulator::Schedule(dur, &LoRaMAC::PacketTimeslot, this);
     
     return;
 }
@@ -589,8 +595,10 @@ void
 LoRaMAC::RoutingTimeslot (void)
 {
     Time dur;
+    //std::deque<RoutingTableEntry>::const_iterator ci = m_table.begin();
+    //std::deque<RoutingTableEntry>::iterator it = m_table.begin();// + std::distance<std::deque<RoutingTableEntry>::const_iterator>(it, ci);
     
-    Ptr<Packet> packet = Create<Packet>;
+    Ptr<Packet> packet = Create<Packet>();
     LoRaMeshRoutingHeader rheader;
     LoRaMeshHeader header;
     
@@ -613,7 +621,7 @@ LoRaMAC::RoutingTimeslot (void)
     
     if (m_cur == m_table.end())
     {
-        m_cur = m_table.begin();
+        m_cur = m_table.begin();// + std::distance<std::const_iterator>(m_cur, ci);;
     }
     
     /*  increment last counter  */
@@ -629,7 +637,7 @@ LoRaMAC::RoutingTimeslot (void)
     /*  every other nodes timeslots and the next packet timeslot for this node */
     dur = Seconds((m_max_packet_time + m_max_routing_time) * (m_phy->GetChannel()->GetNDevices() - 1) + m_max_packet_time);
     
-    Simulator::Schedule(dur, &RoutingTimeslot, this);
+    Simulator::Schedule(dur, &LoRaMAC::RoutingTimeslot, this);
     
     return;
 }

@@ -17,10 +17,16 @@ TypeId
 LoRaMeshFeedbackHeader::GetTypeId (void)
 {
     static TypeId tid = TypeId ("ns3::LoRaMeshHeader")
-        .SetParent<Object> ()
+        .SetParent<Header> ()
         .SetGroupName ("lora_mesh");
         
     return tid;
+}
+    
+TypeId 
+LoRaMeshFeedbackHeader::GetInstanceTypeId (void) const
+{
+    return GetTypeId();
 }
     
 void

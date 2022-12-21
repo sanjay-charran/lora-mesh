@@ -11,10 +11,10 @@ namespace lora_mesh {
 TypeId
 LoRaPHY::GetTypeId (void)
 {
-    static tid = TypeId ("ns3::LoRaPHY")
+    static TypeId tid =  TypeId ("ns3::LoRaPHY")
         .SetParent<Object> ()
         .SetGroupName ("lora_mesh")
-        .AddTraceSource ("StartSending",
+        /*.AddTraceSource ("StartSending",
                         "Trace source indicating the PHY layer"
                         "has begun the sending process for a packet",
                         MakeTraceSourceAccessor (&LoraPhy::m_startSending),
@@ -47,7 +47,7 @@ LoRaPHY::GetTypeId (void)
                         "could not be correctly received because"
                         "its received power is below the sensitivity of the receiver",
                         MakeTraceSourceAccessor (&LoraPhy::m_underSensitivity),
-                        "ns3::Packet::TracedCallback");
+                        "ns3::Packet::TracedCallback")*/;
         
     return tid;
 }
@@ -304,7 +304,8 @@ LoRaPHY::ToggleLowDataRateOpt (void)
     return;
 }
 
-bool IsLowDataRateOptEnabled (void) const
+bool 
+LoRaPHY::IsLowDataRateOptEnabled (void) const
 {
     return m_lowDataRateOpt;
 }
@@ -325,15 +326,15 @@ LoRaPHY::Send (Ptr<Packet> packet)
     
     m_channel->Send (this, packet, m_tx_power_dBm, m_tx_freq_MHz, m_tx_sf, dur);
     
-    Simulator::Schedule (dur, &SwitchStateSTANDBY, this);
+    Simulator::Schedule (dur, &LoRaPHY::SwitchStateSTANDBY, this);
     
     if (m_device)
     {
-        m_startSending (packet, m_device->GetNode()->GetId());
+        //m_startSending (packet, m_device->GetNode()->GetId());
     }
     else
     {
-        m_startSending (packet, 0);
+        //m_startSending (packet, 0);
     }
     
     return;
@@ -386,7 +387,7 @@ LoRaPHY::StartReceive (Ptr<Packet> packet, Time duration, uint8_t sf, double rx_
             
             Simulator::Schedule (duration, &LoRaPHY::EndReceive, this, packet);
             
-            m_phyRxBeginTrace (packet);
+            //m_phyRxBeginTrace (packet);
         }
     }
     
@@ -394,11 +395,11 @@ LoRaPHY::StartReceive (Ptr<Packet> packet, Time duration, uint8_t sf, double rx_
 }
 
 void
-LoRaPHY::EndReceive (Ptr<packet> packet)
+LoRaPHY::EndReceive (Ptr<Packet> packet)
 {
     SwitchStateSTANDBY ();
     
-    m_phyRxEndTrace (packet);
+    //m_phyRxEndTrace (packet);
     
     if (m_mac)
     {
@@ -407,11 +408,11 @@ LoRaPHY::EndReceive (Ptr<packet> packet)
     
     if (m_device)
     {
-        m_successfullyReceivedPacket (packet, m_device->GetNode()->GetId());
+        //m_successfullyReceivedPacket (packet, m_device->GetNode()->GetId());
     }
     else
     {
-        m_successfullyReceivedPacket (packet, 0);
+        //m_successfullyReceivedPacket (packet, 0);
     }
 }
 

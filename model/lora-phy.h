@@ -6,7 +6,7 @@
 #include "ns3/ptr.h"
 #include "ns3/packet.h"
 #include "ns3/callback.h"
-#include "ns3/nstime.h
+#include "ns3/nstime.h"
 
 #include "ns3/lora-channel.h"
 #include "ns3/lora-net-device.h"
@@ -18,6 +18,9 @@
 namespace ns3 {
 namespace lora_mesh {
     
+class LoRaMAC;
+class LoRaChannel;    
+
 enum PHYState
 {
     SLEEP,
@@ -28,7 +31,7 @@ enum PHYState
     
 class LoRaPHY : public Object
 {
-pubilc:
+public:
 
     /*  Constructor & Destructor    */
     LoRaPHY ();
@@ -95,18 +98,18 @@ pubilc:
     /*  sending and receiving */
     void Send (Ptr<Packet> packet); /*  send/receive using current transmit/receive parameters  */
     void StartReceive (Ptr<Packet> packet, Time duration, uint8_t sf, double rx_power_dBm, double freq_MHz);//
-    void EndReceive (Ptr<packet> packet);
+    void EndReceive (Ptr<Packet> packet);
     
     Time GetOnAirTime (Ptr<Packet> packet);
     
-protected:
+private:
     void SwitchStateTX (void);
     void SwitchStateRX (void);
     
     PHYState m_state;
     
     Ptr<LoRaNetDevice> m_device;
-    Ptr<LoRaMeshChannel> m_channel;
+    Ptr<LoRaChannel> m_channel;
     Ptr<LoRaMAC> m_mac;
     
     Ptr<MobilityModel> m_mobility;
@@ -127,12 +130,12 @@ protected:
     double m_rx_freq_MHz;
     uint8_t m_rx_sf;
 
-    TracedCallback<Ptr<const Packet>, uint32_t> m_startSending;
+    /*TracedCallback<Ptr<const Packet>, uint32_t> m_startSending;
     TracedCallback<Ptr<const Packet> > m_phyRxBeginTrace;
     TracedCallback<Ptr<const Packet> > m_phyRxEndTrace;
     TracedCallback<Ptr<const Packet>, uint32_t> m_successfullyReceivedPacket;
     TracedCallback<Ptr<const Packet>, uint32_t> m_underSensitivity;
-    TracedCallback<Ptr<const Packet>, uint32_t> m_interferedPacket;
+    TracedCallback<Ptr<const Packet>, uint32_t> m_interferedPacket;*/
 };
     
 }
