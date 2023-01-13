@@ -6,6 +6,7 @@
 #include "ns3/object.h"
 #include "ns3/ptr.h"
 #include "ns3/nstime.h"
+#include "ns3/random-variable-stream.h"
 
 #include "ns3/lora-phy.h"
 #include "ns3/lora-net-device.h"
@@ -20,6 +21,9 @@
 #define MAX_NUMEL_LAST_PACKETS_LIST 25
 
 #define MAX_PACKET_MSG_LENGTH_BYTES 50
+
+#define MIN_RAND_UINT32  1
+#define MAX_RAND_UINT32  10
 
 namespace ns3 {
 namespace lora_mesh {
