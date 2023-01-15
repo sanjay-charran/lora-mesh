@@ -574,7 +574,7 @@ LoRaMAC::PacketTimeslot (void)
         next = GetNextPacketFromQueue();
         next->PeekHeader(header);
         
-        if (CalcETX(GetId(), header.dest) != 0)
+        if (CalcETX(GetId(), header.GetDest()) != 0)
         {
             for (i = MAX_NUMEL_LAST_PACKETS_LIST - 1, count = 0;i >= 0;i--)
             {
@@ -594,7 +594,7 @@ LoRaMAC::PacketTimeslot (void)
             }
             
             /*  schedule routing timeslot after packet timeslot */
-            dur = m_phy->GetOnAirTime(packet);
+            dur = m_phy->GetOnAirTime(next);
             dur = Seconds(dur.GetSeconds() + 0.1);
             Simulator::Schedule(dur, &LoRaMAC::RoutingTimeslot, this);
         }
