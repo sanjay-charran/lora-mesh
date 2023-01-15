@@ -55,6 +55,7 @@ LoRaPHY::GetTypeId (void)
     
 LoRaPHY::LoRaPHY ()
 {
+    m_packet_collision = false;
 }
 
 LoRaPHY::~LoRaPHY ()
@@ -367,7 +368,7 @@ LoRaPHY::StartReceive (Ptr<Packet> packet, Time duration, uint8_t sf, double rx_
 {
     bool canLockOn = true;
     
-    if (m_state == STANDBY)
+    if (m_state != SLEEP && m_state != TX)
     {
         if (freq_MHz != m_rx_freq_MHz)
         {
@@ -386,9 +387,21 @@ LoRaPHY::StartReceive (Ptr<Packet> packet, Time duration, uint8_t sf, double rx_
         
         if (canLockOn)
         {
+            if (m_state == RX)
+            {
+                m_packet_collision = true;  // need to set to prevent the EndReceive call from being wrong
+                
+                if (Simulator::GetDelayLeft(m_last_receive_event).GetSeconds() < duration)
+                {
+                    Simulator::Cancel(m_last_receive_event);
+                }
+                
+                //any packet collision handling will be called from here
+            }
+            
             SwitchStateRX();
             
-            Simulator::Schedule (duration, &LoRaPHY::EndReceive, this, packet);
+            m_last_receive_event = Simulator::Schedule (duration, &LoRaPHY::EndReceive, this, packet);
             
             //m_phyRxBeginTrace (packet);
         }
@@ -406,10 +419,12 @@ LoRaPHY::EndReceive (Ptr<Packet> packet)
     
     //m_phyRxEndTrace (packet);
     
-    if (m_mac)
+    if (m_mac && !m_packet_collision)
     {
         m_mac->Receive(packet);
     }
+    
+    m_packet_collision = false;
     
     if (m_device)
     {
