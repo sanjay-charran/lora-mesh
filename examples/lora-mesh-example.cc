@@ -4,12 +4,16 @@
 #include "ns3/lora-mesh-helper.h"
 #include "ns3/simulator.h"
 #include "ns3/log.h"
-#include "mobility-helper.h"
+#include "ns3/application.h"
+#include "ns3/mobility-helper.h"
+#include "ns3/application-container.h"
 
 #include "ns3/lora-phy.h"
 #include "ns3/lora-mac.h"
 #include "ns3/lora-net-device.h"
 #include "ns3/lora-channel.h"
+
+#include <iterator>
 
 #define NUM_NODES   4
 
@@ -65,7 +69,7 @@ main(int argc, char *argv[])
         phy->SetChannel(channel);
         phy->SetNetDevice(device);
         phy->SetMAC(mac);
-        //phy tx/rx params
+        //phy tx/rx params (using def here)
         
         mac->SetPHY(phy);
         mac->SetDevice(device);
@@ -81,11 +85,27 @@ main(int argc, char *argv[])
     }
     
     //install applications
-    //simulator setups
+    ApplicationContainer apps;
     
-
+    for (NodeContainer::Iterator i = loranodes.begin();i != loranodes.end(); ++i)
+    {
+        Ptr<Application> app = CreateObject<Application>();
+        
+        app->SetNode(*i);
+        (*i)->AddApplication(app);
+        
+        apps.Add(app);
+    }
+    
+    //simulator setups
+    NodeContainer::Iterator i = loranodes.begin();
+    Ptr<Packet> packet = CreateObject<Packet>(10);
+    Simulator::Schedule(Seconds(10), &LoRaNetDevice::SendTo, (*i)->GetDevice(0), packet, (*(i + 3))->GetId())
+    
+    Simulator::Stop(Minutes(2));
     Simulator::Run ();
     Simulator::Destroy ();
+    
     return 0;
 }
 

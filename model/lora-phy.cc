@@ -56,6 +56,21 @@ LoRaPHY::GetTypeId (void)
 LoRaPHY::LoRaPHY ()
 {
     m_packet_collision = false;
+    m_state = STANDBY;
+    
+    m_tx_headerDisabled = false;
+    m_tx_codingRate = 1;
+    m_tx_bandwidth_Hz = 125000;
+    m_tx_numPreambles = 8;
+    m_crcEnabled = true;
+    m_lowDataRateOpt = false;
+    
+    m_tx_sf = 7;
+    m_rx_sf = 7;
+    m_tx_power_dBm = 14;
+    m_rx_sens_dBm = -124;
+    m_rx_freq_MHz = 868.1;
+    m_tx_freq_MHz = 868.1;
 }
 
 LoRaPHY::~LoRaPHY ()
