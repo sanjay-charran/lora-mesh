@@ -7,7 +7,7 @@
 #     conf.check_nonfatal(header_name='stdint.h', define_name='HAVE_STDINT_H')
 
 def build(bld):
-    module = bld.create_ns3_module('lora-mesh', ['core'])
+    module = bld.create_ns3_module('lora-mesh', ['core', 'propagation', 'mobility', 'network'])
     module.source = [
         'model/lora-mesh.cc',
         'model/lora-channel.cc',
