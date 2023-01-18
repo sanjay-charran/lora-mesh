@@ -7,6 +7,14 @@
 #include "ns3/application.h"
 #include "ns3/mobility-helper.h"
 #include "ns3/application-container.h"
+#include "ns3/random-waypoint-mobility-model.h"
+#include "ns3/propagation-loss-model.h"
+#include "ns3/propagation-delay-model.h"
+#include "ns3/mobility-helper.h"
+#include "ns3/node-container.h"
+#include "ns3/ptr.h"
+#include "ns3/net-device-container.h"
+#include "ns3/object-factory.h"
 
 #include "ns3/lora-phy.h"
 #include "ns3/lora-mac.h"
@@ -40,10 +48,14 @@ main(int argc, char *argv[])
     //setup mobility and initial positions
     MobilityHelper mobility;
     
-    Ptr<RandomDiscPositionAllocator> position = CreateObject<RandomDiscPositionAllocator>();    //set rho and theta with connect
+    Ptr<RandomDiscPositionAllocator> position = CreateObject<RandomDiscPositionAllocator>();
     
     mobility.SetPositionAllocator(position);
-    mobility.SetMobilityModel("ns3::RandomWaypointMobilityModel");  //set position allocator for this
+    mobility.SetMobilityModel(  "ns3::RandomWaypointMobilityModel",
+                                "Speed", StringValue ("ns3::UniformRandomVariable[Min=0|Max=60]"),
+                                "Pause", StringValue ("ns3::ConstantRandomVariable[Constant=0.0]"),
+                                "PositionAllocator", PointerValue(position)
+    );
     
     
     //create nodes
@@ -58,21 +70,17 @@ main(int argc, char *argv[])
     //attach devices, phys and macs
     //add phys to channel
     
-    for (NodeContainer::Iterator i = loranodes.begin(); i != loranodes.end(); ++i)
+    for (NodeContainer::Iterator i = loranodes.Begin(); i != loranodes.End(); ++i)
     {
         Ptr<Node> node = *i;
         Ptr<LoRaNetDevice> device = CreateObject<LoRaNetDevice>();
         Ptr<LoRaPHY> phy = CreateObject<LoRaPHY>();
         Ptr<LoRaMAC> mac = CreateObject<LoRaMAC>();
         
-        
         phy->SetChannel(channel);
         phy->SetNetDevice(device);
         phy->SetMAC(mac);
         //phy tx/rx params (using def here)
-        
-        mac->SetPHY(phy);
-        mac->SetDevice(device);
         
         channel->AddPHY(phy);
         
@@ -81,13 +89,16 @@ main(int argc, char *argv[])
         device->SetNode(node);
         //device params
         
+        mac->SetPHY(phy);
+        mac->SetDevice(device);
+        
         node->AddDevice(device);
     }
     
     //install applications
     ApplicationContainer apps;
     
-    for (NodeContainer::Iterator i = loranodes.begin();i != loranodes.end(); ++i)
+    for (NodeContainer::Iterator i = loranodes.Begin();i != loranodes.End(); ++i)
     {
         Ptr<Application> app = CreateObject<Application>();
         
@@ -98,9 +109,9 @@ main(int argc, char *argv[])
     }
     
     //simulator setups
-    NodeContainer::Iterator i = loranodes.begin();
-    Ptr<Packet> packet = CreateObject<Packet>(10);
-    Simulator::Schedule(Seconds(10), &LoRaNetDevice::SendTo, (*i)->GetDevice(0), packet, (*(i + 3))->GetId())
+    //NodeContainer::Iterator i = loranodes.Begin();
+    Ptr<Packet> packet = Create<Packet>(10);
+    //Simulator::Schedule(Seconds(10), &LoRaNetDevice::SendTo, (*i)->GetDevice(0), packet, (*(i + 3))->GetId());
     
     Simulator::Stop(Minutes(2));
     Simulator::Run ();

@@ -7,6 +7,7 @@
 #include "ns3/ptr.h"
 #include "ns3/nstime.h"
 #include "ns3/random-variable-stream.h"
+#include "ns3/simulator.h"
 
 #include "ns3/lora-phy.h"
 #include "ns3/lora-net-device.h"

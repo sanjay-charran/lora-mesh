@@ -22,7 +22,7 @@ LoRaMeshFeedbackHeader::GetTypeId (void)
         
     return tid;
 }
-    
+
 TypeId 
 LoRaMeshFeedbackHeader::GetInstanceTypeId (void) const
 {

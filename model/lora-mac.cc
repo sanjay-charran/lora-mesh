@@ -60,10 +60,10 @@ LoRaMAC::SetPHY (Ptr<LoRaPHY> phy)
         dur_packet = Seconds((m_max_packet_time + m_max_routing_time) * GetId());
         dur_routing = Seconds((m_max_packet_time + m_max_routing_time) * GetId() + m_max_packet_time);
     
-        Simulator::Schedule (dur_packet, &LoRaMAC::PacketTimeslot, this);
-        Simulator::Schedule (dur_routing, &LoRaMAC::RoutingTimeslot, this);*/
         
-        PacketTimeslot();
+        Simulator::Schedule (dur_routing, &LoRaMAC::RoutingTimeslot, this);*/
+        Simulator::Schedule (Seconds(3), &LoRaMAC::PacketTimeslot, this);
+        //PacketTimeslot();
     }
     else
     {

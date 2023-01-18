@@ -1,7 +1,5 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 
-#include "ns3/simulator.h"
-
 #include "ns3/lora-net-device.h"
 
 namespace ns3 {
@@ -21,9 +19,6 @@ LoRaNetDevice::GetTypeId (void)
     
 LoRaNetDevice::LoRaNetDevice ()
 {
-    m_node = 0;
-    m_phy = 0;
-    m_mac = 0;
 }
  
 LoRaNetDevice::~LoRaNetDevice ()
