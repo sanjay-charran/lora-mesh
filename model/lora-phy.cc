@@ -126,7 +126,14 @@ LoRaPHY::SetMobility (Ptr<MobilityModel> mobility)
 Ptr<MobilityModel> 
 LoRaPHY::GetMobility (void) const
 {
-    return m_mobility;
+    if (m_mobility != 0)
+    {
+        return m_mobility;
+    }
+    else
+    {
+        return m_device->GetNode()->GetObject<MobilityModel>();
+    }
 }
 
 void 

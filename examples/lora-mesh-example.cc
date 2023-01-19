@@ -33,6 +33,9 @@ NS_LOG_COMPONENT_DEFINE ("LoRaMeshExample");
 int 
 main(int argc, char *argv[])
 {   
+    LogComponentEnable("LoRaMAC", LOG_LEVEL_INFO);
+    NS_LOG_UNCOND ("LoRa Mesh Simulation Example...");
+    
     //create channel
     Ptr<LoRaChannel> channel = CreateObject<LoRaChannel>();
     
@@ -70,12 +73,16 @@ main(int argc, char *argv[])
     //attach devices, phys and macs
     //add phys to channel
     
+    Ptr<LoRaNetDevice> device;
+    Ptr<LoRaPHY> phy;
+    Ptr<LoRaMAC> mac;
+    
     for (NodeContainer::Iterator i = loranodes.Begin(); i != loranodes.End(); ++i)
     {
         Ptr<Node> node = *i;
-        Ptr<LoRaNetDevice> device = CreateObject<LoRaNetDevice>();
-        Ptr<LoRaPHY> phy = CreateObject<LoRaPHY>();
-        Ptr<LoRaMAC> mac = CreateObject<LoRaMAC>();
+        device = Create<LoRaNetDevice>();
+        phy = CreateObject<LoRaPHY>();
+        mac = CreateObject<LoRaMAC>();
         
         phy->SetChannel(channel);
         phy->SetNetDevice(device);
@@ -87,12 +94,12 @@ main(int argc, char *argv[])
         device->SetMAC(mac);
         device->SetPHY(phy);
         device->SetNode(node);
+        
+        node->AddDevice(device);
         //device params
         
         mac->SetPHY(phy);
         mac->SetDevice(device);
-        
-        node->AddDevice(device);
     }
     
     //install applications
@@ -107,10 +114,10 @@ main(int argc, char *argv[])
         
         apps.Add(app);
     }
-    
     //simulator setups
+    
     //NodeContainer::Iterator i = loranodes.Begin();
-    Ptr<Packet> packet = Create<Packet>(10);
+    //Ptr<Packet> packet = Create<Packet>(0);
     //Simulator::Schedule(Seconds(10), &LoRaNetDevice::SendTo, (*i)->GetDevice(0), packet, (*(i + 3))->GetId());
     
     Simulator::Stop(Minutes(2));

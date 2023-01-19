@@ -21,10 +21,6 @@ LoRaMAC::GetTypeId (void)
 
 LoRaMAC::LoRaMAC ()
 {
-    RoutingTableEntry first_entry = {GetId(), GetId(), 0, 0};
-    AddTableEntry(first_entry);
-    
-    m_cur = m_table.begin();
     m_last_counter = 0;
 }
 
@@ -83,6 +79,18 @@ void
 LoRaMAC::SetDevice (Ptr<LoRaNetDevice> device)
 {
     m_device = device;
+    
+    RoutingTableEntry first_entry;
+    first_entry.s = GetId();
+    first_entry.r = GetId();
+    first_entry.etx = 0;
+    first_entry.last = 0;
+    
+    AddTableEntry(first_entry);
+    NS_LOG_INFO("Node " << GetId() << ": Added entry (" << first_entry.s << "->" << first_entry.r << ")");
+    
+    m_cur = m_table.begin();
+    
     return;
 }
 
@@ -113,6 +121,7 @@ LoRaMAC::AddTableEntry (RoutingTableEntry entry)
     if (m_table.empty())
     {
         m_table.insert(it, entry);
+        m_cur = m_table.begin();
         return;
     }
     
@@ -121,11 +130,13 @@ LoRaMAC::AddTableEntry (RoutingTableEntry entry)
         if (it->s > entry.s)
         {
             m_table.insert(it, entry);
+            m_cur = m_table.begin();
             return;
         }
         else if (it->s == entry.s && it->r > entry.r)
         {
             m_table.insert(it, entry);
+            m_cur = m_table.begin();
             return;
         }
         else if (it->s == entry.s && it->r == entry.r)
@@ -136,6 +147,7 @@ LoRaMAC::AddTableEntry (RoutingTableEntry entry)
     }
     
     m_table.insert(it, entry);
+    m_cur = m_table.begin();
     return;
 }
 
@@ -158,6 +170,7 @@ LoRaMAC::RemoveTableEntry (uint32_t s, uint32_t r)
         {
             /*  remove entry    */
             m_table.erase(it);
+            m_cur = m_table.begin();
             return;
         }
     }
@@ -177,6 +190,7 @@ LoRaMAC::UpdateTableEntry (RoutingTableEntry entry)
     {
         /*  update by adding    */
         AddTableEntry (entry);
+        m_cur = m_table.begin();
         return;
     }
     
@@ -193,6 +207,7 @@ LoRaMAC::UpdateTableEntry (RoutingTableEntry entry)
     
     /*  could not find -- add in entry  */
     AddTableEntry (entry);
+    m_cur = m_table.begin();
     return;
 }
 
@@ -269,19 +284,22 @@ LoRaMAC::Receive (Ptr<Packet> packet)
     LoRaMeshRoutingHeader rheader;
     LoRaMeshFeedbackHeader fheader;
     Ptr<Packet> feedback;
-    packet->PeekHeader(header);
     RoutingTableEntry entry, temp;
+    
+    packet->RemoveHeader(header);
     
     switch (header.GetType())
     {
         case ROUTING_UPDATE:
-            packet->RemoveHeader(header);
+            //packet->RemoveHeader(header);
             packet->RemoveHeader(rheader);
             
             entry.s = header.GetSrc();
             entry.r = header.GetDest();
             entry.etx = rheader.GetETX();
             entry.last = rheader.GetLast();
+            
+            NS_LOG_INFO("(receive MAC)Node " << header.GetFwd() << "->" << GetId() << ": " << entry.s << "->" << entry.r << " (etx: " << entry.etx << ")");
             
             if (EntryExists(entry))
             {
@@ -314,6 +332,7 @@ LoRaMAC::Receive (Ptr<Packet> packet)
                 
                 if (entry.etx <= 10)
                 {
+                    NS_LOG_INFO("Node " << GetId() << ": Added entry (" << entry.s << "->" << entry.r << ")");
                     AddTableEntry(entry);
                 }
             }
@@ -324,6 +343,10 @@ LoRaMAC::Receive (Ptr<Packet> packet)
             //unsure if to implement
             break;
         case DIRECTED:
+            
+            NS_LOG_INFO("(receive MAC)Node " << header.GetFwd() << "->" << GetId() << ": Packet #" << packet->GetUid());
+            
+            packet->AddHeader(header);
             
             if (header.GetDest() == GetId())
             {
@@ -348,8 +371,10 @@ LoRaMAC::Receive (Ptr<Packet> packet)
             break;
         case FEEDBACK:
             
-            packet->RemoveHeader(header);
+            //packet->RemoveHeader(header);
             packet->RemoveHeader(fheader);
+            
+            NS_LOG_INFO("(receive MAC)Node " << header.GetFwd() << "->" << GetId() << ": Feedback #" << fheader.GetPacketId());
             
             if (header.GetDest() == GetId())
             {
@@ -542,7 +567,7 @@ LoRaMAC::CalcETX (uint32_t src, uint32_t dest, uint32_t last)
 Ptr<Packet>
 LoRaMAC::MakeFeedback (Ptr<Packet> packet, uint32_t fwd)
 {
-    Ptr<Packet> feedback = Create<Packet>();
+    Ptr<Packet> feedback = Create<Packet>(50);
     LoRaMeshFeedbackHeader fheader;
     LoRaMeshHeader header;
     
@@ -583,6 +608,8 @@ LoRaMAC::PacketTimeslot (void)
                     count++;
                 }
             }
+            
+            NS_LOG_INFO("(send MAC)Node " << GetId() << ": " << header.GetSrc() << "->" << header.GetDest());
             
             m_phy->Send(next);
             AddToLastPacketList (next);
@@ -629,27 +656,29 @@ LoRaMAC::RoutingTimeslot (void)
     NS_LOG_FUNCTION (this);
     
     Time dur;
-    
-    Ptr<Packet> packet = Create<Packet>();
-    LoRaMeshRoutingHeader rheader;
+    RoutingTableEntry cur = *m_cur;
+    Ptr<Packet> packet = Create<Packet>(50);
     LoRaMeshHeader header;
     
     header.SetType(ROUTING_UPDATE);
-    header.SetSrc(m_cur->s);
-    header.SetDest(m_cur->r);
+    header.SetSrc(cur.s);
+    header.SetDest(cur.r);
     header.SetFwd(GetId());
     
-    rheader.SetETX(m_cur->etx);
+    LoRaMeshRoutingHeader rheader;
+    rheader.SetETX(cur.etx);
     rheader.SetLast(m_last_counter);
     
+    NS_LOG_INFO("(send MAC)Node " << GetId() << ": " << cur.s << "->" << cur.r << " (etx: " << cur.etx << ")");
+    
     packet->AddHeader(rheader);
+    
     packet->AddHeader(header);
     
     m_phy->Send(packet);
     
-    
     /*  move entry iterator by one  */
-    m_cur++;
+    ++m_cur;
     
     if (m_cur == m_table.end())
     {

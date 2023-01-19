@@ -110,7 +110,7 @@ LoRaMeshHeader::Serialize (Buffer::Iterator start) const
 uint32_t
 LoRaMeshHeader::Deserialize (Buffer::Iterator start)
 {
-    m_type = (MsgType)start.ReadU8 ();
+    m_type = (MsgType)(start.ReadU8());
     m_src = start.ReadU32 ();
     m_dest = start.ReadU32 ();
     m_fwd = start.ReadU32 ();
