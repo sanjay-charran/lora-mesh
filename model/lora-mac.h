@@ -97,7 +97,7 @@ private:
     bool SearchLastPacketList (Ptr<Packet> packet);
     //bool SearchLastPacketList (uint64_t uid);//
     
-    float CalcETX (uint32_t src, uint32_t dest, uint32_t last);//improve later
+    //float CalcETX (uint32_t src, uint32_t dest, uint32_t last);//improve later
     
     Ptr<LoRaPHY> m_phy;
     Ptr<LoRaNetDevice> m_device;

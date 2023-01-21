@@ -37,6 +37,7 @@ main(int argc, char *argv[])
     Time::SetResolution (Time::NS);
     LogComponentEnableAll(LOG_PREFIX_TIME);
     LogComponentEnable("LoRaMAC", LOG_LEVEL_INFO);
+    LogComponentEnable("LoRaPHY", LOG_LEVEL_INFO);
     NS_LOG_UNCOND ("LoRa Mesh Simulation Example...");
     
     //create channel

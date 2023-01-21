@@ -572,57 +572,55 @@ LoRaMAC::CalcETX (uint32_t src, uint32_t dest)
         }
         
     }
-    
-    //return CalcETX(src, dest, checked_nodes);
 }
 
-/*  routing algorithm -- improve later  */
-float
-LoRaMAC::CalcETX (uint32_t src, uint32_t dest, uint32_t last)
-{
-    float etx, min;
-    std::deque<RoutingTableEntry>::iterator it;
-    
-    if (src == dest)
-    {
-        return 0.0;
-    }
-    
-    for (it = m_table.begin();it != m_table.end();++it)
-    {
-        if (it->s == src && it->r == dest)
-        {
-            return it->etx;
-        }
-        
-        if (it->s > src)
-        {
-            /*  beyond where the entry ought to be  */
-            break;
-        }
-    }
-    
-    for (it = m_table.begin(), min = 0;it != m_table.end();++it)
-    {
-        //(!EntryExists(TableLookup(last, it->r)) || src == last)
-        if (it->s == src && it->r != last)
-        {
-            if (it->r == dest)
-            {
-                return it->etx;
-            }
-            
-            etx = CalcETX(it->r, dest, src) + it->etx;
-            
-            if (etx < min || min == 0)
-            {
-                min = etx;
-            }
-        }
-    }
-    
-    return min;
-}
+// /*  routing algorithm -- improve later  */
+// float
+// LoRaMAC::CalcETX (uint32_t src, uint32_t dest, uint32_t last)
+// {
+//     float etx, min;
+//     std::deque<RoutingTableEntry>::iterator it;
+//     
+//     if (src == dest)
+//     {
+//         return 0.0;
+//     }
+//     
+//     for (it = m_table.begin();it != m_table.end();++it)
+//     {
+//         if (it->s == src && it->r == dest)
+//         {
+//             return it->etx;
+//         }
+//         
+//         if (it->s > src)
+//         {
+//             /*  beyond where the entry ought to be  */
+//             break;
+//         }
+//     }
+//     
+//     for (it = m_table.begin(), min = 0;it != m_table.end();++it)
+//     {
+//         (!EntryExists(TableLookup(last, it->r)) || src == last)
+//         if (it->s == src && it->r != last)
+//         {
+//             if (it->r == dest)
+//             {
+//                 return it->etx;
+//             }
+//             
+//             etx = CalcETX(it->r, dest, src) + it->etx;
+//             
+//             if (etx < min || min == 0)
+//             {
+//                 min = etx;
+//             }
+//         }
+//     }
+//     
+//     return min;
+// }
 
 Ptr<Packet>
 LoRaMAC::MakeFeedback (Ptr<Packet> packet, uint32_t fwd)

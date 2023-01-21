@@ -1,6 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 
 #include "ns3/simulator.h"
+#include "ns3/log.h"
 
 #include "ns3/lora-phy.h"
 
@@ -412,6 +413,8 @@ LoRaPHY::StartReceive (Ptr<Packet> packet, Time duration, uint8_t sf, double rx_
             if (m_state == RX)
             {
                 m_packet_collision = true;  // need to set to prevent the EndReceive call from being wrong
+                
+                NS_LOG_INFO("Packet Collision for Packet #" << packet->GetUid());
                 
                 if (Simulator::GetDelayLeft(m_last_receive_event).GetSeconds() < duration)
                 {
