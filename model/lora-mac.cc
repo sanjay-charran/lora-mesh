@@ -78,7 +78,9 @@ LoRaMAC::GetPHY (void) const
 void
 LoRaMAC::SetDevice (Ptr<LoRaNetDevice> device)
 {
+    Vector3D pos;
     m_device = device;
+    
     
     RoutingTableEntry first_entry;
     first_entry.s = GetId();
@@ -87,7 +89,9 @@ LoRaMAC::SetDevice (Ptr<LoRaNetDevice> device)
     first_entry.last = 0;
     
     AddTableEntry(first_entry);
-    NS_LOG_INFO("Node " << GetId() << ": Added entry (" << first_entry.s << "->" << first_entry.r << ")");
+    
+    pos = m_phy->GetMobility()->GetPosition();
+    NS_LOG_INFO("Node #" << GetId() << "(x=" << pos.x << " y=" << pos.y << " z=" << pos.z << ")" << ": Added entry (" << first_entry.s << "->" << first_entry.r << ")");
     
     m_cur = m_table.begin();
     
@@ -284,6 +288,7 @@ LoRaMAC::Receive (Ptr<Packet> packet)
     LoRaMeshRoutingHeader rheader;
     LoRaMeshFeedbackHeader fheader;
     Ptr<Packet> feedback;
+    Vector3D pos = m_phy->GetMobility()->GetPosition();;
     RoutingTableEntry entry, temp;
     
     packet->RemoveHeader(header);
@@ -299,7 +304,7 @@ LoRaMAC::Receive (Ptr<Packet> packet)
             entry.etx = rheader.GetETX();
             entry.last = rheader.GetLast();
             
-            NS_LOG_INFO("(receive MAC)Node " << header.GetFwd() << "->" << GetId() << ": " << entry.s << "->" << entry.r << " (etx: " << entry.etx << ")");
+            NS_LOG_INFO("(receive MAC)Node (x=" << pos.x << " y=" << pos.y << " z=" << pos.z << ")#" << header.GetFwd() << "->#" << GetId() << ": " << entry.s << "->" << entry.r << " (etx: " << entry.etx << ")");
             
             if (EntryExists(entry))
             {
@@ -332,7 +337,7 @@ LoRaMAC::Receive (Ptr<Packet> packet)
                 
                 if (entry.etx <= 10)
                 {
-                    NS_LOG_INFO("Node " << GetId() << ": Added entry (" << entry.s << "->" << entry.r << ")");
+                    NS_LOG_INFO("Node #" << GetId() << ": Added entry (" << entry.s << "->" << entry.r << ")");
                     AddTableEntry(entry);
                 }
             }
@@ -344,7 +349,7 @@ LoRaMAC::Receive (Ptr<Packet> packet)
             break;
         case DIRECTED:
             
-            NS_LOG_INFO("(receive MAC)Node " << header.GetFwd() << "->" << GetId() << ": Packet #" << packet->GetUid());
+            NS_LOG_INFO("(receive MAC)Node (x=" << pos.x << " y=" << pos.y << " z=" << pos.z << ")#" << header.GetFwd() << "->" << GetId() << ": Packet #" << packet->GetUid());
             
             packet->AddHeader(header);
             
@@ -374,7 +379,7 @@ LoRaMAC::Receive (Ptr<Packet> packet)
             //packet->RemoveHeader(header);
             packet->RemoveHeader(fheader);
             
-            NS_LOG_INFO("(receive MAC)Node " << header.GetFwd() << "->" << GetId() << ": Feedback #" << fheader.GetPacketId());
+            NS_LOG_INFO("(receive MAC)Node (x=" << pos.x << " y=" << pos.y << " z=" << pos.z << ")#" << header.GetFwd() << "->" << GetId() << ": Feedback #" << fheader.GetPacketId());
             
             if (header.GetDest() == GetId())
             {
@@ -651,6 +656,7 @@ LoRaMAC::PacketTimeslot (void)
     unsigned int count;
     uint32_t temp;
     Time dur;
+    Vector3D pos = m_phy->GetMobility()->GetPosition();
     
     if (!m_packet_queue.empty())
     {
@@ -667,7 +673,7 @@ LoRaMAC::PacketTimeslot (void)
                 }
             }
             
-            NS_LOG_INFO("(send MAC)Node " << GetId() << ": " << header.GetSrc() << "->" << header.GetDest());
+            NS_LOG_INFO("(send MAC)Node #" << GetId() << " (x=" << pos.x << " y=" << pos.y << " z=" << pos.z << "): " << header.GetSrc() << "->" << header.GetDest());
             
             m_phy->Send(next);
             AddToLastPacketList (next);
@@ -717,6 +723,7 @@ LoRaMAC::RoutingTimeslot (void)
     RoutingTableEntry cur = *m_cur;
     Ptr<Packet> packet = Create<Packet>(50);
     LoRaMeshHeader header;
+    Vector3D pos = m_phy->GetMobility()->GetPosition();
     
     header.SetType(ROUTING_UPDATE);
     header.SetSrc(cur.s);
@@ -727,7 +734,7 @@ LoRaMAC::RoutingTimeslot (void)
     rheader.SetETX(cur.etx);
     rheader.SetLast(m_last_counter);
     
-    NS_LOG_INFO("(send MAC)Node " << GetId() << ": " << cur.s << "->" << cur.r << " (etx: " << cur.etx << ")");
+    NS_LOG_INFO("(send MAC)Node #" << GetId() << "(x=" << pos.x << " y=" << pos.y << " z=" << pos.z << "): " << cur.s << "->" << cur.r << " (etx: " << cur.etx << ")");
     
     packet->AddHeader(rheader);
     

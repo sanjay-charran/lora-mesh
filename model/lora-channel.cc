@@ -155,8 +155,7 @@ LoRaChannel::Send (Ptr<LoRaPHY> sender, Ptr<Packet> packet, double tx_power_dBm,
     double rx_power_dBm;
     uint32_t dst_id;
     
-    //std::deque<Ptr<LoRaPHY>>::const_iterator ci = m_phyList.begin();
-    std::deque<Ptr<LoRaPHY>>::iterator i = m_phyList.begin();// + std::distance<std::deque<Ptr<LoRaPHY>>::const_iterator>(i, ci);
+    std::deque<Ptr<LoRaPHY>>::iterator i = m_phyList.begin();
     
     for (;i != m_phyList.end();i++)
     {
