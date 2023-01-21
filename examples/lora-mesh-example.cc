@@ -22,6 +22,7 @@
 #include "ns3/lora-channel.h"
 
 #include <iterator>
+#include <vector>
 
 #define NUM_NODES   4
 
@@ -33,6 +34,8 @@ NS_LOG_COMPONENT_DEFINE ("LoRaMeshExample");
 int 
 main(int argc, char *argv[])
 {   
+    Time::SetResolution (Time::NS);
+    LogComponentEnableAll(LOG_PREFIX_TIME);
     LogComponentEnable("LoRaMAC", LOG_LEVEL_INFO);
     NS_LOG_UNCOND ("LoRa Mesh Simulation Example...");
     
@@ -73,6 +76,8 @@ main(int argc, char *argv[])
     //attach devices, phys and macs
     //add phys to channel
     
+    std::vector<Ptr<LoRaNetDevice>> devices;
+    
     Ptr<LoRaNetDevice> device;
     Ptr<LoRaPHY> phy;
     Ptr<LoRaMAC> mac;
@@ -100,6 +105,8 @@ main(int argc, char *argv[])
         
         mac->SetPHY(phy);
         mac->SetDevice(device);
+        
+        devices.push_back(device);
     }
     
     //install applications
@@ -116,9 +123,10 @@ main(int argc, char *argv[])
     }
     //simulator setups
     
-    //NodeContainer::Iterator i = loranodes.Begin();
-    //Ptr<Packet> packet = Create<Packet>(0);
-    //Simulator::Schedule(Seconds(10), &LoRaNetDevice::SendTo, (*i)->GetDevice(0), packet, (*(i + 3))->GetId());
+     //NodeContainer::Iterator i = loranodes.Begin();
+     Ptr<Packet> packet = Create<Packet>(50);
+     //Ptr<LoRaNetDevice> temp = (*i)->GetDevice(0);
+     devices[0]->SendTo(packet, 3);
     
     Simulator::Stop(Minutes(2));
     Simulator::Run ();

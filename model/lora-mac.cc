@@ -308,7 +308,7 @@ LoRaMAC::Receive (Ptr<Packet> packet)
                 
                 if (!IsErrEntry(temp))
                 {
-                    temp.etx = (entry.last > temp.last)?(1.0/(entry.last - temp.last)):(1.0/((255 - temp.last) + entry.last + 1));
+                    temp.etx = (entry.last > temp.last)?(entry.last - temp.last):(255 - temp.last + entry.last);
                     temp.last = entry.last;
                     
                     if (temp.etx > 10)
@@ -326,7 +326,7 @@ LoRaMAC::Receive (Ptr<Packet> packet)
             {
                 if (entry.s == entry.r)
                 {
-                    entry.etx = 1.0/(entry.last + 1);
+                    entry.etx = (entry.last + 1);
                     entry.r = GetId();  /*  node broadcasting itself was received so adds that as the entry     */
                 }
                 
@@ -518,7 +518,62 @@ LoRaMAC::SearchLastPacketList (Ptr<Packet> packet)
 float
 LoRaMAC::CalcETX (uint32_t src, uint32_t dest)
 {
-    return CalcETX(src, dest, src);
+    std::vector<RoutingTableEntry> checked_nodes;
+    std::deque<RoutingTableEntry>::iterator it, temp;
+    float min;
+    unsigned int i, j;
+    bool flag;
+    RoutingTableEntry entry;
+    entry.r = src;
+    entry.etx = 0;
+    
+    checked_nodes.push_back(entry);
+    
+    for (;;)
+    {
+        for (i = 0, min = 1000000;i < checked_nodes.size();i++)
+        {
+            for (it = m_table.begin();it != m_table.end();++it)
+            {
+                if (checked_nodes[i].r == it->s)
+                {
+                    for (j = 0, flag = false;j < checked_nodes.size();j++)
+                    {
+                        if (checked_nodes[j].r == it->r)
+                        {
+                            flag = true;
+                            break;
+                        }
+                    }
+                    
+                    if (!flag && (checked_nodes[i].etx + it->etx) < min)
+                    {
+                        min = checked_nodes[i].etx + it->etx;
+                        temp = it;
+                    }
+                }
+            }
+        }
+        
+        if (min != 1000000)
+        {
+            if (temp->r == dest)
+            {
+                return min;
+            }
+            
+            entry.r = temp->r;
+            entry.etx = min;
+            checked_nodes.push_back(entry);
+        }
+        else
+        {
+            return 0;
+        }
+        
+    }
+    
+    //return CalcETX(src, dest, checked_nodes);
 }
 
 /*  routing algorithm -- improve later  */
@@ -532,7 +587,6 @@ LoRaMAC::CalcETX (uint32_t src, uint32_t dest, uint32_t last)
     {
         return 0.0;
     }
-    
     
     for (it = m_table.begin();it != m_table.end();++it)
     {
@@ -550,8 +604,14 @@ LoRaMAC::CalcETX (uint32_t src, uint32_t dest, uint32_t last)
     
     for (it = m_table.begin(), min = 0;it != m_table.end();++it)
     {
-        if (it->s == src && (!EntryExists(TableLookup(last, it->r)) || src == last))
+        //(!EntryExists(TableLookup(last, it->r)) || src == last)
+        if (it->s == src && it->r != last)
         {
+            if (it->r == dest)
+            {
+                return it->etx;
+            }
+            
             etx = CalcETX(it->r, dest, src) + it->etx;
             
             if (etx < min || min == 0)
