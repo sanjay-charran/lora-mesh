@@ -16,40 +16,47 @@ LoRaPHY::GetTypeId (void)
     static TypeId tid =  TypeId ("ns3::LoRaPHY")
         .SetParent<Object> ()
         .SetGroupName ("lora_mesh")
-        /*.AddTraceSource ("StartSending",
+        .AddTraceSource ("StartSending",
                         "Trace source indicating the PHY layer"
                         "has begun the sending process for a packet",
-                        MakeTraceSourceAccessor (&LoraPhy::m_startSending),
+                        MakeTraceSourceAccessor (&LoRaPHY::m_startSending),
                         "ns3::Packet::TracedCallback")
         .AddTraceSource ("PhyRxBegin",
                         "Trace source indicating a packet "
                         "is now being received from the channel medium "
                         "by the device",
-                        MakeTraceSourceAccessor (&LoraPhy::m_phyRxBeginTrace),
+                        MakeTraceSourceAccessor (&LoRaPHY::m_phyRxBeginTrace),
                         "ns3::Packet::TracedCallback")
         .AddTraceSource ("PhyRxEnd",
                         "Trace source indicating the PHY has finished "
                         "the reception process for a packet",
-                        MakeTraceSourceAccessor (&LoraPhy::m_phyRxEndTrace),
+                        MakeTraceSourceAccessor (&LoRaPHY::m_phyRxEndTrace),
                         "ns3::Packet::TracedCallback")
         .AddTraceSource ("ReceivedPacket",
                         "Trace source indicating a packet "
                         "was correctly received",
-                        MakeTraceSourceAccessor
-                        (&LoraPhy::m_successfullyReceivedPacket),
+                        MakeTraceSourceAccessor(&LoRaPHY::m_successfullyReceivedPacket),
                         "ns3::Packet::TracedCallback")
         .AddTraceSource ("LostPacketBecauseInterference",
                         "Trace source indicating a packet "
                         "could not be correctly decoded because of interfering"
                         "signals",
-                        MakeTraceSourceAccessor (&LoraPhy::m_interferedPacket),
+                        MakeTraceSourceAccessor (&LoRaPHY::m_interferedPacket),
                         "ns3::Packet::TracedCallback")
         .AddTraceSource ("LostPacketBecauseUnderSensitivity",
                         "Trace source indicating a packet "
                         "could not be correctly received because"
                         "its received power is below the sensitivity of the receiver",
-                        MakeTraceSourceAccessor (&LoraPhy::m_underSensitivity),
-                        "ns3::Packet::TracedCallback")*/;
+                        MakeTraceSourceAccessor (&LoRaPHY::m_underSensitivity),
+                        "ns3::Packet::TracedCallback")
+        .AddTraceSource ("RxSniffer",
+                        "Trace source which simulates sniffing for received packets",
+                        MakeTraceSourceAccessor (&LoRaPHY::m_rxSniffer),
+                        "ns3::LoRaPHY::RxSnifferTracedCallback")
+        .AddTraceSource ("TxSniffer",
+                        "Trace source which simulates sniffing for transmitted packets",
+                        MakeTraceSourceAccessor (&LoRaPHY::m_txSniffer),
+                        "ns3::LoRaPHY::TxSnifferTracedCallback");
         
     return tid;
 }

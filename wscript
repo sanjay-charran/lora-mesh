@@ -18,6 +18,7 @@ def build(bld):
         'model/lora-net-device.cc',
         'model/lora-phy.cc',
         'helper/lora-mesh-helper.cc',
+        'helper/pcap-helper-for-lora.cc',
         ]
 
     module_test = bld.create_ns3_module_test_library('lora-mesh')
@@ -37,6 +38,7 @@ def build(bld):
         'model/lora-net-device.h',
         'model/lora-phy.h',
         'helper/lora-mesh-helper.h',
+        'helper/pcap-helper-for-lora.h'
         ]
 
     if bld.env.ENABLE_EXAMPLES:
