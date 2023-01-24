@@ -81,6 +81,7 @@ public:
     
     void Broadcast (Ptr<Packet> packet);
     void SendTo (Ptr<Packet> packet, uint32_t dest);
+    void Send (Ptr<Packet> packet); //assumes packet already sorted out header data
     
     Ptr<Packet> MakeFeedback (Ptr<Packet> packet, uint32_t fwd);
     

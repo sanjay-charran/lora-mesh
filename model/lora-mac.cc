@@ -421,6 +421,19 @@ LoRaMAC::Broadcast (Ptr<Packet> packet)
 }
 
 void 
+LoRaMAC::Send (Ptr<Packet> packet)
+{
+    NS_LOG_FUNCTION (this << packet);
+    
+    if (m_phy)
+    {
+        AddPacketToQueue (packet, false);
+    }
+    
+    return;
+}
+
+void 
 LoRaMAC::SendTo (Ptr<Packet> packet, uint32_t dest)
 {
     NS_LOG_FUNCTION (this << packet << dest);
@@ -673,7 +686,7 @@ LoRaMAC::PacketTimeslot (void)
                 }
             }
             
-            NS_LOG_INFO("(send MAC)Node #" << GetId() << " (x=" << pos.x << " y=" << pos.y << " z=" << pos.z << "): " << header.GetSrc() << "->" << header.GetDest());
+            NS_LOG_INFO("(send MAC)Node #" << GetId() << " (x=" << pos.x << " y=" << pos.y << " z=" << pos.z << "): " << header.GetSrc() << "->" << header.GetDest() << " Packet #" << next->GetUid());
             
             m_phy->Send(next);
             AddToLastPacketList (next);

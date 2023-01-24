@@ -195,8 +195,12 @@ LoRaNetDevice::NeedsArp (void) const
 bool 
 LoRaNetDevice::Send (Ptr<Packet> packet, const Address &dest, uint16_t protocolNumber)
 {
-    //unsupported
-    return false;
+    if (m_mac != 0)
+    {
+        m_mac->Send(packet);
+    }
+    
+    return true;
 }
 
 bool
