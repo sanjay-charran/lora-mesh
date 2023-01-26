@@ -13,7 +13,7 @@
 #include "ns3/lora-net-device.h"
 #include "ns3/lora-mac.h"
 
-#define MINIMUM_LORA_SPREADING_FACTOR   7
+#define MINIMUM_LORA_SPREADING_FACTOR   0
 #define MAXIMUM_LORA_SPREADING_FACTOR   12
 
 namespace ns3 {

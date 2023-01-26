@@ -23,6 +23,8 @@
 #include <iterator>
 #include <vector>
 
+#define SIMULATION_SF   6
+
 using namespace ns3;
 using namespace lora_mesh;
 
@@ -42,7 +44,7 @@ main (int argc, char *argv[])
     
     Ptr<PropagationDelayModel> delay = CreateObject<ConstantSpeedPropagationDelayModel> ();
     Ptr<LogDistancePropagationLossModel> loss = CreateObject<LogDistancePropagationLossModel>();
-    loss->SetPathLossExponent (3.76);
+    loss->SetPathLossExponent (4.5);
     loss->SetReference (1, 7.7);
     
     channel->SetLossModel(loss);
@@ -76,6 +78,13 @@ main (int argc, char *argv[])
         phy->SetNetDevice(device);
         phy->SetMAC(mac);
         //phy tx/rx params (using def here)
+        phy->SetRxSens(-146.5); //dBm
+        phy->SetTxPower(20);    //dBm
+        phy->SetRxFreq(430);    //MHz
+        phy->SetTxFreq(430);    //MHz
+        phy->SetTxSF(SIMULATION_SF);    
+        phy->SetRxSF(SIMULATION_SF);
+        phy->SetTxBW(125000);   //Hz
         
         channel->AddPHY(phy);
         
@@ -88,9 +97,13 @@ main (int argc, char *argv[])
         
         mac->SetPHY(phy);
         mac->SetDevice(device);
+        mac->SetMinDelay(0);
+        mac->SetMaxDelay(60);
         
         nodes.Add(node);
     }
+    
+    loranodes.Get(6)->GetDevice()->GetObject<LoRaNetDevice>()->GetPHY()->SwitchStateSLEEP();    //node 6 was missing in paper
     
     //set locations
     Vector3D pos;

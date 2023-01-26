@@ -88,6 +88,11 @@ public:
     void PacketTimeslot (void);
     void RoutingTimeslot (void);
     
+    void SetMinDelay(uint32_t min);
+    uint32_t GetMinDelay(void) const;
+    void SetMaxDelay(uint32_t max);
+    uint32_t GetMaxDelay(void) const;
+    
 private:
     
     /*  packet queue funcs  */
@@ -112,7 +117,8 @@ private:
     std::deque<Ptr<Packet>> m_packet_queue;
     std::deque<uint64_t> m_last_packets;
     uint8_t m_last_counter;
-    
+    uint32_t m_minDelay;
+    uint32_t m_maxDelay;
     double m_max_packet_time;
     double m_max_routing_time;
 };

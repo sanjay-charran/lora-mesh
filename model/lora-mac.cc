@@ -22,6 +22,8 @@ LoRaMAC::GetTypeId (void)
 LoRaMAC::LoRaMAC ()
 {
     m_last_counter = 0;
+    m_minDelay = 0;
+    m_maxDelay = 60;
 }
 
 LoRaMAC::~LoRaMAC ()
@@ -113,6 +115,32 @@ LoRaMAC::GetId (void) const
     }
     
     return 0;
+}
+
+void
+LoRaMAC::SetMinDelay(uint32_t min)
+{
+    m_minDelay = min;
+    return;
+}
+
+uint32_t
+LoRaMAC::GetMinDelay(void) const
+{
+    return m_minDelay;
+}
+
+void
+LoRaMAC::SetMaxDelay(uint32_t max)
+{
+    m_maxDelay = max;
+    return;
+}
+
+uint32_t
+LoRaMAC::GetMaxDelay(void) const
+{
+    return m_maxDelay;
 }
 
 void 
@@ -714,7 +742,7 @@ LoRaMAC::PacketTimeslot (void)
     }
     
     Ptr<UniformRandomVariable> x = CreateObject<UniformRandomVariable>();
-    temp = x->GetInteger(MIN_RAND_UINT32, MAX_RAND_UINT32);
+    temp = x->GetInteger(m_minDelay, m_maxDelay);
     dur = Seconds(temp);        //  adjust to be more reasonable based on tested data or make user controlled
     
     
