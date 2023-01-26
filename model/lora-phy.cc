@@ -358,18 +358,19 @@ LoRaPHY::Send (Ptr<Packet> packet)
     
     //not sure about tag bit need to dbl check
     
+    m_txSniffer(packet);
     m_channel->Send (this, packet, m_tx_power_dBm, m_tx_freq_MHz, m_tx_sf, dur);
     
     Simulator::Schedule (dur, &LoRaPHY::SwitchStateSTANDBY, this);
     
-    if (m_device)
-    {
-        //m_startSending (packet, m_device->GetNode()->GetId());
-    }
-    else
-    {
-        //m_startSending (packet, 0);
-    }
+//     if (m_device)
+//     {
+//         m_startSending (packet, m_device->GetNode()->GetId());
+//     }
+//     else
+//     {
+//         m_startSending (packet, 0);
+//     }
     
     return;
 }
@@ -453,6 +454,7 @@ LoRaPHY::EndReceive (Ptr<Packet> packet)
     
     if (m_mac && !m_packet_collision)
     {
+        m_rxSniffer(packet);
         m_mac->Receive(packet);
     }
     

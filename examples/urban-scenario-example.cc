@@ -103,7 +103,7 @@ main (int argc, char *argv[])
         nodes.Add(node);
     }
     
-    loranodes.Get(6)->GetDevice()->GetObject<LoRaNetDevice>()->GetPHY()->SwitchStateSLEEP();    //node 6 was missing in paper
+    loranodes.Get(6)->GetDevice(0)->GetObject<LoRaNetDevice>()->GetPHY()->SwitchStateSLEEP();    //node 6 was missing in paper
     
     //set locations
     Vector3D pos;
