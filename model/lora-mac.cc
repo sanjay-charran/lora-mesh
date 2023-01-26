@@ -316,15 +316,16 @@ LoRaMAC::Receive (Ptr<Packet> packet)
     LoRaMeshRoutingHeader rheader;
     LoRaMeshFeedbackHeader fheader;
     Ptr<Packet> feedback;
+    
     Vector3D pos = m_phy->GetMobility()->GetPosition();;
     RoutingTableEntry entry, temp;
     
-    packet->RemoveHeader(header);
+    packet->PeekHeader(header);
     
     switch (header.GetType())
     {
         case ROUTING_UPDATE:
-            //packet->RemoveHeader(header);
+            packet->RemoveHeader(header);
             packet->RemoveHeader(rheader);
             
             entry.s = header.GetSrc();
@@ -369,6 +370,8 @@ LoRaMAC::Receive (Ptr<Packet> packet)
                     AddTableEntry(entry);
                 }
             }
+            packet->AddHeader(rheader);
+            packet->AddHeader(header);
             
             
             break;
@@ -379,7 +382,7 @@ LoRaMAC::Receive (Ptr<Packet> packet)
             
             NS_LOG_INFO("(receive MAC)Node (x=" << pos.x << " y=" << pos.y << " z=" << pos.z << ")#" << header.GetFwd() << "->" << GetId() << ": Packet #" << packet->GetUid());
             
-            packet->AddHeader(header);
+            //packet->AddHeader(header);
             
             if (header.GetDest() == GetId())
             {
@@ -404,7 +407,7 @@ LoRaMAC::Receive (Ptr<Packet> packet)
             break;
         case FEEDBACK:
             
-            //packet->RemoveHeader(header);
+            packet->RemoveHeader(header);
             packet->RemoveHeader(fheader);
             
             NS_LOG_INFO("(receive MAC)Node (x=" << pos.x << " y=" << pos.y << " z=" << pos.z << ")#" << header.GetFwd() << "->" << GetId() << ": Feedback #" << fheader.GetPacketId());
@@ -762,7 +765,7 @@ LoRaMAC::RoutingTimeslot (void)
     
     Time dur;
     RoutingTableEntry cur = *m_cur;
-    Ptr<Packet> packet = Create<Packet>(50);
+    Ptr<Packet> packet = Create<Packet>(25);
     LoRaMeshHeader header;
     Vector3D pos = m_phy->GetMobility()->GetPosition();
     

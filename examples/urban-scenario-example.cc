@@ -61,8 +61,6 @@ main (int argc, char *argv[])
     
     mobility.Install(loranodes);
     
-    
-    NodeContainer nodes;
     Ptr<LoRaNetDevice> device;
     Ptr<LoRaPHY> phy;
     Ptr<LoRaMAC> mac;
@@ -99,8 +97,6 @@ main (int argc, char *argv[])
         mac->SetDevice(device);
         mac->SetMinDelay(0);
         mac->SetMaxDelay(60);
-        
-        nodes.Add(node);
     }
     
     loranodes.Get(6)->GetDevice(0)->GetObject<LoRaNetDevice>()->GetPHY()->SwitchStateSLEEP();    //node 6 was missing in paper
@@ -196,15 +192,24 @@ main (int argc, char *argv[])
     for (NodeContainer::Iterator i = loranodes.Begin();i != loranodes.End(); ++i)
     {
         Ptr<Application> app = CreateObject<Application>();
+        Ptr<Packet> packet = Create<Packet>(50);
+        LoRaMeshHeader header;
+        
+        header.SetType(DIRECTED);
+        header.SetSrc((*i)->GetId());
+        header.SetDest(loranodes.Get(0)->GetId());
+        packet->AddHeader(header);
         
         app->SetNode(*i);
         (*i)->AddApplication(app);
+        
+        (*i)->GetDevice(0)->GetObject<LoRaNetDevice>()->Send(packet, Address(), 0);
         
         apps.Add(app);
     }
     
     //simulator setup
-    Simulator::Stop(Minutes(2));
+    Simulator::Stop(Minutes(1));
     Simulator::Run ();
     Simulator::Destroy ();
     

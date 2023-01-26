@@ -66,7 +66,7 @@ LoRaMeshRoutingHeader::GetSerializedSize (void) const
 void
 LoRaMeshRoutingHeader::Serialize (Buffer::Iterator start) const
 {
-    start.Write ((uint8_t *)&m_etx, 4);
+    start.Write ((uint8_t *)&m_etx, sizeof(float));
     start.WriteU8 (m_last);
     
     return;
