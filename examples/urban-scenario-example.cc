@@ -44,7 +44,7 @@ main (int argc, char *argv[])
     
     Ptr<PropagationDelayModel> delay = CreateObject<ConstantSpeedPropagationDelayModel> ();
     Ptr<LogDistancePropagationLossModel> loss = CreateObject<LogDistancePropagationLossModel>();
-    loss->SetPathLossExponent (4.5);
+    loss->SetPathLossExponent (3.76);
     loss->SetReference (1, 7.7);
     
     channel->SetLossModel(loss);
@@ -93,10 +93,10 @@ main (int argc, char *argv[])
         node->AddDevice(device);
         //device params
         
+        mac->SetMinDelay(0);
+        mac->SetMaxDelay(10);
         mac->SetPHY(phy);
         mac->SetDevice(device);
-        mac->SetMinDelay(0);
-        mac->SetMaxDelay(60);
     }
     
     loranodes.Get(6)->GetDevice(0)->GetObject<LoRaNetDevice>()->GetPHY()->SwitchStateSLEEP();    //node 6 was missing in paper
@@ -192,24 +192,29 @@ main (int argc, char *argv[])
     for (NodeContainer::Iterator i = loranodes.Begin();i != loranodes.End(); ++i)
     {
         Ptr<Application> app = CreateObject<Application>();
-        Ptr<Packet> packet = Create<Packet>(50);
-        LoRaMeshHeader header;
-        
-        header.SetType(DIRECTED);
-        header.SetSrc((*i)->GetId());
-        header.SetDest(loranodes.Get(0)->GetId());
-        packet->AddHeader(header);
         
         app->SetNode(*i);
         (*i)->AddApplication(app);
         
-        (*i)->GetDevice(0)->GetObject<LoRaNetDevice>()->Send(packet, Address(), 0);
-        
         apps.Add(app);
     }
     
+//     Ptr<Packet> packet = Create<Packet>(50);
+//     loranodes.Get(2)->GetDevice(0)->GetObject<LoRaNetDevice>()->SendTo(packet, loranodes.Get(0)->GetId());
+    
+    Ptr<Packet> packet = Create<Packet>(50);
+    LoRaMeshHeader header;
+        
+    header.SetType(DIRECTED);
+    header.SetSrc(loranodes.Get(2)->GetId());
+    header.SetFwd(loranodes.Get(2)->GetId());
+    header.SetDest(loranodes.Get(0)->GetId());
+    packet->AddHeader(header);
+    
+    loranodes.Get(2)->GetDevice(0)->Send(packet, Address(), 0);
+    
     //simulator setup
-    Simulator::Stop(Minutes(1));
+    Simulator::Stop(Minutes(20));
     Simulator::Run ();
     Simulator::Destroy ();
     

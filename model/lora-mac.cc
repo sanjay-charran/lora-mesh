@@ -315,7 +315,7 @@ LoRaMAC::Receive (Ptr<Packet> packet)
     LoRaMeshHeader header;
     LoRaMeshRoutingHeader rheader;
     LoRaMeshFeedbackHeader fheader;
-    Ptr<Packet> feedback;
+    Ptr<Packet> feedback, new_packet;
     
     Vector3D pos = m_phy->GetMobility()->GetPosition();;
     RoutingTableEntry entry, temp;
@@ -380,7 +380,7 @@ LoRaMAC::Receive (Ptr<Packet> packet)
             break;
         case DIRECTED:
             
-            NS_LOG_INFO("(receive MAC)Node (x=" << pos.x << " y=" << pos.y << " z=" << pos.z << ")#" << header.GetFwd() << "->" << GetId() << ": Packet #" << packet->GetUid());
+            NS_LOG_INFO("(receive MAC)Node (x=" << pos.x << " y=" << pos.y << " z=" << pos.z << ")#" << header.GetSrc() << "(" << header.GetFwd() << ")->" << GetId() << ": Packet #" << packet->GetUid());
             
             //packet->AddHeader(header);
             
@@ -388,8 +388,9 @@ LoRaMAC::Receive (Ptr<Packet> packet)
             {
                 feedback = MakeFeedback (packet, header.GetFwd());
                 AddPacketToQueue (feedback, true);
-                packet->RemoveHeader(header);
-                m_device->Receive(packet);
+                //packet->RemoveHeader(header);
+                //m_device->Receive(packet);
+                //NS_LOG_INFO("Made Feedback");
                 break;
             }
             
@@ -398,10 +399,12 @@ LoRaMAC::Receive (Ptr<Packet> packet)
             {
                 feedback = MakeFeedback (packet, header.GetFwd());
                 AddPacketToQueue (feedback, true);
-                packet->RemoveHeader(header);            
+                new_packet = packet->Copy();
+                new_packet->RemoveHeader(header);            
                 header.SetFwd(GetId());
-                packet->AddHeader(header);
-                AddPacketToQueue (packet, false);
+                new_packet->AddHeader(header);
+                AddPacketToQueue (new_packet, false);
+                //NS_LOG_INFO("Made Feedback");
             }
             
             break;
@@ -412,23 +415,30 @@ LoRaMAC::Receive (Ptr<Packet> packet)
             
             NS_LOG_INFO("(receive MAC)Node (x=" << pos.x << " y=" << pos.y << " z=" << pos.z << ")#" << header.GetFwd() << "->" << GetId() << ": Feedback #" << fheader.GetPacketId());
             
-            if (header.GetDest() == GetId())
+            if (header.GetDest() == GetId() && !m_packet_queue.empty())
             {
                 if (fheader.GetPacketId() == GetNextPacketFromQueue()->GetUid() || /*  for feedback for packets    */
                     packet->GetUid() == GetNextPacketFromQueue()->GetUid())        /*  for feedback for feedback */
                 {
+                    packet->AddHeader(fheader);
+                    packet->AddHeader(header);
                     RemovePacketFromQueue();
                 }
+                
+                break;
             }
             
             if (CalcETX(header.GetFwd(), header.GetDest()) > CalcETX(GetId(), header.GetDest()))
             {
-                packet->AddHeader(fheader);
+                new_packet = packet->Copy();
+                new_packet->AddHeader(fheader);
                 header.SetFwd(GetId());
-                packet->AddHeader(header);
+                new_packet->AddHeader(header);
                 AddPacketToQueue(packet, true);
             }
             
+            packet->AddHeader(fheader);
+            packet->AddHeader(header);
             break;
     }
 }
@@ -477,6 +487,7 @@ LoRaMAC::SendTo (Ptr<Packet> packet, uint32_t dest)
         header.SetType(DIRECTED);
         header.SetSrc(GetId());
         header.SetDest(dest);
+        header.SetFwd(GetId());
         
         packet->AddHeader(header);
         AddPacketToQueue (packet, false);
@@ -502,6 +513,7 @@ LoRaMAC::AddPacketToQueue (Ptr<Packet> packet, bool isFeedback)
             if (header.GetType() != FEEDBACK)
             {
                 m_packet_queue.insert(it, packet);
+                return;
             }
         }
         
@@ -623,54 +635,6 @@ LoRaMAC::CalcETX (uint32_t src, uint32_t dest)
     }
 }
 
-// /*  routing algorithm -- improve later  */
-// float
-// LoRaMAC::CalcETX (uint32_t src, uint32_t dest, uint32_t last)
-// {
-//     float etx, min;
-//     std::deque<RoutingTableEntry>::iterator it;
-//     
-//     if (src == dest)
-//     {
-//         return 0.0;
-//     }
-//     
-//     for (it = m_table.begin();it != m_table.end();++it)
-//     {
-//         if (it->s == src && it->r == dest)
-//         {
-//             return it->etx;
-//         }
-//         
-//         if (it->s > src)
-//         {
-//             /*  beyond where the entry ought to be  */
-//             break;
-//         }
-//     }
-//     
-//     for (it = m_table.begin(), min = 0;it != m_table.end();++it)
-//     {
-//         (!EntryExists(TableLookup(last, it->r)) || src == last)
-//         if (it->s == src && it->r != last)
-//         {
-//             if (it->r == dest)
-//             {
-//                 return it->etx;
-//             }
-//             
-//             etx = CalcETX(it->r, dest, src) + it->etx;
-//             
-//             if (etx < min || min == 0)
-//             {
-//                 min = etx;
-//             }
-//         }
-//     }
-//     
-//     return min;
-// }
-
 Ptr<Packet>
 LoRaMAC::MakeFeedback (Ptr<Packet> packet, uint32_t fwd)
 {
@@ -683,6 +647,7 @@ LoRaMAC::MakeFeedback (Ptr<Packet> packet, uint32_t fwd)
     
     header.SetSrc(GetId());
     header.SetDest(fwd);
+    header.SetFwd(GetId());
     header.SetType(FEEDBACK);
     feedback->AddHeader(header);
     
@@ -707,7 +672,7 @@ LoRaMAC::PacketTimeslot (void)
         next = GetNextPacketFromQueue();
         next->PeekHeader(header);
         
-        if (CalcETX(GetId(), header.GetDest()) != 0)
+        if (CalcETX(GetId(), header.GetDest()) != 0 || header.GetType() == FEEDBACK)
         {
             for (i = MAX_NUMEL_LAST_PACKETS_LIST - 1, count = 0;i >= 0;i--)
             {
@@ -722,7 +687,7 @@ LoRaMAC::PacketTimeslot (void)
             m_phy->Send(next);
             AddToLastPacketList (next);
             
-            if (count == 9)
+            if (count == 9 || header.GetType() == FEEDBACK)
             {
                 /*  remove if it is on tenth send   */
                 RemovePacketFromQueue();
@@ -767,7 +732,7 @@ LoRaMAC::RoutingTimeslot (void)
     RoutingTableEntry cur = *m_cur;
     Ptr<Packet> packet = Create<Packet>(25);
     LoRaMeshHeader header;
-    Vector3D pos = m_phy->GetMobility()->GetPosition();
+    //Vector3D pos = m_phy->GetMobility()->GetPosition();
     
     header.SetType(ROUTING_UPDATE);
     header.SetSrc(cur.s);

@@ -77,8 +77,6 @@ main(int argc, char *argv[])
     //attach devices, phys and macs
     //add phys to channel
     
-    NetDeviceContainer devices;
-    NodeContainer nodes;
     Ptr<LoRaNetDevice> device;
     Ptr<LoRaPHY> phy;
     Ptr<LoRaMAC> mac;
@@ -106,9 +104,6 @@ main(int argc, char *argv[])
         
         mac->SetPHY(phy);
         mac->SetDevice(device);
-        
-        devices.Add(device);
-        nodes.Add(node);
     }
     
     //install applications
@@ -128,17 +123,17 @@ main(int argc, char *argv[])
     //NodeContainer::Iterator i = loranodes.Begin();
     Ptr<Packet> packet = Create<Packet>(50);
     LoRaMeshHeader header;
-    //Ptr<LoRaNetDevice> temp = (*i)->GetDevice(0);
-    //devices[0]->SendTo(packet, 3);
     
     header.SetType(DIRECTED);
-    header.SetSrc(nodes.Get(0)->GetId());
-    header.SetDest(nodes.Get(3)->GetId());
+    header.SetSrc(loranodes.Get(0)->GetId());
+    header.SetFwd(loranodes.Get(0)->GetId());
+    header.SetDest(loranodes.Get(3)->GetId());
     packet->AddHeader(header);
     
-    nodes.Get(0)->GetDevice(0)->Send(packet, Address(), 0);
-     
-    Simulator::Stop(Minutes(2));
+    loranodes.Get(0)->GetDevice(0)->Send(packet, Address(), 0);
+    //loranodes.Get(0)->GetObject<LoRaNetDevice>()->SendTo(packet, 2);
+    
+    Simulator::Stop(Minutes(5));
     Simulator::Run ();
     Simulator::Destroy ();
     

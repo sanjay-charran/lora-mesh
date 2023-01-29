@@ -54,9 +54,9 @@ LoRaNetDevice::GetPHY(void) const
 void
 LoRaNetDevice::SendTo (Ptr<Packet> packet, uint32_t dest)
 {
-     NS_LOG_FUNCTION (this << packet << dest);
+    NS_LOG_FUNCTION (this << packet << dest);
     
-    if (m_mac)
+    if (m_mac != 0)
     {
         m_mac->SendTo(packet, dest);
     }

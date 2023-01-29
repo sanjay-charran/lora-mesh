@@ -422,7 +422,7 @@ LoRaPHY::StartReceive (Ptr<Packet> packet, Time duration, uint8_t sf, double rx_
             {
                 m_packet_collision = true;  // need to set to prevent the EndReceive call from being wrong
                 
-                NS_LOG_INFO("Packet Collision for Packet #" << packet->GetUid());
+                //NS_LOG_INFO("Packet Collision for Packet #" << packet->GetUid());
                 
                 if (Simulator::GetDelayLeft(m_last_receive_event).GetSeconds() < duration)
                 {
