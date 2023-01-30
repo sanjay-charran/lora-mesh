@@ -28,7 +28,7 @@
 using namespace ns3;
 using namespace lora_mesh;
 
-NS_LOG_COMPONENT_DEFINE ("LoRaMeshExample");
+NS_LOG_COMPONENT_DEFINE ("UrbanScenarioExample");
 
 int
 main (int argc, char *argv[])
@@ -44,7 +44,7 @@ main (int argc, char *argv[])
     
     Ptr<PropagationDelayModel> delay = CreateObject<ConstantSpeedPropagationDelayModel> ();
     Ptr<LogDistancePropagationLossModel> loss = CreateObject<LogDistancePropagationLossModel>();
-    loss->SetPathLossExponent (3.76);
+    loss->SetPathLossExponent (4.5);
     loss->SetReference (1, 7.7);
     
     channel->SetLossModel(loss);
@@ -77,7 +77,7 @@ main (int argc, char *argv[])
         phy->SetMAC(mac);
         //phy tx/rx params (using def here)
         phy->SetRxSens(-146.5); //dBm
-        phy->SetTxPower(20);    //dBm
+        phy->SetTxPower(60);    //dBm
         phy->SetRxFreq(430);    //MHz
         phy->SetTxFreq(430);    //MHz
         phy->SetTxSF(SIMULATION_SF);    
@@ -206,15 +206,15 @@ main (int argc, char *argv[])
     LoRaMeshHeader header;
         
     header.SetType(DIRECTED);
-    header.SetSrc(loranodes.Get(2)->GetId());
-    header.SetFwd(loranodes.Get(2)->GetId());
+    header.SetSrc(loranodes.Get(3)->GetId());
+    header.SetFwd(loranodes.Get(3)->GetId());
     header.SetDest(loranodes.Get(0)->GetId());
     packet->AddHeader(header);
     
-    loranodes.Get(2)->GetDevice(0)->Send(packet, Address(), 0);
+    loranodes.Get(3)->GetDevice(0)->Send(packet, Address(), 0);
     
     //simulator setup
-    Simulator::Stop(Minutes(20));
+    Simulator::Stop(Minutes(5));
     Simulator::Run ();
     Simulator::Destroy ();
     

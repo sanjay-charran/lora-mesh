@@ -732,7 +732,7 @@ LoRaMAC::RoutingTimeslot (void)
     RoutingTableEntry cur = *m_cur;
     Ptr<Packet> packet = Create<Packet>(25);
     LoRaMeshHeader header;
-    //Vector3D pos = m_phy->GetMobility()->GetPosition();
+    Vector3D pos = m_phy->GetMobility()->GetPosition();
     
     header.SetType(ROUTING_UPDATE);
     header.SetSrc(cur.s);
