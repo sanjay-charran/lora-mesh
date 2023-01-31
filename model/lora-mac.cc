@@ -14,7 +14,15 @@ LoRaMAC::GetTypeId (void)
 {
     static TypeId tid = TypeId ("ns3::LoRaMAC")
         .SetParent<Object> ()
-        .SetGroupName ("lora_mesh");
+        .SetGroupName ("lora_mesh")
+        .AddTraceSource ("RxPacketSniffer",
+                        "Trace Source which simulates sniffer for received data packets",
+                        MakeTraceSourceAccessor (&LoRaMAC::m_rxPacketSniffer),
+                        "ns3::LoRaMAC::RxPacketSnifferTracedCallback")
+        .AddTraceSource ("TxPacketSniffer",
+                        "Trace Source which simulates sniffer for transmitted data packets",
+                        MakeTraceSourceAccessor (&LoRaMAC::m_txPacketSniffer),
+                        "ns3::LoRaMAC::TxPacketSnifferTracedCallback");
         
     return tid;
 }
@@ -382,6 +390,8 @@ LoRaMAC::Receive (Ptr<Packet> packet)
             
             NS_LOG_INFO("(receive MAC)Node (x=" << pos.x << " y=" << pos.y << " z=" << pos.z << ")#" << header.GetSrc() << "(" << header.GetFwd() << ")->" << GetId() << ": Packet #" << packet->GetUid());
             
+            m_rxPacketSniffer(packet);
+            
             //packet->AddHeader(header);
             
             if (header.GetDest() == GetId())
@@ -686,6 +696,11 @@ LoRaMAC::PacketTimeslot (void)
             
             m_phy->Send(next);
             AddToLastPacketList (next);
+            
+            if (header.GetType() != FEEDBACK)
+            {
+                m_txPacketSniffer(next);
+            }
             
             if (count == 9 || header.GetType() == FEEDBACK)
             {

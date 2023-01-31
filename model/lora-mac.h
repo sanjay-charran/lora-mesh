@@ -10,6 +10,7 @@
 #include "ns3/simulator.h"
 #include "ns3/mobility-model.h"
 #include "ns3/vector.h"
+#include "ns3/callback.h"
 
 #include "ns3/lora-phy.h"
 #include "ns3/lora-net-device.h"
@@ -121,6 +122,9 @@ private:
     uint32_t m_maxDelay;
     double m_max_packet_time;
     double m_max_routing_time;
+    
+    TracedCallback<Ptr<Packet>> m_rxPacketSniffer;
+    TracedCallback<Ptr<Packet>> m_txPacketSniffer;
 };
 
 }

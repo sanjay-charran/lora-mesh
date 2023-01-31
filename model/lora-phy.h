@@ -133,6 +133,7 @@ private:
 
     bool m_packet_collision;
     EventId m_last_receive_event;
+    
     TracedCallback<Ptr<const Packet>, uint32_t> m_startSending;
     TracedCallback<Ptr<const Packet> > m_phyRxBeginTrace;
     TracedCallback<Ptr<const Packet> > m_phyRxEndTrace;
