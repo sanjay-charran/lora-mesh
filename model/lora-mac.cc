@@ -68,7 +68,11 @@ LoRaMAC::SetPHY (Ptr<LoRaPHY> phy)
     
         
         Simulator::Schedule (dur_routing, &LoRaMAC::RoutingTimeslot, this);*/
-        Simulator::Schedule (Seconds(3), &LoRaMAC::PacketTimeslot, this);
+        Ptr<UniformRandomVariable> x = CreateObject<UniformRandomVariable>();
+        uint32_t temp = x->GetInteger(m_minDelay, m_maxDelay);
+        Time dur = Seconds(temp);
+        
+        Simulator::Schedule (dur, &LoRaMAC::PacketTimeslot, this);
         //PacketTimeslot();
     }
     else
