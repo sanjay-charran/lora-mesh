@@ -24,7 +24,7 @@ def build(bld):
 
     module_test = bld.create_ns3_module_test_library('lora-mesh')
     module_test.source = [
-        'test/lora-mesh-test-suite.cc',
+        'test/lora-mesh-test-suite-1.cc',
         ]
 
     headers = bld(features='ns3header')
