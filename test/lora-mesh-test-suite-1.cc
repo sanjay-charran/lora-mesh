@@ -8,6 +8,8 @@
 #include "ns3/node-container.h"
 #include "ns3/vector.h"
 #include "ns3/mobility-helper.h"
+#include "ns3/simulator.h"
+#include "ns3/callback.h"
 
 #include <iterator>
 
@@ -499,6 +501,189 @@ LoRaMeshTestCase1_11::DoRun (void)
     return;
 }
 /************************************************************************************/
+/*  Test Case #1.12: Node Sending Packet through Channel   */
+class LoRaMeshTestCase1_12 : public TestCase
+{
+public:
+    LoRaMeshTestCase1_12 ();
+    virtual ~LoRaMeshTestCase1_12 ();
+    void PacketSent (Ptr<const Packet> packet);
+
+private:
+    virtual void DoRun (void);
+    unsigned int m_sentPackets;
+    uint32_t m_packet_id;
+};
+
+LoRaMeshTestCase1_12::LoRaMeshTestCase1_12 ()
+  : TestCase ("LoRa Mesh Test Case #1.12: Node Sending Packet through Channel")
+{
+    m_sentPackets = 0;
+}
+
+LoRaMeshTestCase1_12::~LoRaMeshTestCase1_12 ()
+{
+}
+
+void
+LoRaMeshTestCase1_12::PacketSent (Ptr<const Packet> packet)
+{
+    if (packet->GetUid() == m_packet_id)
+    {
+        m_sentPackets++;
+    }
+    
+    return;
+}
+
+void
+LoRaMeshTestCase1_12::DoRun (void)
+{
+    Ptr<Node> node = CreateObject<Node>();
+    Ptr<LoRaPHY> phy = CreateObject<LoRaPHY>();
+    Ptr<LoRaMAC> mac = CreateObject<LoRaMAC>();
+    Ptr<LoRaNetDevice> device = CreateObject<LoRaNetDevice>();
+    Ptr<LoRaChannel> channel = CreateObject<LoRaChannel>();
+    
+    phy->SetNetDevice(device);
+    phy->SetMAC(mac);
+    device->SetMAC(mac);
+    device->SetPHY(phy);
+    device->SetNode(node);
+    node->AddDevice(device);
+    mac->SetPHY(phy);
+    mac->SetDevice(device);
+    channel->AddPHY(phy);
+    
+    /*  make packet to send */
+    Ptr<Packet> packet = Create<Packet>(50);
+    LoRaMeshHeader header;
+    header.SetType(DIRECTED);
+    header.SetSrc(node->GetId());
+    header.SetFwd(node->GetId());
+    header.SetDest(node->GetId() + 1);
+    packet->AddHeader(header);
+    m_packet_id = packet->GetUid();
+    
+    //not intended way of using module
+    phy->Send(packet);
+    
+    channel->TraceConnectWithoutContext("PacketSent", MakeCallback(&LoRaMeshTestCase1_12::PacketSent, this));
+    
+    Simulator::Stop(Seconds(10));
+    Simulator::Run();
+    Simulator::Destroy();
+    
+    NS_TEST_ASSERT_MSG_EQ(m_sentPackets, 1, "Test Case #1.12: Failed to send packet through Channel");
+    
+    return;
+}
+/************************************************************************************/
+/*  Test Case #1.13: Node Receiving Packet through Channel   */
+class LoRaMeshTestCase1_13 : public TestCase
+{
+public:
+    LoRaMeshTestCase1_13 ();
+    virtual ~LoRaMeshTestCase1_13 ();
+    void PacketReceived (Ptr<const Packet> packet);
+
+private:
+    virtual void DoRun (void);
+    unsigned int m_receivedPackets;
+    uint32_t m_packet_id;
+};
+
+LoRaMeshTestCase1_13::LoRaMeshTestCase1_13 ()
+  : TestCase ("LoRa Mesh Test Case #1.13: Node Receiving Packet through Channel")
+{
+    m_receivedPackets = 0;
+}
+
+LoRaMeshTestCase1_13::~LoRaMeshTestCase1_13 ()
+{
+}
+
+void
+LoRaMeshTestCase1_13::PacketReceived (Ptr<const Packet> packet)
+{
+    if (packet->GetUid() == m_packet_id)
+    {
+        m_receivedPackets++;
+    }
+    
+    return;
+}
+
+void
+LoRaMeshTestCase1_13::DoRun (void)
+{
+    NodeContainer nodes;
+    Ptr<LoRaPHY> phy;
+    Ptr<LoRaMAC> mac;
+    Ptr<LoRaNetDevice> device;
+    Ptr<LoRaChannel> channel = CreateObject<LoRaChannel>();
+    
+    Ptr<LogDistancePropagationLossModel> loss = CreateObject<LogDistancePropagationLossModel>();
+    loss->SetPathLossExponent (3.76);
+    loss->SetReference (1, 7.7);
+    
+    Ptr<PropagationDelayModel> delay = CreateObject<ConstantSpeedPropagationDelayModel> ();
+    
+    channel->SetLossModel(loss);
+    channel->SetDelayModel(delay);
+    
+    MobilityHelper mobility;
+    
+    mobility.SetMobilityModel("ns3::ConstantPositionMobilityModel");
+    
+    nodes.Create(2);
+    mobility.Install(nodes);
+    
+    for (NodeContainer::Iterator i = nodes.Begin();i != nodes.End();++i)
+    {
+        Ptr<Node> node = *i;
+        device = Create<LoRaNetDevice>();
+        phy = CreateObject<LoRaPHY>();
+        mac = CreateObject<LoRaMAC>();
+        
+        phy->SetNetDevice(device);
+        phy->SetMAC(mac);
+        device->SetMAC(mac);
+        device->SetPHY(phy);
+        device->SetNode(node);
+        node->AddDevice(device);
+        mac->SetPHY(phy);
+        mac->SetDevice(device);
+        channel->AddPHY(phy);
+    }
+    
+    Vector3D pos = nodes.Get(0)->GetObject<MobilityModel>()->GetPosition();
+    nodes.Get(1)->GetObject<MobilityModel>()->SetPosition(pos);
+    
+    /*  make packet to send */
+    Ptr<Packet> packet = Create<Packet>(50);
+    LoRaMeshHeader header;
+    header.SetType(DIRECTED);
+    header.SetSrc(nodes.Get(0)->GetId());
+    header.SetFwd(nodes.Get(0)->GetId());
+    header.SetDest(nodes.Get(1)->GetId());
+    packet->AddHeader(header);
+    m_packet_id = packet->GetUid();
+    
+    //not intended way of using module
+    nodes.Get(0)->GetObject<LoRaNetDevice>()->GetMAC()->GetPHY()->Send(packet);
+    
+    nodes.Get(1)->GetObject<LoRaNetDevice>()->GetMAC()->GetPHY()->TraceConnectWithoutContext("PhyRxBegin", MakeCallback(&LoRaMeshTestCase1_13::PacketReceived, this));
+    
+    Simulator::Stop(Seconds(10));
+    Simulator::Run();
+    Simulator::Destroy();
+    
+    NS_TEST_ASSERT_MSG_EQ(m_receivedPackets, 1, "Test Case #1.13: Failed to receive packet through Channel");
+    
+    return;
+}
+/************************************************************************************/
 
 
 class LoRaMeshTestSuite_1 : public TestSuite
@@ -524,6 +709,8 @@ LoRaMeshTestSuite_1::LoRaMeshTestSuite_1 ()
     AddTestCase (new LoRaMeshTestCase1_9, TestCase::QUICK);
     AddTestCase (new LoRaMeshTestCase1_10, TestCase::QUICK);
     AddTestCase (new LoRaMeshTestCase1_11, TestCase::QUICK);
+    AddTestCase (new LoRaMeshTestCase1_12, TestCase::EXTENSIVE);
+    AddTestCase (new LoRaMeshTestCase1_13, TestCase::EXTENSIVE);
 }
 
 // Do not forget to allocate an instance of this TestSuite
