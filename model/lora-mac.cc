@@ -104,8 +104,11 @@ LoRaMAC::SetDevice (Ptr<LoRaNetDevice> device)
     
     AddTableEntry(first_entry);
     
-    pos = m_phy->GetMobility()->GetPosition();
-    NS_LOG_INFO("Node #" << GetId() << "(x=" << pos.x << " y=" << pos.y << " z=" << pos.z << ")" << ": Added entry (" << first_entry.s << "->" << first_entry.r << ")");
+    if (m_phy && m_phy->GetMobility())
+    {
+        pos = m_phy->GetMobility()->GetPosition();
+        NS_LOG_INFO("Node #" << GetId() << "(x=" << pos.x << " y=" << pos.y << " z=" << pos.z << ")" << ": Added entry (" << first_entry.s << "->" << first_entry.r << ")");
+    }
     
     m_cur = m_table.begin();
     
