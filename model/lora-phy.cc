@@ -358,7 +358,7 @@ LoRaPHY::Send (Ptr<Packet> packet)
     
     //not sure about tag bit need to dbl check
     
-    //m_txSniffer(packet);
+    m_txSniffer(packet);
     m_channel->Send (this, packet, m_tx_power_dBm, m_tx_freq_MHz, m_tx_sf, dur);
     
     Simulator::Schedule (dur, &LoRaPHY::SwitchStateSTANDBY, this);
@@ -422,7 +422,7 @@ LoRaPHY::StartReceive (Ptr<Packet> packet, Time duration, uint8_t sf, double rx_
             {
                 m_packet_collision = true;  // need to set to prevent the EndReceive call from being wrong
                 
-                //NS_LOG_INFO("Packet Collision for Packet #" << packet->GetUid());
+                NS_LOG_INFO("Packet Collision for Packet #" << packet->GetUid());
                 
                 if (Simulator::GetDelayLeft(m_last_receive_event).GetSeconds() < duration)
                 {
@@ -454,7 +454,7 @@ LoRaPHY::EndReceive (Ptr<Packet> packet)
     
     if (m_mac != 0 && !m_packet_collision)
     {
-        //m_rxSniffer(packet);
+        m_rxSniffer(packet);
         m_mac->Receive(packet);
     }
     

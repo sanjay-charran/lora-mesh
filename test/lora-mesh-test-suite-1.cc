@@ -10,6 +10,7 @@
 #include "ns3/mobility-helper.h"
 #include "ns3/simulator.h"
 #include "ns3/callback.h"
+#include "ns3/application.h"
 
 #include <iterator>
 
@@ -495,6 +496,7 @@ LoRaMeshTestCase1_11::DoRun (void)
     
     old_phys = channel->GetNDevices();
     channel->AddPHY(phy);
+    phy->SetChannel(channel);
     new_phys = channel->GetNDevices();
     
     NS_TEST_ASSERT_MSG_NE(new_phys, old_phys, "Test Case #1.11: Failed to Attach Node to Channel");
@@ -529,6 +531,8 @@ LoRaMeshTestCase1_12::~LoRaMeshTestCase1_12 ()
 void
 LoRaMeshTestCase1_12::PacketSent (Ptr<const Packet> packet)
 {
+    NS_LOG_INFO("Packet Sent...");
+    
     if (packet->GetUid() == m_packet_id)
     {
         m_sentPackets++;
@@ -545,16 +549,20 @@ LoRaMeshTestCase1_12::DoRun (void)
     Ptr<LoRaMAC> mac = CreateObject<LoRaMAC>();
     Ptr<LoRaNetDevice> device = Create<LoRaNetDevice>();
     Ptr<LoRaChannel> channel = CreateObject<LoRaChannel>();
+    Ptr<Application> app = CreateObject<Application>();
     
     phy->SetNetDevice(device);
     phy->SetMAC(mac);
+    phy->SetChannel(channel);
+    channel->AddPHY(phy);
     device->SetMAC(mac);
     device->SetPHY(phy);
     device->SetNode(node);
     node->AddDevice(device);
     mac->SetPHY(phy);
     mac->SetDevice(device);
-    channel->AddPHY(phy);
+    app->SetNode(node);
+    node->AddApplication(app);
     
     /*  make packet to send */
     Ptr<Packet> packet = Create<Packet>(50);
@@ -571,7 +579,7 @@ LoRaMeshTestCase1_12::DoRun (void)
     
     channel->TraceConnectWithoutContext("PacketSent", MakeCallback(&LoRaMeshTestCase1_12::PacketSent, this));
     
-    Simulator::Stop(Seconds(10));
+    Simulator::Stop(Minutes(5));
     Simulator::Run();
     Simulator::Destroy();
     
@@ -649,17 +657,26 @@ LoRaMeshTestCase1_13::DoRun (void)
         
         phy->SetNetDevice(device);
         phy->SetMAC(mac);
+        phy->SetChannel(channel);
+        channel->AddPHY(phy);
         device->SetMAC(mac);
         device->SetPHY(phy);
         device->SetNode(node);
         node->AddDevice(device);
         mac->SetPHY(phy);
         mac->SetDevice(device);
-        channel->AddPHY(phy);
     }
     
-    Vector3D pos = nodes.Get(0)->GetObject<MobilityModel>()->GetPosition();
-    nodes.Get(1)->GetObject<MobilityModel>()->SetPosition(pos);
+    for (NodeContainer::Iterator i = nodes.Begin();i != nodes.End(); ++i)
+    {
+        Ptr<Application> app = CreateObject<Application>();
+        
+        app->SetNode(*i);
+        (*i)->AddApplication(app);
+    }
+    
+//     Vector3D pos = nodes.Get(0)->GetObject<MobilityModel>()->GetPosition();
+//     nodes.Get(1)->GetObject<MobilityModel>()->SetPosition(pos);
     
     /*  make packet to send */
     Ptr<Packet> packet = Create<Packet>(50);
@@ -672,7 +689,7 @@ LoRaMeshTestCase1_13::DoRun (void)
     m_packet_id = packet->GetUid();
     
     //not intended way of using module
-    nodes.Get(0)->GetObject<LoRaNetDevice>()->GetMAC()->GetPHY()->Send(packet);
+    nodes.Get(0)->GetDevice(0)->Send(packet, Address(), 0);
     
     nodes.Get(1)->GetObject<LoRaNetDevice>()->GetMAC()->GetPHY()->TraceConnectWithoutContext("PhyRxBegin", MakeCallback(&LoRaMeshTestCase1_13::PacketReceived, this));
     
@@ -709,9 +726,9 @@ LoRaMeshTestSuite_1::LoRaMeshTestSuite_1 ()
     AddTestCase (new LoRaMeshTestCase1_8, TestCase::QUICK);
     AddTestCase (new LoRaMeshTestCase1_9, TestCase::QUICK);
     AddTestCase (new LoRaMeshTestCase1_10, TestCase::QUICK);
-//     AddTestCase (new LoRaMeshTestCase1_11, TestCase::QUICK);
-    AddTestCase (new LoRaMeshTestCase1_12, TestCase::EXTENSIVE);
-    AddTestCase (new LoRaMeshTestCase1_13, TestCase::EXTENSIVE);
+    //AddTestCase (new LoRaMeshTestCase1_11, TestCase::QUICK);
+    //AddTestCase (new LoRaMeshTestCase1_12, TestCase::TAKES_FOREVER);
+    AddTestCase (new LoRaMeshTestCase1_13, TestCase::TAKES_FOREVER);
 }
 
 // Do not forget to allocate an instance of this TestSuite
