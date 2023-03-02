@@ -350,7 +350,7 @@ LoRaMeshTestCase5_4::DoRun (void)
     }
     
     AsciiHelperForLoRa ascii;
-    ascii.EnableAscii("", nodes);
+    ascii.EnableAscii("Test5_4_", nodes);
     
     /*  make packet to send */
     Ptr<Packet> packet = Create<Packet>(50);
@@ -451,7 +451,7 @@ LoRaMeshTestCase5_5::DoRun (void)
     }
     
     AsciiHelperForLoRa ascii;
-    ascii.EnableAscii("", nodes);
+    ascii.EnableAscii("Test5_5_", nodes);
     
     for (unsigned int i = 0;i < 10;i++)
     {
