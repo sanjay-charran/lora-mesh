@@ -129,7 +129,9 @@ LoRaMeshTestCase4_1::DoRun (void)
     header2.SetDest(nodes.Get(1)->GetId());
     packet->AddHeader(header);
     
+    nodes.Get(0)->GetDevice(0)->Send(packet, Address(), 0);
     nodes.Get(2)->GetDevice(0)->Send(packet2, Address(), 0);
+    
     
     Simulator::Stop(Minutes(1));
     Simulator::Run();
