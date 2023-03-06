@@ -436,7 +436,7 @@ LoRaPHY::StartReceive (Ptr<Packet> packet, Time duration, uint8_t sf, double rx_
             
             m_last_receive_event = Simulator::Schedule (duration, &LoRaPHY::EndReceive, this, packet);
             
-            m_phyRxBeginTrace (packet);
+            //m_phyRxBeginTrace (packet);
         }
     }
     
@@ -450,9 +450,9 @@ LoRaPHY::EndReceive (Ptr<Packet> packet)
     
     SwitchStateSTANDBY ();
     
-    m_phyRxEndTrace (packet);
+    //m_phyRxEndTrace (packet);
     
-    if (m_mac != 0 && !m_packet_collision)
+    if (m_mac && !m_packet_collision)
     {
         m_rxSniffer(packet);
         m_mac->Receive(packet);
@@ -460,7 +460,7 @@ LoRaPHY::EndReceive (Ptr<Packet> packet)
     
     m_packet_collision = false;
     
-    if (m_device != 0)
+    if (m_device)
     {
         //m_successfullyReceivedPacket (packet, m_device->GetNode()->GetId());
     }
@@ -468,6 +468,8 @@ LoRaPHY::EndReceive (Ptr<Packet> packet)
     {
         //m_successfullyReceivedPacket (packet, 0);
     }
+    
+    return;
 }
 
 }

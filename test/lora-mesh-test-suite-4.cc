@@ -73,7 +73,7 @@ LoRaMeshTestCase4_1::DoRun (void)
         mac = CreateObject<LoRaMAC>();
         
         mac->SetMinDelay(0);
-        mac->SetMaxDelaay(2);
+        mac->SetMaxDelay(2);
         
         phy->SetNetDevice(device);
         phy->SetMAC(mac);
@@ -127,7 +127,7 @@ LoRaMeshTestCase4_1::DoRun (void)
     header2.SetSrc(nodes.Get(2)->GetId());
     header2.SetFwd(nodes.Get(2)->GetId());
     header2.SetDest(nodes.Get(1)->GetId());
-    packet->AddHeader(header);
+    packet2->AddHeader(header);
     
     nodes.Get(0)->GetDevice(0)->Send(packet, Address(), 0);
     nodes.Get(2)->GetDevice(0)->Send(packet2, Address(), 0);
@@ -151,8 +151,8 @@ public:
 LoRaMeshTestSuite_4::LoRaMeshTestSuite_4 ()
     : TestSuite ("lora-mesh-4", UNIT)
 {
-    Time::SetResolution (Time::NS);
-    LogComponentEnableAll(LOG_PREFIX_TIME);
+    //Time::SetResolution (Time::NS);
+    //LogComponentEnableAll(LOG_PREFIX_TIME);
     LogComponentEnable("LoRaMeshTestSuite_4", LOG_LEVEL_ALL);
     LogComponentEnable("LoRaPHY", LOG_LEVEL_ALL);
     LogComponentEnable("LoRaMAC", LOG_LEVEL_ALL);

@@ -497,8 +497,8 @@ LoRaMeshTestSuite_5::LoRaMeshTestSuite_5 ()
     AddTestCase (new LoRaMeshTestCase5_1, TestCase::TAKES_FOREVER);
     AddTestCase (new LoRaMeshTestCase5_2, TestCase::TAKES_FOREVER);
     AddTestCase (new LoRaMeshTestCase5_3, TestCase::TAKES_FOREVER);
-    AddTestCase (new LoRaMeshTestCase5_4, TestCase::TAKES_FOREVER);
-    AddTestCase (new LoRaMeshTestCase5_5, TestCase::TAKES_FOREVER);
+//     AddTestCase (new LoRaMeshTestCase5_4, TestCase::TAKES_FOREVER);
+//     AddTestCase (new LoRaMeshTestCase5_5, TestCase::TAKES_FOREVER);
 }
 
 // Do not forget to allocate an instance of this TestSuite

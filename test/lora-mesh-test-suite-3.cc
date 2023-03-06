@@ -73,7 +73,7 @@ LoRaMeshTestCase3_1::DoRun (void)
         mac = CreateObject<LoRaMAC>();
         
         mac->SetMinDelay(0);
-        mac->SetMaxDelaay(5);
+        mac->SetMaxDelay(5);
         
         phy->SetNetDevice(device);
         phy->SetMAC(mac);
@@ -169,7 +169,7 @@ LoRaMeshTestCase3_3::DoRun (void)
         mac = CreateObject<LoRaMAC>();
         
         mac->SetMinDelay(0);
-        mac->SetMaxDelaay(5);
+        mac->SetMaxDelay(5);
         
         phy->SetNetDevice(device);
         phy->SetMAC(mac);
@@ -229,7 +229,7 @@ private:
 };
 
 LoRaMeshTestCase3_4::LoRaMeshTestCase3_4 ()
-  : TestCase ("LoRa Mesh Test Case #3.4: Multihop Routing Updates")
+  : TestCase ("LoRa Mesh Test Case #3.4: Multihop Routing Updates 2")
 {
 }
 
@@ -270,7 +270,7 @@ LoRaMeshTestCase3_4::DoRun (void)
         mac = CreateObject<LoRaMAC>();
         
         mac->SetMinDelay(0);
-        mac->SetMaxDelaay(10);
+        mac->SetMaxDelay(10);
         
         phy->SetNetDevice(device);
         phy->SetMAC(mac);
@@ -332,7 +332,7 @@ LoRaMeshTestCase3_4::DoRun (void)
 }
 
 /************************************************************************************/
-/*  Test Case #3.6: Adjusting min/max value for delay RNG for node  */
+/*  Test Case #3.6: Adjusting min and max value for delay RNG for node  */
 class LoRaMeshTestCase3_6 : public TestCase
 {
 public:
@@ -344,7 +344,7 @@ private:
 };
 
 LoRaMeshTestCase3_6::LoRaMeshTestCase3_6 ()
-  : TestCase ("LoRa Mesh Test Case #3.6: Adjusting min/max value for delay RNG for node")
+  : TestCase ("LoRa Mesh Test Case #3.6: Adjusting min and max value for delay RNG for node")
 {
 }
 
@@ -355,7 +355,7 @@ LoRaMeshTestCase3_6::~LoRaMeshTestCase3_6 ()
 void
 LoRaMeshTestCase3_6::DoRun (void)
 {
-    double old_min, old_max, new_min, new_max;
+    double old_min, old_max;
     
     NodeContainer nodes;
     Ptr<LoRaPHY> phy;
@@ -379,9 +379,6 @@ LoRaMeshTestCase3_6::DoRun (void)
     nodes.Create(1);
     mobility.Install(nodes);
     
-    old_min = mac->GetMinDelay();
-    old_max = mac->GetMaxDelay();
-    
     for (NodeContainer::Iterator i = nodes.Begin();i != nodes.End();++i)
     {
         Ptr<Node> node = *i;
@@ -389,8 +386,11 @@ LoRaMeshTestCase3_6::DoRun (void)
         phy = CreateObject<LoRaPHY>();
         mac = CreateObject<LoRaMAC>();
         
+        old_min = mac->GetMinDelay();
+        old_max = mac->GetMaxDelay();
+        
         mac->SetMinDelay(1);
-        mac->SetMaxDelaay(10);
+        mac->SetMaxDelay(10);
         
         phy->SetNetDevice(device);
         phy->SetMAC(mac);
@@ -464,7 +464,7 @@ LoRaMeshTestCase3_7::DoRun (void)
         mac = CreateObject<LoRaMAC>();
         
         mac->SetMinDelay(0);
-        mac->SetMaxDelaay(10);
+        mac->SetMaxDelay(10);
         
         phy->SetNetDevice(device);
         phy->SetMAC(mac);
@@ -541,8 +541,8 @@ public:
 LoRaMeshTestSuite_3::LoRaMeshTestSuite_3 ()
     : TestSuite ("lora-mesh-3", UNIT)
 {
-    Time::SetResolution (Time::NS);
-    LogComponentEnableAll(LOG_PREFIX_TIME);
+//     Time::SetResolution (Time::NS);
+//     LogComponentEnableAll(LOG_PREFIX_TIME);
     LogComponentEnable("LoRaMeshTestSuite_3", LOG_LEVEL_ALL);
     LogComponentEnable("LoRaPHY", LOG_LEVEL_ALL);
     LogComponentEnable("LoRaMAC", LOG_LEVEL_ALL);
