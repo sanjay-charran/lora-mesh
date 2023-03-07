@@ -349,8 +349,12 @@ LoRaMeshTestCase5_4::DoRun (void)
         (*i)->AddApplication(app);
     }
     
+    Vector3D pos = nodes.Get(0)->GetObject<MobilityModel>()->GetPosition();
+    pos.x += 10;
+    nodes.Get(0)->GetObject<MobilityModel>()->SetPosition(pos);
+    
     AsciiHelperForLoRa ascii;
-    ascii.EnableAscii("Test5_4_", nodes);
+    ascii.EnableAscii("Test5_4", nodes);
     
     /*  make packet to send */
     Ptr<Packet> packet = Create<Packet>(50);

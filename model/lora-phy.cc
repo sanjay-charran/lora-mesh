@@ -397,6 +397,8 @@ LoRaPHY::GetOnAirTime (Ptr<Packet> packet)
 void
 LoRaPHY::StartReceive (Ptr<Packet> packet, Time duration, uint8_t sf, double rx_power_dBm, double freq_MHz)
 {
+    NS_LOG_FUNCTION (this << packet);
+    
     bool canLockOn = true;
     
     if (m_state != SLEEP && m_state != TX)

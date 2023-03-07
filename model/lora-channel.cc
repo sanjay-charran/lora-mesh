@@ -1,6 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 
 #include "ns3/simulator.h"
+#include "ns3/log.h"
 
 #include "ns3/lora-channel.h"
 
@@ -149,6 +150,8 @@ LoRaChannel::GetDelayModel (void) const
 void
 LoRaChannel::Send (Ptr<LoRaPHY> sender, Ptr<Packet> packet, double tx_power_dBm, double tx_freq_MHz, uint8_t tx_sf, Time dur)
 {
+    NS_LOG_FUNCTION(this << packet << sender);
+    
     Ptr<MobilityModel> sender_mobility = sender->GetMobility();
     Ptr<MobilityModel> receiver_mobility;
     Time delay;
@@ -157,7 +160,7 @@ LoRaChannel::Send (Ptr<LoRaPHY> sender, Ptr<Packet> packet, double tx_power_dBm,
     
     std::deque<Ptr<LoRaPHY>>::iterator i = m_phyList.begin();
     
-    for (;i != m_phyList.end();i++)
+    for (;i != m_phyList.end();++i)
     {
         if (sender != (*i))
         {
@@ -165,7 +168,7 @@ LoRaChannel::Send (Ptr<LoRaPHY> sender, Ptr<Packet> packet, double tx_power_dBm,
             delay = m_delayModel->GetDelay(sender_mobility, receiver_mobility);
             rx_power_dBm = GetRxPower (tx_power_dBm, sender_mobility, receiver_mobility);
             
-            if ((*i)->GetNetDevice() != 0)
+            if ((*i)->GetNetDevice())
             {
                 dst_id = (*i)->GetNetDevice()->GetNode()->GetId();
             }
@@ -186,6 +189,8 @@ LoRaChannel::Send (Ptr<LoRaPHY> sender, Ptr<Packet> packet, double tx_power_dBm,
 void
 LoRaChannel::Receive (Ptr<LoRaPHY> receiver, Ptr<Packet> packet, double rx_power_dBm, double rx_freq_MHz, uint8_t rx_sf, Time dur)
 {
+    NS_LOG_FUNCTION(this << packet << receiver);
+    
     receiver->StartReceive(packet, dur, rx_sf, rx_power_dBm, rx_freq_MHz);
     
     return;
