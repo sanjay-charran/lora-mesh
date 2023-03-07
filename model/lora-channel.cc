@@ -66,8 +66,7 @@ LoRaChannel::AddPHY (Ptr<LoRaPHY> phy)
 {
     NS_LOG_FUNCTION (this << phy);
     
-    //std::deque<Ptr<LoRaPHY>>::const_iterator c_iter = m_phyList.begin();
-    std::deque<Ptr<LoRaPHY>>::iterator iter = m_phyList.begin();// + std::distance<std::deque<Ptr<LoRaPHY>>::const_iterator>(iter, c_iter);
+    std::deque<Ptr<LoRaPHY>>::iterator iter = m_phyList.begin();
     
     uint32_t id;
     
@@ -75,7 +74,7 @@ LoRaChannel::AddPHY (Ptr<LoRaPHY> phy)
     {
         id = phy->GetNetDevice()->GetNode()->GetId();
             
-        for (;iter != m_phyList.end();iter++)
+        for (;iter != m_phyList.end();++iter)
         {
             if ((*iter)->GetNetDevice() && (*iter)->GetNetDevice()->GetNode())
             {
@@ -85,12 +84,13 @@ LoRaChannel::AddPHY (Ptr<LoRaPHY> phy)
                     return;
                 }
             }
-            else
-            {
-                m_phyList.insert (iter, phy);
-                return;
-            }
         } 
+        
+        if (iter == m_phyList.end())
+        {
+            m_phyList.insert (iter, phy);
+            return;
+        }
     }
     else 
     {

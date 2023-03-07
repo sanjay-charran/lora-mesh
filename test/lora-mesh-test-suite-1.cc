@@ -477,8 +477,6 @@ LoRaMeshTestCase1_11::~LoRaMeshTestCase1_11 ()
 void
 LoRaMeshTestCase1_11::DoRun (void)
 {
-    unsigned int old_phys, new_phys;
-    
     Ptr<Node> node = CreateObject<Node>();
     Ptr<LoRaPHY> phy = CreateObject<LoRaPHY>();
     Ptr<LoRaMAC> mac = CreateObject<LoRaMAC>();
@@ -494,10 +492,10 @@ LoRaMeshTestCase1_11::DoRun (void)
     mac->SetPHY(phy);
     mac->SetDevice(device);
     
-    old_phys = channel->GetNDevices();
-    channel->AddPHY(phy);
+    auto old_phys = channel->GetNDevices();
     phy->SetChannel(channel);
-    new_phys = channel->GetNDevices();
+    channel->AddPHY(phy);
+    auto new_phys = channel->GetNDevices();
     
     NS_TEST_ASSERT_MSG_NE(new_phys, old_phys, "Test Case #1.11: Failed to Attach Node to Channel");
     
@@ -726,7 +724,7 @@ LoRaMeshTestSuite_1::LoRaMeshTestSuite_1 ()
     AddTestCase (new LoRaMeshTestCase1_8, TestCase::QUICK);
     AddTestCase (new LoRaMeshTestCase1_9, TestCase::QUICK);
     AddTestCase (new LoRaMeshTestCase1_10, TestCase::QUICK);
-    //AddTestCase (new LoRaMeshTestCase1_11, TestCase::QUICK);
+    AddTestCase (new LoRaMeshTestCase1_11, TestCase::QUICK);
     //AddTestCase (new LoRaMeshTestCase1_12, TestCase::TAKES_FOREVER);
     //AddTestCase (new LoRaMeshTestCase1_13, TestCase::TAKES_FOREVER);
 }

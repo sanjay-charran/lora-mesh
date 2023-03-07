@@ -44,7 +44,7 @@ main(int argc, char *argv[])
     Ptr<LoRaChannel> channel = CreateObject<LoRaChannel>();
     
     Ptr<LogDistancePropagationLossModel> loss = CreateObject<LogDistancePropagationLossModel>();
-    loss->SetPathLossExponent (3.76);
+    loss->SetPathLossExponent (2);
     loss->SetReference (1, 7.7);
     
     Ptr<PropagationDelayModel> delay = CreateObject<ConstantSpeedPropagationDelayModel> ();
@@ -59,7 +59,7 @@ main(int argc, char *argv[])
     
     mobility.SetPositionAllocator(position);
     mobility.SetMobilityModel(  "ns3::RandomWaypointMobilityModel",
-                                "Speed", StringValue ("ns3::UniformRandomVariable[Min=0|Max=60]"),
+                                "Speed", StringValue ("ns3::UniformRandomVariable[Min=1.34|Max=1.79]"),
                                 "Pause", StringValue ("ns3::ConstantRandomVariable[Constant=0.0]"),
                                 "PositionAllocator", PointerValue(position)
     );
