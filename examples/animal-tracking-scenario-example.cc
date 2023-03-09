@@ -8,6 +8,7 @@
 #include "ns3/mobility-helper.h"
 #include "ns3/application-container.h"
 #include "ns3/random-waypoint-mobility-model.h"
+#include "ns3/constant-position-mobility-model.h"
 #include "ns3/propagation-loss-model.h"
 #include "ns3/propagation-delay-model.h"
 #include "ns3/mobility-helper.h"
@@ -15,6 +16,7 @@
 #include "ns3/ptr.h"
 #include "ns3/net-device-container.h"
 #include "ns3/object-factory.h"
+#include "ns3/vector.h"
 
 #include "ns3/lora-phy.h"
 #include "ns3/lora-mac.h"
@@ -22,9 +24,9 @@
 #include "ns3/lora-channel.h"
 
 #include <iterator>
-#include <vector>
 
-#define NUM_NODES   4
+#define NUM_NODES       10
+#define SIMULATION_SF   6
 
 using namespace ns3;
 using namespace lora_mesh;
@@ -53,7 +55,7 @@ main(int argc, char *argv[])
     channel->SetDelayModel(delay);
     
     //setup mobility and initial positions
-    MobilityHelper mobility;
+    MobilityHelper mobility, mobility_centre;
     
     Ptr<RandomDiscPositionAllocator> position = CreateObject<RandomDiscPositionAllocator>();
     
@@ -64,12 +66,15 @@ main(int argc, char *argv[])
                                 "PositionAllocator", PointerValue(position)
     );
     
+    mobility_centre.SetMobilityModel("ns3::ConstantPositionMobilityModel");
     
     //create nodes
-    NodeContainer loranodes;
+    NodeContainer loranodes, centre;
     loranodes.Create(NUM_NODES);
+    centre.Create(1);
     
     mobility.Install(loranodes);
+    mobility_centre.Install(centre);
     
     //create phys for nodes
     //create macs for nodes
@@ -82,6 +87,40 @@ main(int argc, char *argv[])
     Ptr<LoRaMAC> mac;
     
     for (NodeContainer::Iterator i = loranodes.Begin(); i != loranodes.End(); ++i)
+    {
+        Ptr<Node> node = *i;
+        device = Create<LoRaNetDevice>();
+        phy = CreateObject<LoRaPHY>();
+        mac = CreateObject<LoRaMAC>();
+        
+        phy->SetChannel(channel);
+        phy->SetNetDevice(device);
+        phy->SetMAC(mac);
+        //phy tx/rx params (using def here)
+        phy->SetRxSens(-146.5); //dBm
+        phy->SetTxPower(60);    //dBm
+        phy->SetRxFreq(430);    //MHz
+        phy->SetTxFreq(430);    //MHz
+        phy->SetTxSF(SIMULATION_SF);    
+        phy->SetRxSF(SIMULATION_SF);
+        phy->SetTxBW(125000);   //Hz
+        
+        channel->AddPHY(phy);
+        
+        device->SetMAC(mac);
+        device->SetPHY(phy);
+        device->SetNode(node);
+        
+        node->AddDevice(device);
+        //device params
+        
+        mac->SetMinDelay(0);
+        mac->SetMaxDelay(15);
+        mac->SetPHY(phy);
+        mac->SetDevice(device);
+    }
+    
+    for (NodeContainer::Iterator i = centre.Begin(); i != centre.End(); ++i)
     {
         Ptr<Node> node = *i;
         device = Create<LoRaNetDevice>();
@@ -118,22 +157,50 @@ main(int argc, char *argv[])
         
         apps.Add(app);
     }
+    
+    for (NodeContainer::Iterator i = centre.Begin();i != centre.End(); ++i)
+    {
+        Ptr<Application> app = CreateObject<Application>();
+        
+        app->SetNode(*i);
+        (*i)->AddApplication(app);
+        
+        apps.Add(app);
+    }
     //simulator setups
     
-    //NodeContainer::Iterator i = loranodes.Begin();
-    Ptr<Packet> packet = Create<Packet>(50);
-    LoRaMeshHeader header;
+    //fix location of gateway node
+    Vector3D pos;
+    pos.x = 0;
+    pos.y = 0;
+    pos.z = 0;
+    centre.Get(0)->GetObject<MobilityModel>()->SetPosition(pos);
     
-    header.SetType(DIRECTED);
-    header.SetSrc(loranodes.Get(0)->GetId());
-    header.SetFwd(loranodes.Get(0)->GetId());
-    header.SetDest(loranodes.Get(3)->GetId());
-    packet->AddHeader(header);
     
-    loranodes.Get(0)->GetDevice(0)->Send(packet, Address(), 0);
-    //loranodes.Get(0)->GetObject<LoRaNetDevice>()->SendTo(packet, 2);
+    for (NodeContainer::Iterator i = loranodes.Begin();i != loranodes.End(); ++i)
+    {
+        Ptr<Node> node = *i;
+        
+        for (unsigned int j = 0;j < 10;j++)
+        {
+            Ptr<Packet> packet = Create<Packet>(50);
+            LoRaMeshHeader header;
+        
+            header.SetType(DIRECTED);
+            header.SetSrc(node->GetId());
+            header.SetFwd(node->GetId());
+            header.SetDest(centre.Get(0)->GetId());
+            packet->AddHeader(header);
+        
+            node->GetDevice(0)->Send(packet, Address(), 0);
+        }
+    }
     
-    Simulator::Stop(Minutes(5));
+    AsciiHelperForLoRa ascii;
+    ascii.EnableAscii("AnimalTracking", loranodes);
+    ascii.EnableAscii("AnimalTracking", centre);
+    
+    Simulator::Stop(Minutes(10));
     Simulator::Run ();
     Simulator::Destroy ();
     
