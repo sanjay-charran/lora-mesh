@@ -96,11 +96,11 @@ main(int argc, char *argv[])
         phy->SetChannel(channel);
         phy->SetNetDevice(device);
         phy->SetMAC(mac);
-        //phy tx/rx params (using def here)
-        phy->SetRxSens(-146.5); //dBm
-        phy->SetTxPower(60);    //dBm
-        phy->SetRxFreq(430);    //MHz
-        phy->SetTxFreq(430);    //MHz
+        //sx1278
+        phy->SetRxSens(-148); //dBm
+        phy->SetTxPower(20);    //dBm
+        phy->SetRxFreq(860);    //MHz
+        phy->SetTxFreq(860);    //MHz
         phy->SetTxSF(SIMULATION_SF);    
         phy->SetRxSF(SIMULATION_SF);
         phy->SetTxBW(125000);   //Hz
@@ -115,7 +115,7 @@ main(int argc, char *argv[])
         //device params
         
         mac->SetMinDelay(0);
-        mac->SetMaxDelay(15);
+        mac->SetMaxDelay(25);
         mac->SetPHY(phy);
         mac->SetDevice(device);
     }
@@ -130,7 +130,14 @@ main(int argc, char *argv[])
         phy->SetChannel(channel);
         phy->SetNetDevice(device);
         phy->SetMAC(mac);
-        //phy tx/rx params (using def here)
+        //sx1272
+        phy->SetRxSens(-137); //dBm
+        phy->SetTxPower(20);    //dBm
+        phy->SetRxFreq(860);    //MHz
+        phy->SetTxFreq(860);    //MHz
+        phy->SetTxSF(SIMULATION_SF);    
+        phy->SetRxSF(SIMULATION_SF);
+        phy->SetTxBW(125000);   //Hz
         
         channel->AddPHY(phy);
         
@@ -141,6 +148,8 @@ main(int argc, char *argv[])
         node->AddDevice(device);
         //device params
         
+        mac->SetMinDelay(0);
+        mac->SetMaxDelay(25);
         mac->SetPHY(phy);
         mac->SetDevice(device);
     }

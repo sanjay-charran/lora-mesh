@@ -358,8 +358,8 @@ LoRaPHY::Send (Ptr<Packet> packet)
     
     //not sure about tag bit need to dbl check
     
-    m_txSniffer(packet);
     m_channel->Send (this, packet, m_tx_power_dBm, m_tx_freq_MHz, m_tx_sf, dur);
+    m_txSniffer(packet);
     
     Simulator::Schedule (dur, &LoRaPHY::SwitchStateSTANDBY, this);
     
