@@ -96,6 +96,7 @@ main(int argc, char *argv[])
         phy->SetChannel(channel);
         phy->SetNetDevice(device);
         phy->SetMAC(mac);
+
         //sx1278
         phy->SetRxSens(-148); //dBm
         phy->SetTxPower(20);    //dBm
@@ -104,16 +105,12 @@ main(int argc, char *argv[])
         phy->SetTxSF(SIMULATION_SF);    
         phy->SetRxSF(SIMULATION_SF);
         phy->SetTxBW(125000);   //Hz
-        
+
         channel->AddPHY(phy);
-        
         device->SetMAC(mac);
         device->SetPHY(phy);
         device->SetNode(node);
-        
         node->AddDevice(device);
-        //device params
-        
         mac->SetMinDelay(0);
         mac->SetMaxDelay(25);
         mac->SetPHY(phy);
@@ -185,6 +182,9 @@ main(int argc, char *argv[])
     pos.z = 0;
     centre.Get(0)->GetObject<MobilityModel>()->SetPosition(pos);
     
+    AsciiHelperForLoRa ascii;
+    ascii.EnableAscii("AnimalTracking", loranodes);
+    ascii.EnableAscii("AnimalTracking", centre);
     
     for (NodeContainer::Iterator i = loranodes.Begin();i != loranodes.End(); ++i)
     {
@@ -204,10 +204,6 @@ main(int argc, char *argv[])
             node->GetDevice(0)->Send(packet, Address(), 0);
         }
     }
-    
-    AsciiHelperForLoRa ascii;
-    ascii.EnableAscii("AnimalTracking", loranodes);
-    ascii.EnableAscii("AnimalTracking", centre);
     
     Simulator::Stop(Minutes(10));
     Simulator::Run ();

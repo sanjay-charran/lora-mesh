@@ -23,6 +23,7 @@
 #include <iterator>
 #include <vector>
 
+#define NUM_NODES       21
 #define SIMULATION_SF   6
 
 using namespace ns3;
@@ -57,7 +58,7 @@ main (int argc, char *argv[])
     
     //setup nodes
     NodeContainer loranodes;
-    loranodes.Create(21);
+    loranodes.Create(NUM_NODES);
     
     mobility.Install(loranodes);
     
@@ -75,31 +76,39 @@ main (int argc, char *argv[])
         phy->SetChannel(channel);
         phy->SetNetDevice(device);
         phy->SetMAC(mac);
-        //phy tx/rx params (using def here)
-        phy->SetRxSens(-146.5); //dBm
-        phy->SetTxPower(60);    //dBm
-        phy->SetRxFreq(430);    //MHz
-        phy->SetTxFreq(430);    //MHz
+        //sx1278
+        phy->SetRxSens(-148); //dBm
+        phy->SetTxPower(20);    //dBm
+        phy->SetRxFreq(860);    //MHz
+        phy->SetTxFreq(860);    //MHz
         phy->SetTxSF(SIMULATION_SF);    
         phy->SetRxSF(SIMULATION_SF);
         phy->SetTxBW(125000);   //Hz
         
         channel->AddPHY(phy);
-        
         device->SetMAC(mac);
         device->SetPHY(phy);
         device->SetNode(node);
-        
-        node->AddDevice(device);
-        //device params
-        
+        node->AddDevice(device);        
         mac->SetMinDelay(0);
-        mac->SetMaxDelay(10);
+        mac->SetMaxDelay(50);
         mac->SetPHY(phy);
         mac->SetDevice(device);
     }
     
-    loranodes.Get(6)->GetDevice(0)->GetObject<LoRaNetDevice>()->GetPHY()->SwitchStateSLEEP();    //node 6 was missing in paper
+    ApplicationContainer apps;
+    
+    for (NodeContainer::Iterator i = loranodes.Begin();i != loranodes.End(); ++i)
+    {
+        Ptr<Application> app = CreateObject<Application>();
+        
+        app->SetNode(*i);
+        (*i)->AddApplication(app);
+        
+        apps.Add(app);
+    }
+    
+    loranodes.Get(6)->GetDevice(0)->GetObject<LoRaNetDevice>()->GetPHY()->SwitchStateSLEEP();    //node 6 was missing in scaenario
     
     //set locations
     Vector3D pos;
@@ -187,34 +196,30 @@ main (int argc, char *argv[])
     
     //install applications
     
-    ApplicationContainer apps;
+    AsciiHelperForLoRa ascii;
+    ascii.EnableAscii("UrbanScenario", loranodes);
     
-    for (NodeContainer::Iterator i = loranodes.Begin();i != loranodes.End(); ++i)
+    for (NodeContainer::Iterator i = loranodes.Begin();i != loranodes.End();++i)
     {
-        Ptr<Application> app = CreateObject<Application>();
+        Ptr<Node> node = *i;
         
-        app->SetNode(*i);
-        (*i)->AddApplication(app);
-        
-        apps.Add(app);
+        for (unsigned int j = 0;j < 10;j++)
+        {
+            Ptr<Packet> packet = Create<Packet>(50);
+            LoRaMeshHeader header;
+                
+            header.SetType(DIRECTED);
+            header.SetSrc(node->GetId());
+            header.SetFwd(node->GetId());
+            header.SetDest(loranodes.Get(0)->GetId());
+            packet->AddHeader(header);
+            
+            node->GetDevice(0)->Send(packet, Address(), 0);
+        }
     }
     
-//     Ptr<Packet> packet = Create<Packet>(50);
-//     loranodes.Get(2)->GetDevice(0)->GetObject<LoRaNetDevice>()->SendTo(packet, loranodes.Get(0)->GetId());
-    
-    Ptr<Packet> packet = Create<Packet>(50);
-    LoRaMeshHeader header;
-        
-    header.SetType(DIRECTED);
-    header.SetSrc(loranodes.Get(3)->GetId());
-    header.SetFwd(loranodes.Get(3)->GetId());
-    header.SetDest(loranodes.Get(0)->GetId());
-    packet->AddHeader(header);
-    
-    loranodes.Get(3)->GetDevice(0)->Send(packet, Address(), 0);
-    
     //simulator setup
-    Simulator::Stop(Minutes(5));
+    Simulator::Stop(Minutes(60));
     Simulator::Run ();
     Simulator::Destroy ();
     
