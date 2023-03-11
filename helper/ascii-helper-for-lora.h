@@ -10,6 +10,8 @@
 #include "ns3/lora-net-device.h"
 #include "ns3/lora-mac.h"
 
+#include <vector>
+
 namespace ns3 {
 namespace lora_mesh {
 
@@ -21,8 +23,10 @@ public:
     
     void EnableAsciiInternal(Ptr<OutputStreamWrapper> stream, std::string prefix, Ptr<NetDevice> nd, bool explicitFilename);
     
-    void IncrementSent(void);
-    void IncrementReceived(void);
+    void IncrementSent(Ptr<Packet> packet);
+    void IncrementReceived(Ptr<Packet> packet);
+    bool PreviouslySent(uint32_t pid);
+    bool PreviouslyReceived(uint32_t pid);
 private:
     static void AsciiRxSniffer(AsciiHelperForLoRa *ascii, Ptr<OutputStreamWrapper> stream, Ptr<LoRaNetDevice> device, Ptr<Packet> packet);
     static void AsciiTxSniffer(AsciiHelperForLoRa *ascii, Ptr<OutputStreamWrapper> stream, Ptr<LoRaNetDevice> device, Ptr<Packet> packet);
@@ -32,6 +36,8 @@ private:
     
     uint64_t m_sent;
     uint64_t m_received;
+    std::vector<uint32_t> m_sent_ids;
+    std::vector<uint32_t> m_received_ids;
 };
     
 }

@@ -146,7 +146,7 @@ main(int argc, char *argv[])
         //device params
         
         mac->SetMinDelay(0);
-        mac->SetMaxDelay(25);
+        mac->SetMaxDelay(5);
         mac->SetPHY(phy);
         mac->SetDevice(device);
     }
@@ -205,7 +205,7 @@ main(int argc, char *argv[])
         }
     }
     
-    Simulator::Stop(Minutes(10));
+    Simulator::Stop(Minutes(40));
     Simulator::Run ();
     Simulator::Destroy ();
     

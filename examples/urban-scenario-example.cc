@@ -45,7 +45,7 @@ main (int argc, char *argv[])
     
     Ptr<PropagationDelayModel> delay = CreateObject<ConstantSpeedPropagationDelayModel> ();
     Ptr<LogDistancePropagationLossModel> loss = CreateObject<LogDistancePropagationLossModel>();
-    loss->SetPathLossExponent (4.5);
+    loss->SetPathLossExponent (4);
     loss->SetReference (1, 7.7);
     
     channel->SetLossModel(loss);
@@ -91,7 +91,7 @@ main (int argc, char *argv[])
         device->SetNode(node);
         node->AddDevice(device);        
         mac->SetMinDelay(0);
-        mac->SetMaxDelay(50);
+        mac->SetMaxDelay(35);
         mac->SetPHY(phy);
         mac->SetDevice(device);
     }

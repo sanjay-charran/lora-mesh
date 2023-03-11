@@ -434,12 +434,19 @@ LoRaMAC::Receive (Ptr<Packet> packet)
             
             if (header.GetDest() == GetId() && !m_packet_queue.empty())
             {
-                if (fheader.GetPacketId() == GetNextPacketFromQueue()->GetUid() || /*  for feedback for packets    */
-                    packet->GetUid() == GetNextPacketFromQueue()->GetUid())        /*  for feedback for feedback */
+                if (isPacketInQueue(fheader.GetPacketId())) /*  for feedback for packets    */
                 {
                     packet->AddHeader(fheader);
                     packet->AddHeader(header);
-                    RemovePacketFromQueue();
+                    RemovePacketFromQueue(fheader.GetPacketId());
+                    break;
+                }
+                else if (isPacketInQueue(packet->GetUid()))
+                {
+                    packet->AddHeader(fheader);
+                    packet->AddHeader(header);
+                    RemovePacketFromQueue(packet->GetUid());
+                    break;
                 }
                 
                 break;
@@ -451,7 +458,7 @@ LoRaMAC::Receive (Ptr<Packet> packet)
                 new_packet->AddHeader(fheader);
                 header.SetFwd(GetId());
                 new_packet->AddHeader(header);
-                AddPacketToQueue(packet, true);
+                AddPacketToQueue(new_packet, true);
             }
             
             packet->AddHeader(fheader);
@@ -545,16 +552,41 @@ LoRaMAC::AddPacketToQueue (Ptr<Packet> packet, bool isFeedback)
 }
 
 void
-LoRaMAC::RemovePacketFromQueue (void)
+LoRaMAC::RemovePacketFromQueue (uint32_t pid)
 {
-    NS_LOG_FUNCTION (this);
+    NS_LOG_FUNCTION (this << pid);
     
-    if (!m_packet_queue.empty())
+    std::deque<Ptr<Packet>>::iterator it;
+    
+    for (it = m_packet_queue.begin();it != m_packet_queue.end();++it)
     {
-       m_packet_queue.pop_front();
+        if ((*it)->GetUid() == pid)
+        {
+            /*  remove packet if found  */
+            m_packet_queue.erase(it);
+            return;
+        }
     }
 
     return;
+}
+
+bool
+LoRaMAC::isPacketInQueue(uint32_t pid)
+{
+    NS_LOG_FUNCTION (this << pid);
+    
+    std::deque<Ptr<Packet>>::iterator it;
+    
+    for (it = m_packet_queue.begin();it != m_packet_queue.end();++it)
+    {
+        if ((*it)->GetUid() == pid)
+        {
+            return true;
+        }
+    }
+    
+    return false;
 }
 
 Ptr<Packet> 
@@ -712,7 +744,7 @@ LoRaMAC::PacketTimeslot (void)
             if (count == 9 || header.GetType() == FEEDBACK)
             {
                 /*  remove if it is on tenth send   */
-                RemovePacketFromQueue();
+                RemovePacketFromQueue(next->GetUid());
             }
             
             /*  schedule routing timeslot after packet timeslot */

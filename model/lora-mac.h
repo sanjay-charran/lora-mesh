@@ -11,6 +11,7 @@
 #include "ns3/mobility-model.h"
 #include "ns3/vector.h"
 #include "ns3/callback.h"
+#include "ns3/double.h"
 
 #include "ns3/lora-phy.h"
 #include "ns3/lora-net-device.h"
@@ -98,7 +99,8 @@ private:
     
     /*  packet queue funcs  */
     void AddPacketToQueue (Ptr<Packet> packet, bool isFeedback);
-    void RemovePacketFromQueue (void);
+    void RemovePacketFromQueue (uint32_t pid);
+    bool isPacketInQueue(uint32_t pid);
     Ptr<Packet> GetNextPacketFromQueue (void);
     
     /*  handled packet list */

@@ -78,10 +78,10 @@ AsciiHelperForLoRa::AsciiRxSniffer(AsciiHelperForLoRa *ascii, Ptr<OutputStreamWr
     packet->Print(*os);
     *os << "\"" << std::endl << std::endl;
     
-    if (header.GetDest() == device->GetNode()->GetId())
+    if (header.GetDest() == device->GetNode()->GetId() && !(ascii->PreviouslyReceived(packet->GetUid())))
     {
         /*  reached destination */
-        ascii->IncrementReceived();
+        ascii->IncrementReceived(packet);
     }
     
     return;
@@ -103,29 +103,58 @@ AsciiHelperForLoRa::AsciiTxSniffer(AsciiHelperForLoRa *ascii, Ptr<OutputStreamWr
     packet->Print(*os);
     *os << "\"" << std::endl << std::endl;
     
-    if (header.GetSrc() == header.GetFwd())
+    if (header.GetSrc() == header.GetFwd() && !(ascii->PreviouslySent(packet->GetUid())))
     {
         /*  packet starting point   */
-        ascii->IncrementSent();
+        ascii->IncrementSent(packet);
     }
     
     return;
 }
  
 void
-AsciiHelperForLoRa::IncrementSent(void)
+AsciiHelperForLoRa::IncrementSent(Ptr<Packet> packet)
 {
     m_sent++;
+    m_sent_ids.push_back(packet->GetUid());
     return;
 }
 
 void
-AsciiHelperForLoRa::IncrementReceived(void)
+AsciiHelperForLoRa::IncrementReceived(Ptr<Packet> packet)
 {
     m_received++;
+    m_received_ids.push_back(packet->GetUid());
     return;
 }
 
+bool
+AsciiHelperForLoRa::PreviouslySent(uint32_t pid)
+{
+    for (unsigned int i = 0;i < m_sent_ids.size();i++)
+    {
+        if (m_sent_ids[i] == pid)
+        {
+            return true;
+        }
+    }
+    
+    return false;
+}
+
+bool
+AsciiHelperForLoRa::PreviouslyReceived(uint32_t pid)
+{
+    for (unsigned int i = 0;i < m_received_ids.size();i++)
+    {
+        if (m_received_ids[i] == pid)
+        {
+            return true;
+        }
+    }
+    
+    return false;
+}
  
 void
 AsciiHelperForLoRa::DisplayPDR(void)
