@@ -31,7 +31,7 @@
 using namespace ns3;
 using namespace lora_mesh;
 
-NS_LOG_COMPONENT_DEFINE ("LoRaMeshExample");
+NS_LOG_COMPONENT_DEFINE ("AnimalTrackingScenario");
 
 int 
 main(int argc, char *argv[])
@@ -40,7 +40,7 @@ main(int argc, char *argv[])
     LogComponentEnableAll(LOG_PREFIX_TIME);
     LogComponentEnable("LoRaMAC", LOG_LEVEL_INFO);
     LogComponentEnable("LoRaPHY", LOG_LEVEL_INFO);
-    NS_LOG_UNCOND ("LoRa Mesh Simulation Example...");
+    NS_LOG_UNCOND ("LoRa Mesh Animal Tracking Scenario Example...");
     
     //create channel
     Ptr<LoRaChannel> channel = CreateObject<LoRaChannel>();
@@ -205,7 +205,7 @@ main(int argc, char *argv[])
         }
     }
     
-    Simulator::Stop(Minutes(40));
+    Simulator::Stop(Minutes(10));
     Simulator::Run ();
     Simulator::Destroy ();
     
