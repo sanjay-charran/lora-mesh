@@ -38,8 +38,8 @@ main(int argc, char *argv[])
 {   
     Time::SetResolution (Time::NS);
     LogComponentEnableAll(LOG_PREFIX_TIME);
-    LogComponentEnable("LoRaMAC", LOG_LEVEL_INFO);
-    LogComponentEnable("LoRaPHY", LOG_LEVEL_INFO);
+    LogComponentEnable("LoRaMAC", LOG_LEVEL_ALL);
+    LogComponentEnable("LoRaPHY", LOG_LEVEL_ALL);
     NS_LOG_UNCOND ("LoRa Mesh Animal Tracking Scenario Example...");
     
     //create channel
@@ -47,7 +47,7 @@ main(int argc, char *argv[])
     
     Ptr<LogDistancePropagationLossModel> loss = CreateObject<LogDistancePropagationLossModel>();
     loss->SetPathLossExponent (2);
-    loss->SetReference (1, 7.7);
+    loss->SetReference (1, 97);
     
     Ptr<PropagationDelayModel> delay = CreateObject<ConstantSpeedPropagationDelayModel> ();
     
@@ -58,6 +58,7 @@ main(int argc, char *argv[])
     MobilityHelper mobility, mobility_centre;
     
     Ptr<RandomDiscPositionAllocator> position = CreateObject<RandomDiscPositionAllocator>();
+    position->SetAttribute("Rho", StringValue("ns3::UniformRandomVariable[Min=0|Max=1000]"));
     
     mobility.SetPositionAllocator(position);
     mobility.SetMobilityModel(  "ns3::RandomWaypointMobilityModel",
@@ -112,7 +113,7 @@ main(int argc, char *argv[])
         device->SetNode(node);
         node->AddDevice(device);
         mac->SetMinDelay(0);
-        mac->SetMaxDelay(25);
+        mac->SetMaxDelay(60);
         mac->SetPHY(phy);
         mac->SetDevice(device);
     }
@@ -146,7 +147,7 @@ main(int argc, char *argv[])
         //device params
         
         mac->SetMinDelay(0);
-        mac->SetMaxDelay(5);
+        mac->SetMaxDelay(60);
         mac->SetPHY(phy);
         mac->SetDevice(device);
     }
@@ -205,7 +206,7 @@ main(int argc, char *argv[])
         }
     }
     
-    Simulator::Stop(Minutes(10));
+    Simulator::Stop(Minutes(1000));
     Simulator::Run ();
     Simulator::Destroy ();
     

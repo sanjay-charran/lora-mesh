@@ -749,7 +749,7 @@ LoRaMAC::PacketTimeslot (void)
             
             /*  schedule routing timeslot after packet timeslot */
             dur = m_phy->GetOnAirTime(next);
-            dur = Seconds(dur.GetSeconds() + 0.1);
+            dur = Seconds(dur.GetSeconds());
             Simulator::Schedule(dur, &LoRaMAC::RoutingTimeslot, this);
         }
         else
