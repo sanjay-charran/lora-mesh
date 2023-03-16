@@ -25,8 +25,8 @@
 
 #include <iterator>
 
-#define NUM_NODES       10
-#define SIMULATION_SF   6
+#define NUM_NODES       100
+#define SIMULATION_SF   10
 
 using namespace ns3;
 using namespace lora_mesh;
@@ -58,7 +58,7 @@ main(int argc, char *argv[])
     MobilityHelper mobility, mobility_centre;
     
     Ptr<RandomDiscPositionAllocator> position = CreateObject<RandomDiscPositionAllocator>();
-    position->SetAttribute("Rho", StringValue("ns3::UniformRandomVariable[Min=0|Max=1000]"));
+    position->SetAttribute("Rho", StringValue("ns3::UniformRandomVariable[Min=0|Max=1200]"));
     
     mobility.SetPositionAllocator(position);
     mobility.SetMobilityModel(  "ns3::RandomWaypointMobilityModel",
@@ -113,7 +113,7 @@ main(int argc, char *argv[])
         device->SetNode(node);
         node->AddDevice(device);
         mac->SetMinDelay(0);
-        mac->SetMaxDelay(NUM_NODES*30);
+        mac->SetMaxDelay(NUM_NODES*10);
         mac->SetPHY(phy);
         mac->SetDevice(device);
     }
@@ -147,7 +147,7 @@ main(int argc, char *argv[])
         //device params
         
         mac->SetMinDelay(0);
-        mac->SetMaxDelay(NUM_NODES*30);
+        mac->SetMaxDelay(NUM_NODES*10);
         mac->SetPHY(phy);
         mac->SetDevice(device);
     }
@@ -206,7 +206,7 @@ main(int argc, char *argv[])
         }
     }
     
-    Simulator::Stop(Hours(10));
+    Simulator::Stop(Hours(1000));
     Simulator::Run ();
     Simulator::Destroy ();
     
