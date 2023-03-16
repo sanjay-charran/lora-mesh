@@ -24,7 +24,7 @@
 #include <vector>
 
 #define NUM_NODES       21
-#define SIMULATION_SF   6
+#define SIMULATION_SF   12
 
 using namespace ns3;
 using namespace lora_mesh;
@@ -36,9 +36,9 @@ main (int argc, char *argv[])
 {
     Time::SetResolution (Time::NS);
     LogComponentEnableAll(LOG_PREFIX_TIME);
-    LogComponentEnable("LoRaMAC", LOG_LEVEL_INFO);
-    LogComponentEnable("LoRaPHY", LOG_LEVEL_INFO);
-    NS_LOG_UNCOND ("LoRa Mesh Simulation Example..." << std::endl);
+    LogComponentEnable("LoRaMAC", LOG_LEVEL_ALL);
+    LogComponentEnable("LoRaPHY", LOG_LEVEL_ALL);
+    NS_LOG_UNCOND ("LoRa Mesh Urban Scenario Example..." << std::endl);
     
     //create channel
     Ptr<LoRaChannel> channel = CreateObject<LoRaChannel>();
@@ -77,7 +77,7 @@ main (int argc, char *argv[])
         phy->SetNetDevice(device);
         phy->SetMAC(mac);
         //sx1278
-        phy->SetRxSens(-148); //dBm
+        phy->SetRxSens(-118); //dBm
         phy->SetTxPower(20);    //dBm
         phy->SetRxFreq(860);    //MHz
         phy->SetTxFreq(860);    //MHz
@@ -91,7 +91,7 @@ main (int argc, char *argv[])
         device->SetNode(node);
         node->AddDevice(device);        
         mac->SetMinDelay(0);
-        mac->SetMaxDelay(35);
+        mac->SetMaxDelay(NUM_NODES * 5);
         mac->SetPHY(phy);
         mac->SetDevice(device);
     }
@@ -199,7 +199,7 @@ main (int argc, char *argv[])
     AsciiHelperForLoRa ascii;
     ascii.EnableAscii("UrbanScenario", loranodes);
     
-    for (NodeContainer::Iterator i = loranodes.Begin();i != loranodes.End();++i)
+    for (NodeContainer::Iterator i = loranodes.Begin() + 1;i != loranodes.End();++i)
     {
         Ptr<Node> node = *i;
         
@@ -219,7 +219,7 @@ main (int argc, char *argv[])
     }
     
     //simulator setup
-    Simulator::Stop(Minutes(60));
+    Simulator::Stop(Hours(10));
     Simulator::Run ();
     Simulator::Destroy ();
     

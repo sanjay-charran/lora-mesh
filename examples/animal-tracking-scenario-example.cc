@@ -47,7 +47,7 @@ main(int argc, char *argv[])
     
     Ptr<LogDistancePropagationLossModel> loss = CreateObject<LogDistancePropagationLossModel>();
     loss->SetPathLossExponent (2);
-    loss->SetReference (1, 97);
+    loss->SetReference (1, 78);
     
     Ptr<PropagationDelayModel> delay = CreateObject<ConstantSpeedPropagationDelayModel> ();
     
@@ -99,7 +99,7 @@ main(int argc, char *argv[])
         phy->SetMAC(mac);
 
         //sx1278
-        phy->SetRxSens(-148); //dBm
+        phy->SetRxSens(-118); //dBm
         phy->SetTxPower(20);    //dBm
         phy->SetRxFreq(860);    //MHz
         phy->SetTxFreq(860);    //MHz
@@ -113,7 +113,7 @@ main(int argc, char *argv[])
         device->SetNode(node);
         node->AddDevice(device);
         mac->SetMinDelay(0);
-        mac->SetMaxDelay(60);
+        mac->SetMaxDelay(NUM_NODES*30);
         mac->SetPHY(phy);
         mac->SetDevice(device);
     }
@@ -129,7 +129,7 @@ main(int argc, char *argv[])
         phy->SetNetDevice(device);
         phy->SetMAC(mac);
         //sx1272
-        phy->SetRxSens(-137); //dBm
+        phy->SetRxSens(-122); //dBm
         phy->SetTxPower(20);    //dBm
         phy->SetRxFreq(860);    //MHz
         phy->SetTxFreq(860);    //MHz
@@ -147,7 +147,7 @@ main(int argc, char *argv[])
         //device params
         
         mac->SetMinDelay(0);
-        mac->SetMaxDelay(60);
+        mac->SetMaxDelay(NUM_NODES*30);
         mac->SetPHY(phy);
         mac->SetDevice(device);
     }
@@ -206,7 +206,7 @@ main(int argc, char *argv[])
         }
     }
     
-    Simulator::Stop(Minutes(1000));
+    Simulator::Stop(Hours(10));
     Simulator::Run ();
     Simulator::Destroy ();
     

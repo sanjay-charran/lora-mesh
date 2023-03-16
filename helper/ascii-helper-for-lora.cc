@@ -67,10 +67,12 @@ AsciiHelperForLoRa::AsciiRxSniffer(AsciiHelperForLoRa *ascii, Ptr<OutputStreamWr
 {
     LoRaMeshHeader header;
     std::ostream *os = stream->GetStream();
+    Vector3D pos = device->GetNode()->GetObject<MobilityModel>()->GetPosition();
     
     packet->PeekHeader(header);
     
     *os << Simulator::Now().GetDouble() << "\tNode #" << device->GetNode()->GetId() << ": Received Packet #" << packet->GetUid() << std::endl;
+    *os << "\t\tx=" << pos.x << " , y=" << pos.y << " , z=" << pos.z << std::endl;
     *os << "\t\tSrc: " << header.GetSrc() << std::endl;
     *os << "\t\tDest: " << header.GetDest() << std::endl;
     *os << "\t\tFwd: " << header.GetFwd() << std::endl;
@@ -92,10 +94,12 @@ AsciiHelperForLoRa::AsciiTxSniffer(AsciiHelperForLoRa *ascii, Ptr<OutputStreamWr
 {
     LoRaMeshHeader header;
     std::ostream *os = stream->GetStream();
+    Vector3D pos = device->GetNode()->GetObject<MobilityModel>()->GetPosition();
     
     packet->PeekHeader(header);
     
     *os << Simulator::Now().GetDouble() << "\tNode #" << device->GetNode()->GetId() << ": Transmitted Packet #" << packet->GetUid() << std::endl;
+    *os << "\t\tx=" << pos.x << " , y=" << pos.y << " , z=" << pos.z << std::endl;
     *os << "\t\tSrc: " << header.GetSrc() << std::endl;
     *os << "\t\tDest: " << header.GetDest() << std::endl;
     *os << "\t\tFwd: " << header.GetFwd() << std::endl;

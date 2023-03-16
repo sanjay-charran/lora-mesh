@@ -6,6 +6,8 @@
 #include "ns3/ptr.h"
 #include "ns3/net-device.h"
 #include "ns3/simulator.h"
+#include "ns3/mobility-model.h"
+#include "ns3/vector.h"
 
 #include "ns3/lora-net-device.h"
 #include "ns3/lora-mac.h"
