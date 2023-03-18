@@ -415,6 +415,121 @@ LoRaMeshTestCase3_4::DoRun (void)
 }
 
 /************************************************************************************/
+/*  Test Case #3.5: Feedback from Nodes Receiving Packets  */
+class LoRaMeshTestCase3_5 : public TestCase
+{
+public:
+    LoRaMeshTestCase3_5 ();
+    virtual ~LoRaMeshTestCase3_5 ();
+
+private:
+    virtual void DoRun (void);
+};
+
+LoRaMeshTestCase3_5::LoRaMeshTestCase3_5 ()
+  : TestCase ("LoRa Mesh Test Case #3.5: Feedback from Nodes Receiving Packets")
+{
+}
+
+LoRaMeshTestCase3_5::~LoRaMeshTestCase3_5 ()
+{
+}
+
+void
+LoRaMeshTestCase3_5::DoRun (void)
+{
+    NodeContainer nodes;
+    Ptr<LoRaPHY> phy;
+    Ptr<LoRaMAC> mac;
+    Ptr<LoRaNetDevice> device;
+    Ptr<LoRaChannel> channel = CreateObject<LoRaChannel>();
+    
+    Ptr<LogDistancePropagationLossModel> loss = CreateObject<LogDistancePropagationLossModel>();
+    loss->SetPathLossExponent (3.76);
+    loss->SetReference (1, 7.7);
+    
+    Ptr<PropagationDelayModel> delay = CreateObject<ConstantSpeedPropagationDelayModel> ();
+    
+    channel->SetLossModel(loss);
+    channel->SetDelayModel(delay);
+    
+    MobilityHelper mobility;
+    
+    mobility.SetMobilityModel("ns3::ConstantPositionMobilityModel");
+    
+    nodes.Create(4);
+    mobility.Install(nodes);
+    
+    for (NodeContainer::Iterator i = nodes.Begin();i != nodes.End();++i)
+    {
+        Ptr<Node> node = *i;
+        device = Create<LoRaNetDevice>();
+        phy = CreateObject<LoRaPHY>();
+        mac = CreateObject<LoRaMAC>();
+        
+        mac->SetMinDelay(0);
+        mac->SetMaxDelay(5);
+        
+        phy->SetNetDevice(device);
+        phy->SetMAC(mac);
+        phy->SetChannel(channel);
+        channel->AddPHY(phy);
+        device->SetMAC(mac);
+        device->SetPHY(phy);
+        device->SetNode(node);
+        node->AddDevice(device);
+        mac->SetPHY(phy);
+        mac->SetDevice(device);
+    }
+    
+    for (NodeContainer::Iterator i = nodes.Begin();i != nodes.End(); ++i)
+    {
+        Ptr<Application> app = CreateObject<Application>();
+        
+        app->SetNode(*i);
+        (*i)->AddApplication(app);
+    }
+    
+    Vector3D pos;
+    
+    pos.x = 0;
+    pos.y = 0;
+    pos.z = 0;
+    nodes.Get(0)->GetObject<MobilityModel>()->SetPosition(pos);
+    
+    pos.x = 100;
+    pos.y = 0;
+    pos.z = 0;
+    nodes.Get(1)->GetObject<MobilityModel>()->SetPosition(pos);
+    
+    pos.x = 200;
+    pos.y = 0;
+    pos.z = 0;
+    nodes.Get(2)->GetObject<MobilityModel>()->SetPosition(pos);
+    
+    pos.x = 150;
+    pos.y = 50;
+    pos.z = 0;
+    nodes.Get(3)->GetObject<MobilityModel>()->SetPosition(pos);
+    
+    Ptr<Packet> packet = Create<Packet>(50);
+    LoRaMeshHeader header;
+    header.SetType(DIRECTED);
+    header.SetSrc(nodes.Get(1)->GetId());
+    header.SetFwd(nodes.Get(1)->GetId());
+    header.SetDest(nodes.Get(2)->GetId());
+    packet->AddHeader(header);
+    
+    nodes.Get(1)->GetDevice(0)->Send(packet, Address(), 0);
+    
+    Simulator::Stop(Minutes(3));
+    Simulator::Run();
+    Simulator::Destroy();
+    
+    return;
+}
+
+/************************************************************************************/
 /*  Test Case #3.6: Adjusting min and max value for delay RNG for node  */
 class LoRaMeshTestCase3_6 : public TestCase
 {
@@ -636,6 +751,7 @@ LoRaMeshTestSuite_3::LoRaMeshTestSuite_3 ()
     AddTestCase (new LoRaMeshTestCase3_2, TestCase::QUICK);
     AddTestCase (new LoRaMeshTestCase3_3, TestCase::QUICK);
     AddTestCase (new LoRaMeshTestCase3_4, TestCase::EXTENSIVE);
+    AddTestCase (new LoRaMeshTestCase3_5, TestCase::EXTENSIVE);
     AddTestCase (new LoRaMeshTestCase3_6, TestCase::QUICK);
     AddTestCase (new LoRaMeshTestCase3_7, TestCase::EXTENSIVE);
 }
