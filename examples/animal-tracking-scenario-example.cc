@@ -25,13 +25,16 @@
 
 #include <iterator>
 
-#define NUM_NODES       100
-#define SIMULATION_SF   10
+#define NUM_NODES       10
+#define SIMULATION_SF   6
 
 using namespace ns3;
 using namespace lora_mesh;
 
 NS_LOG_COMPONENT_DEFINE ("AnimalTrackingScenario");
+
+double sx1272_RxSens[7] = {-121, -124, -127, -130, -133, -135, -137};   //for BW=125kHz
+double sx1278_RxSens[7] = {-118, -123, -126, -129, -132, -133, -136};   //for BW=125kHz
 
 int 
 main(int argc, char *argv[])
@@ -47,7 +50,7 @@ main(int argc, char *argv[])
     
     Ptr<LogDistancePropagationLossModel> loss = CreateObject<LogDistancePropagationLossModel>();
     loss->SetPathLossExponent (2);
-    loss->SetReference (1, 78);
+    loss->SetReference (1, 97);
     
     Ptr<PropagationDelayModel> delay = CreateObject<ConstantSpeedPropagationDelayModel> ();
     
@@ -58,7 +61,7 @@ main(int argc, char *argv[])
     MobilityHelper mobility, mobility_centre;
     
     Ptr<RandomDiscPositionAllocator> position = CreateObject<RandomDiscPositionAllocator>();
-    position->SetAttribute("Rho", StringValue("ns3::UniformRandomVariable[Min=0|Max=1200]"));
+    position->SetAttribute("Rho", StringValue("ns3::UniformRandomVariable[Min=0|Max=2000]"));
     
     mobility.SetPositionAllocator(position);
     mobility.SetMobilityModel(  "ns3::RandomWaypointMobilityModel",
@@ -99,7 +102,7 @@ main(int argc, char *argv[])
         phy->SetMAC(mac);
 
         //sx1278
-        phy->SetRxSens(-118); //dBm
+        phy->SetRxSens(sx1278_RxSens[SIMULATION_SF - 6]); //dBm
         phy->SetTxPower(20);    //dBm
         phy->SetRxFreq(860);    //MHz
         phy->SetTxFreq(860);    //MHz
@@ -113,7 +116,7 @@ main(int argc, char *argv[])
         device->SetNode(node);
         node->AddDevice(device);
         mac->SetMinDelay(0);
-        mac->SetMaxDelay(NUM_NODES*10);
+        mac->SetMaxDelay(NUM_NODES*5);
         mac->SetPHY(phy);
         mac->SetDevice(device);
     }
@@ -129,7 +132,7 @@ main(int argc, char *argv[])
         phy->SetNetDevice(device);
         phy->SetMAC(mac);
         //sx1272
-        phy->SetRxSens(-122); //dBm
+        phy->SetRxSens(sx1272_RxSens[SIMULATION_SF - 6]); //dBm
         phy->SetTxPower(20);    //dBm
         phy->SetRxFreq(860);    //MHz
         phy->SetTxFreq(860);    //MHz
@@ -147,7 +150,7 @@ main(int argc, char *argv[])
         //device params
         
         mac->SetMinDelay(0);
-        mac->SetMaxDelay(NUM_NODES*10);
+        mac->SetMaxDelay(NUM_NODES*5);
         mac->SetPHY(phy);
         mac->SetDevice(device);
     }
@@ -206,7 +209,7 @@ main(int argc, char *argv[])
         }
     }
     
-    Simulator::Stop(Hours(1000));
+    Simulator::Stop(Hours(10));
     Simulator::Run ();
     Simulator::Destroy ();
     

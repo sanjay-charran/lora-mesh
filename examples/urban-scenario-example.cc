@@ -24,10 +24,12 @@
 #include <vector>
 
 #define NUM_NODES       21
-#define SIMULATION_SF   12
+#define SIMULATION_SF   11
 
 using namespace ns3;
 using namespace lora_mesh;
+
+double sx1278_RxSens[7] = {-118, -123, -126, -129, -132, -133, -136};   //for BW=125kHz
 
 NS_LOG_COMPONENT_DEFINE ("UrbanScenarioExample");
 
@@ -77,7 +79,7 @@ main (int argc, char *argv[])
         phy->SetNetDevice(device);
         phy->SetMAC(mac);
         //sx1278
-        phy->SetRxSens(-118); //dBm
+        phy->SetRxSens(sx1278_RxSens[SIMULATION_SF - 6]); //dBm
         phy->SetTxPower(20);    //dBm
         phy->SetRxFreq(860);    //MHz
         phy->SetTxFreq(860);    //MHz
@@ -91,7 +93,7 @@ main (int argc, char *argv[])
         device->SetNode(node);
         node->AddDevice(device);        
         mac->SetMinDelay(0);
-        mac->SetMaxDelay(NUM_NODES * 5);
+        mac->SetMaxDelay(100);
         mac->SetPHY(phy);
         mac->SetDevice(device);
     }
@@ -219,7 +221,7 @@ main (int argc, char *argv[])
     }
     
     //simulator setup
-    Simulator::Stop(Hours(10));
+    Simulator::Stop(Hours(100));
     Simulator::Run ();
     Simulator::Destroy ();
     
