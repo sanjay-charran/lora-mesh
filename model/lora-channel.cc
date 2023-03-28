@@ -81,6 +81,7 @@ LoRaChannel::AddPHY (Ptr<LoRaPHY> phy)
             {
                 if ((*iter)->GetNetDevice()->GetNode()->GetId() > id)
                 {
+                    /*  add LoRaPHYs sorted by node ids if possible */
                     m_phyList.insert (iter, phy);
                     return;
                 }
@@ -112,6 +113,7 @@ LoRaChannel::RemovePHY (Ptr<LoRaPHY> phy)
     {
         if ((*iter) == phy)
         {
+            /*  if LoRaPHY is found remove it   */
             m_phyList.erase(iter);
             return;
         }
@@ -165,7 +167,10 @@ LoRaChannel::Send (Ptr<LoRaPHY> sender, Ptr<Packet> packet, double tx_power_dBm,
         if (sender != (*i))
         {
             receiver_mobility = (*i)->GetMobility();
+            
+            /*  get delay for packet to arrive at receiver  */
             delay = m_delayModel->GetDelay(sender_mobility, receiver_mobility);
+            
             rx_power_dBm = GetRxPower (tx_power_dBm, sender_mobility, receiver_mobility);
             
             if ((*i)->GetNetDevice())

@@ -1,5 +1,4 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
-
 #include "ns3/simulator.h"
 
 #include "ns3/lora-mac.h"
@@ -48,32 +47,11 @@ LoRaMAC::SetPHY (Ptr<LoRaPHY> phy)
     {
         m_phy = phy;
         
-        /*Time dur_packet, dur_routing;
-        Ptr<Packet> max_packet = Create<Packet>(MAX_PACKET_MSG_LENGTH_BYTES);
-        
-        max_packet->AddHeader(header);
-        dur_packet = m_phy->GetOnAirTime(max_packet);
-        
-        Ptr<Packet> routing_packet = Create<Packet>(0);
-        
-        
-        routing_packet->AddHeader(rheader);
-        dur_routing = m_phy->GetOnAirTime(routing_packet);
-        
-        m_max_packet_time = dur_packet.GetSeconds();
-        m_max_routing_time = dur_routing.GetSeconds();
-        
-        dur_packet = Seconds((m_max_packet_time + m_max_routing_time) * GetId());
-        dur_routing = Seconds((m_max_packet_time + m_max_routing_time) * GetId() + m_max_packet_time);
-    
-        
-        Simulator::Schedule (dur_routing, &LoRaMAC::RoutingTimeslot, this);*/
         Ptr<UniformRandomVariable> x = CreateObject<UniformRandomVariable>();
         uint32_t temp = x->GetValue(m_minDelay, m_maxDelay);
         Time dur = Seconds(temp);
         
         Simulator::Schedule (dur, &LoRaMAC::PacketTimeslot, this);
-        //PacketTimeslot();
     }
     else
     {
@@ -294,7 +272,9 @@ LoRaMAC::IsErrEntry (RoutingTableEntry entry)
 RoutingTableEntry 
 LoRaMAC::TableLookup (uint32_t s, uint32_t r)
 {
-    RoutingTableEntry err = {GetId(), GetId(), 1, 0}; /*  an error return since it ought to be 0 etx for node to transmit to itself   */
+    RoutingTableEntry err = {GetId(), GetId(), 1, 0};   /*  an error return since it ought to be 
+                                                            0 etx for node to transmit to itself   */
+                                                            
     std::deque<RoutingTableEntry>::iterator it = m_table.begin();
     
     for (;it != m_table.end();++it)
@@ -306,22 +286,6 @@ LoRaMAC::TableLookup (uint32_t s, uint32_t r)
     }
  
     return err; /*  returns initialised val */
-}
-
-RoutingTableEntry 
-LoRaMAC::TableLookup (uint64_t n)
-{
-    RoutingTableEntry err = {GetId(), GetId(), 1, 0}; /*  an error return since it ought to be 0 etx for node to transmit to itself   */
-    std::deque<RoutingTableEntry>::iterator it = m_table.begin();
-    
-    if (m_table.size() <= n)
-    {
-        /*  number not in valid range */
-        return err;
-    }
-    
-    std::advance (it, n);
-    return (*it);
 }
 
 void 
@@ -389,9 +353,6 @@ LoRaMAC::Receive (Ptr<Packet> packet)
             packet->AddHeader(header);
             
             
-            break;
-        case BROADCAST:
-            //unsure if to implement
             break;
         case DIRECTED:
             
@@ -465,24 +426,6 @@ LoRaMAC::Receive (Ptr<Packet> packet)
             packet->AddHeader(header);
             break;
     }
-}
-
-void
-LoRaMAC::Broadcast (Ptr<Packet> packet)
-{
-    LoRaMeshHeader header;
-    
-    if (m_phy)
-    {
-        header.SetType(BROADCAST);
-        header.SetSrc(GetId());
-        /*  broadcast doesnt have specific destination node so no need to set it    */
-        
-        packet->AddHeader(header);
-        AddPacketToQueue (packet, false);
-    }
-    
-    return;
 }
 
 void 
@@ -606,23 +549,6 @@ LoRaMAC::AddToLastPacketList (Ptr<Packet> packet)
     }
     
     return;
-}
-
-bool 
-LoRaMAC::SearchLastPacketList (Ptr<Packet> packet)
-{
-    unsigned int i;
-    uint64_t id = packet->GetUid();
-    
-    for (i = 0;i < MAX_NUMEL_LAST_PACKETS_LIST;i++)
-    {
-        if (m_last_packets[i] == id)
-        {
-            return true;
-        }
-    }
-    
-    return false;
 }
 
 float
@@ -765,11 +691,7 @@ LoRaMAC::PacketTimeslot (void)
     
     Ptr<UniformRandomVariable> x = CreateObject<UniformRandomVariable>();
     temp = x->GetValue(m_minDelay, m_maxDelay);
-    dur = Seconds(temp);        //  adjust to be more reasonable based on tested data or make user controlled
-    
-    
-    /*  next timeslot will be after the routing timeslot for this device and the packet and routing slots for all other devices */
-    //dur = Seconds((m_max_packet_time + m_max_routing_time) * (m_phy->GetChannel()->GetNDevices() - 1) + m_max_routing_time);
+    dur = Seconds(temp);
     
     /*  schedule next slot  */
     Simulator::Schedule(dur, &LoRaMAC::PacketTimeslot, this);
@@ -822,11 +744,6 @@ LoRaMAC::RoutingTimeslot (void)
     {
         m_last_counter++;
     }
-    
-    /*  every other nodes timeslots and the next packet timeslot for this node */
-   // dur = Seconds((m_max_packet_time + m_max_routing_time) * (m_phy->GetChannel()->GetNDevices() - 1) + m_max_packet_time);
-    
-    //Simulator::Schedule(dur, &LoRaMAC::RoutingTimeslot, this);
     
     return;
 }

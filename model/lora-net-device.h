@@ -1,3 +1,4 @@
+/* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 #ifndef __LORA_NET_DEVICE_H__
 #define __LORA_NET_DEVICE_H__
 
@@ -19,6 +20,12 @@ namespace lora_mesh {
 class LoRaPHY;
 class LoRaMAC;    
 
+/**
+ *  \brief  Net Device used to interface with MAC and PHY layers of LoRa mesh module
+ * 
+ *  This class serves to interface between the Node and MAC and PHY layers of the LoRa mesh moduel
+ *  and is expected to be the point where the user is to send and receive packets
+ */
 class LoRaNetDevice : public NetDevice
 {
 public:
@@ -27,10 +34,32 @@ public:
     
     static TypeId GetTypeId (void);
     
+    /**
+     *  Attaches LoRaMAC to this LoRaNetDevice
+     * 
+     *  \param  mac pointer to the LoRaMAC to be attached
+     */
     void SetMAC (Ptr<LoRaMAC> mac);
+    
+    /**
+     *  Gets the attached LoRaMAC
+     * 
+     *  \return pointer to the attached LoRaMAC
+     */
     Ptr<LoRaMAC> GetMAC (void) const;
     
+    /**
+     *  Attaches LoRaPHY to this LoRaNetDevice
+     * 
+     *  \param  phy pointer to the LoRaPHY to be attached
+     */
     void SetPHY (Ptr<LoRaPHY> phy);
+    
+    /**
+     *  Gets the attached LoRaPHY
+     * 
+     *  \return pointer to the attached LoRaPHY
+     */
     Ptr<LoRaPHY> GetPHY(void) const;
     
     void SendTo (Ptr<Packet> packet, uint32_t dest);
@@ -39,22 +68,17 @@ public:
     /*  virtual funcs from NetDevice    */
     void SetNode (Ptr<Node> node);
     Ptr<Node> GetNode (void) const;
-    
     void SetAddress (Address address);
     Address GetAddress (void) const;
-    
     void SetIfIndex (const uint32_t index);
     uint32_t GetIfIndex (void) const;
-    
     bool SetMtu (const uint16_t mtu);
     uint16_t GetMtu (void) const;
-    
     bool IsBridge (void) const;
     bool IsBroadcast (void) const;
     bool IsLinkUp (void) const;
     bool IsMulticast (void) const;
     bool IsPointToPoint (void) const;
-    
     Ptr<Channel> GetChannel (void) const;
     Address GetMulticast (Ipv4Address multicastGroup) const;
     Address GetBroadcast (void) const;
