@@ -1,5 +1,5 @@
 # lora-mesh
-LoRa mesh module for ns-3.29
+LoRa mesh module for ns-3.29 which makes use of a custom mesh protocol
 
 ##  Building the Module
 To build this module, you are required to have ns-3 (v3.29), see the [ns-3 wiki's guide](https://www.nsnam.org/wiki/Installation).
