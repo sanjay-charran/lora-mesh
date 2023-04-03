@@ -48,7 +48,7 @@ LoRaMAC::SetPHY (Ptr<LoRaPHY> phy)
         m_phy = phy;
         
         Ptr<UniformRandomVariable> x = CreateObject<UniformRandomVariable>();
-        uint32_t temp = x->GetValue(m_minDelay, m_maxDelay);
+        double temp = x->GetValue(m_minDelay, m_maxDelay);
         Time dur = Seconds(temp);
         
         Simulator::Schedule (dur, &LoRaMAC::PacketTimeslot, this);
@@ -638,7 +638,7 @@ LoRaMAC::PacketTimeslot (void)
     LoRaMeshHeader header;
     int i;
     unsigned int count;
-    uint32_t temp;
+    double temp;
     Time dur;
     Vector3D pos = m_phy->GetMobility()->GetPosition();
     
