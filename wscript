@@ -16,8 +16,6 @@ def build(bld):
         'model/lora-mesh-routing-header.cc',
         'model/lora-net-device.cc',
         'model/lora-phy.cc',
-        'helper/lora-mesh-helper.cc',
-        'helper/pcap-helper-for-lora.cc',
         'helper/ascii-helper-for-lora.cc'
         ]
 
@@ -41,8 +39,6 @@ def build(bld):
         'model/lora-mesh-routing-header.h',
         'model/lora-net-device.h',
         'model/lora-phy.h',
-        'helper/lora-mesh-helper.h',
-        'helper/pcap-helper-for-lora.h',
         'helper/ascii-helper-for-lora.h'
         ]
 
