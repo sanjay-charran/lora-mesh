@@ -7,8 +7,9 @@
 #     conf.check_nonfatal(header_name='stdint.h', define_name='HAVE_STDINT_H')
 
 def build(bld):
-    module = bld.create_ns3_module('lora-mesh', ['core', 'propagation', 'mobility', 'network'])
+    module = bld.create_ns3_module('lora-mesh', ['core', 'propagation', 'mobility', 'network', 'buildings'])
     module.source = [
+        'model/building-penetration-loss.cc',
         'model/lora-channel.cc',
         'model/lora-mac.cc',
         'model/lora-mesh-feedback-header.cc',
@@ -31,6 +32,7 @@ def build(bld):
     headers = bld(features='ns3header')
     headers.module = 'lora-mesh'
     headers.source = [
+        'model/building-penetration-loss.h',
         'model/lora-mesh.h',
         'model/lora-channel.h',
         'model/lora-mac.h',
