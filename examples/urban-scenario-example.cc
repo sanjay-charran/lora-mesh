@@ -7,6 +7,7 @@
 #include "ns3/application-container.h"
 #include "ns3/constant-position-mobility-model.h"
 #include "ns3/propagation-loss-model.h"
+#include "ns3/correlated-shadowing-propagation-loss-model.h"
 #include "ns3/propagation-delay-model.h"
 #include "ns3/mobility-helper.h"
 #include "ns3/node-container.h"
@@ -14,6 +15,9 @@
 #include "ns3/net-device-container.h"
 #include "ns3/object-factory.h"
 #include "ns3/vector.h"
+#include "ns3/buildings-module.h"
+#include "ns3/building-container.h"
+#include "ns3/buildings-helper.h"
 
 #include "ns3/lora-phy.h"
 #include "ns3/lora-mac.h"
@@ -49,7 +53,9 @@ main (int argc, char *argv[])
     Ptr<LogDistancePropagationLossModel> loss = CreateObject<LogDistancePropagationLossModel>();
     loss->SetPathLossExponent (4);
     loss->SetReference (1, 7.7);
+    Ptr<BuildingPenetrationLoss> buildingLoss = CreateObject<BuildingPenetrationLoss>();
     
+    loss->SetNext(buildingLoss);
     channel->SetLossModel(loss);
     channel->SetDelayModel(delay);
     
@@ -58,11 +64,88 @@ main (int argc, char *argv[])
     
     mobility.SetMobilityModel("ns3::ConstantPositionMobilityModel");
     
+    //setup buildings
+    BuildingContainer buildings;
+    Ptr<Building> building;
+    
+    building = CreateObject<Building>();
+    building->SetBoundaries(Box(242.718, 339.806, 312.46, 394.888, 0, 20));
+    building->SetBuildingType(Building::Commercial);
+    building->SetExtWallsType(Building::ConcreteWithWindows);
+    building->SetNFloors(1);
+    building->SetNRoomsX(1);
+    building->SetNRoomsY(1);
+    buildings.Add(building);
+    
+    building = CreateObject<Building>();
+    building->SetBoundaries(Box(217.476, 423.301, 490.735, 600, 0, 20));
+    building->SetBuildingType(Building::Commercial);
+    building->SetExtWallsType(Building::ConcreteWithWindows);
+    building->SetNFloors(1);
+    building->SetNRoomsX(1);
+    building->SetNRoomsY(1);
+    buildings.Add(building);
+    
+    building = CreateObject<Building>();
+    building->SetBoundaries(Box(326.214, 423.301, 95.847, 228.115, 0, 20));
+    building->SetBuildingType(Building::Commercial);
+    building->SetExtWallsType(Building::ConcreteWithWindows);
+    building->SetNFloors(1);
+    building->SetNRoomsX(1);
+    building->SetNRoomsY(1);
+    buildings.Add(building);
+    
+    building = CreateObject<Building>();
+    building->SetBoundaries(Box(266.019, 423.301, 0, 84.345, 0, 20));
+    building->SetBuildingType(Building::Commercial);
+    building->SetExtWallsType(Building::ConcreteWithWindows);
+    building->SetNFloors(1);
+    building->SetNRoomsX(1);
+    building->SetNRoomsY(1);
+    buildings.Add(building);
+    
+    building = CreateObject<Building>();
+    building->SetBoundaries(Box(436.893, 557.282, 394.888, 467.732, 0, 20));
+    building->SetBuildingType(Building::Commercial);
+    building->SetExtWallsType(Building::ConcreteWithWindows);
+    building->SetNFloors(1);
+    building->SetNRoomsX(1);
+    building->SetNRoomsY(1);
+    buildings.Add(building);
+    
+    building = CreateObject<Building>();
+    building->SetBoundaries(Box(568.932, 702.913, 431.31, 467.732, 0, 20));
+    building->SetBuildingType(Building::Commercial);
+    building->SetExtWallsType(Building::ConcreteWithWindows);
+    building->SetNFloors(1);
+    building->SetNRoomsX(1);
+    building->SetNRoomsY(1);
+    buildings.Add(building);
+    
+    building = CreateObject<Building>();
+    building->SetBoundaries(Box(582.524, 691.262, 228.115, 287.54, 0, 20));
+    building->SetBuildingType(Building::Commercial);
+    building->SetExtWallsType(Building::ConcreteWithWindows);
+    building->SetNFloors(1);
+    building->SetNRoomsX(1);
+    building->SetNRoomsY(1);
+    buildings.Add(building);
+    
+    building = CreateObject<Building>();
+    building->SetBoundaries(Box(714.563, 800, 431.31, 563.578, 0, 20));
+    building->SetBuildingType(Building::Commercial);
+    building->SetExtWallsType(Building::ConcreteWithWindows);
+    building->SetNFloors(1);
+    building->SetNRoomsX(1);
+    building->SetNRoomsY(1);
+    buildings.Add(building);
+    
     //setup nodes
     NodeContainer loranodes;
     loranodes.Create(NUM_NODES);
     
     mobility.Install(loranodes);
+    BuildingsHelper::Install(loranodes);
     
     Ptr<LoRaNetDevice> device;
     Ptr<LoRaPHY> phy;
@@ -112,7 +195,7 @@ main (int argc, char *argv[])
     
     loranodes.Get(6)->GetDevice(0)->GetObject<LoRaNetDevice>()->GetPHY()->SwitchStateSLEEP();    //node 6 was missing in scaenario
     
-    //set locations
+    //set node locations
     Vector3D pos;
     pos.z = 0;
     

@@ -27,6 +27,7 @@
 #include "ns3/lora-mac.h"
 #include "ns3/lora-net-device.h"
 #include "ns3/lora-channel.h"
+#include "ns3/building-penetration-loss.h"
 
 #endif /* LORA_MESH_H */
 
