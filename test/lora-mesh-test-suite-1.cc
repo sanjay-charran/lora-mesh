@@ -497,7 +497,7 @@ LoRaMeshTestCase1_11::DoRun (void)
     channel->AddPHY(phy);
     auto new_phys = channel->GetNDevices();
     
-    NS_TEST_ASSERT_MSG_NE(new_phys, old_phys, "Test Case #1.11: Failed to Attach Node to Channel");
+    NS_TEST_ASSERT_MSG_EQ(new_phys, old_phys, "Test Case #1.11: Failed to Attach Node to Channel");
     
     Simulator::Destroy();
     

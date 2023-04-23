@@ -50,6 +50,8 @@ LoRaMAC::LoRaMAC ()
     m_last_counter = 0;
     m_minDelay = 0;
     m_maxDelay = 60;
+    m_routingUpdateFreq = 1;
+    m_routingUpdateCounter = 0;
 }
 
 LoRaMAC::~LoRaMAC ()
@@ -107,8 +109,6 @@ LoRaMAC::SetDevice (Ptr<LoRaNetDevice> device)
         NS_LOG_INFO("Node #" << GetId() << "(x=" << pos.x << " y=" << pos.y << " z=" << pos.z << ")" << ": Added entry (" << first_entry.s << "->" << first_entry.r << ")");
     }
     
-    m_cur = m_table.begin();
-    
     return;
 }
 
@@ -155,6 +155,23 @@ LoRaMAC::GetMaxDelay(void) const
     return m_maxDelay;
 }
 
+void
+LoRaMAC::SetRoutingUpdateFrequency(uint32_t freq)
+{
+    if (freq != 0)
+    {
+        m_routingUpdateFreq = freq;
+    }
+    
+    return;
+}
+
+uint32_t
+LoRaMAC::GetRoutingUpdateFrequency(void) const
+{
+    return m_routingUpdateFreq;
+}
+
 void 
 LoRaMAC::AddTableEntry (RoutingTableEntry entry)
 {
@@ -165,7 +182,6 @@ LoRaMAC::AddTableEntry (RoutingTableEntry entry)
     if (m_table.empty())
     {
         m_table.insert(it, entry);
-        m_cur = m_table.begin();
         return;
     }
     
@@ -174,13 +190,11 @@ LoRaMAC::AddTableEntry (RoutingTableEntry entry)
         if (it->s > entry.s)
         {
             m_table.insert(it, entry);
-            m_cur = m_table.begin();
             return;
         }
         else if (it->s == entry.s && it->r > entry.r)
         {
             m_table.insert(it, entry);
-            m_cur = m_table.begin();
             return;
         }
         else if (it->s == entry.s && it->r == entry.r)
@@ -191,7 +205,6 @@ LoRaMAC::AddTableEntry (RoutingTableEntry entry)
     }
     
     m_table.insert(it, entry);
-    m_cur = m_table.begin();
     return;
 }
 
@@ -214,7 +227,6 @@ LoRaMAC::RemoveTableEntry (uint32_t s, uint32_t r)
         {
             /*  remove entry    */
             m_table.erase(it);
-            m_cur = m_table.begin();
             return;
         }
     }
@@ -234,7 +246,6 @@ LoRaMAC::UpdateTableEntry (RoutingTableEntry entry)
     {
         /*  update by adding    */
         AddTableEntry (entry);
-        m_cur = m_table.begin();
         return;
     }
     
@@ -251,7 +262,6 @@ LoRaMAC::UpdateTableEntry (RoutingTableEntry entry)
     
     /*  could not find -- add in entry  */
     AddTableEntry (entry);
-    m_cur = m_table.begin();
     return;
 }
 
@@ -723,11 +733,23 @@ LoRaMAC::RoutingTimeslot (void)
 {
     NS_LOG_FUNCTION (this);
     
+    m_routingUpdateCounter++;
+    
+    if (m_routingUpdateCounter < m_routingUpdateFreq)
+    {
+        return;
+    }
+    
     Time dur;
-    RoutingTableEntry cur = *m_cur;
     Ptr<Packet> packet = Create<Packet>(25);
     LoRaMeshHeader header;
     Vector3D pos = m_phy->GetMobility()->GetPosition();
+    
+    auto size = m_table.size();
+    Ptr<UniformRandomVariable> x = CreateObject<UniformRandomVariable>();
+    uint32_t temp = x->GetInteger(0, size);
+    
+    RoutingTableEntry cur = m_table[temp];
     
     header.SetType(ROUTING_UPDATE);
     header.SetSrc(cur.s);
@@ -745,14 +767,6 @@ LoRaMAC::RoutingTimeslot (void)
     packet->AddHeader(header);
     
     m_phy->Send(packet);
-    
-    /*  move entry iterator by one  */
-    ++m_cur;
-    
-    if (m_cur == m_table.end())
-    {
-        m_cur = m_table.begin();// + std::distance<std::const_iterator>(m_cur, ci);;
-    }
     
     /*  increment last counter  */
     if (m_last_counter == 255)  /*  max for uint8_t */

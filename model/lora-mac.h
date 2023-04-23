@@ -259,6 +259,21 @@ public:
      */
     uint32_t GetMaxDelay(void) const;
     
+    /**
+     *  Sets the frequency of routing updates used relative to packet timeslots (e.g., 1 for every
+     *  timeslot, 2 for every other timeslot, etc.)
+     * 
+     *  \param  freq the value to be used to control the routing update frequency
+     */
+    void SetRoutingUpdateFrequency(uint32_t freq);
+    
+    /**
+     *  Gets the value being used for controlling the routing update frequency for this LoRaMAC
+     * 
+     *  \return the value currently being used for controlling the routing update frequency
+     */
+    uint32_t GetRoutingUpdateFrequency(void) const;
+    
 private:
     
     /**
@@ -304,15 +319,22 @@ private:
     
     /*  routing table containing info the end device is aware of    */
     std::deque<RoutingTableEntry> m_table;
-    std::deque<RoutingTableEntry>::iterator m_cur; /*  used for deciding next routing update to send   */
     
+    /*  Packets queued for sending  */
     std::deque<Ptr<Packet>> m_packet_queue;
+    
+    /*  record of last packets sent */
     std::deque<uint64_t> m_last_packets;
+    
     uint8_t m_last_counter;
+    
+    /*  Min and Max range settings for random delay between packet timeslots    */
     uint32_t m_minDelay;
     uint32_t m_maxDelay;
-    double m_max_packet_time;
-    double m_max_routing_time;
+    
+    /*  Used to control how often routing updates are sent (e.g., 1 for every timeslot, 2 for every other, etc.)*/
+    uint32_t m_routingUpdateFreq;
+    uint32_t m_routingUpdateCounter;
     
     TracedCallback<Ptr<Packet>> m_rxPacketSniffer;
     TracedCallback<Ptr<Packet>> m_txPacketSniffer;

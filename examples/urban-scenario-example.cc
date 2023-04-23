@@ -28,7 +28,7 @@
 #include <vector>
 
 #define NUM_NODES       21
-#define SIMULATION_SF   11
+#define SIMULATION_SF   12
 
 using namespace ns3;
 using namespace lora_mesh;
@@ -176,7 +176,8 @@ main (int argc, char *argv[])
         device->SetNode(node);
         node->AddDevice(device);        
         mac->SetMinDelay(0);
-        mac->SetMaxDelay(100);
+        mac->SetMaxDelay(20);
+        mac->SetRoutingUpdateFrequency(2);
         mac->SetPHY(phy);
         mac->SetDevice(device);
     }
