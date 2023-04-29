@@ -17,31 +17,31 @@
 using namespace ns3;
 using namespace lora_mesh;
 
-NS_LOG_COMPONENT_DEFINE ("LoRaMeshTestSuite_4");
+NS_LOG_COMPONENT_DEFINE("LoRaMeshTestSuite_4");
 
 /************************************************************************************/
 /*  Test Case #4.1: Packet Collisions   */
 class LoRaMeshTestCase4_1 : public TestCase
 {
 public:
-    LoRaMeshTestCase4_1 ();
-    virtual ~LoRaMeshTestCase4_1 ();
+    LoRaMeshTestCase4_1();
+    virtual ~LoRaMeshTestCase4_1();
 
 private:
-    virtual void DoRun (void);
+    virtual void DoRun(void);
 };
 
-LoRaMeshTestCase4_1::LoRaMeshTestCase4_1 ()
-  : TestCase ("LoRa Mesh Test Case #4.1: Packet Collisions")
+LoRaMeshTestCase4_1::LoRaMeshTestCase4_1()
+  : TestCase("LoRa Mesh Test Case #4.1: Packet Collisions")
 {
 }
 
-LoRaMeshTestCase4_1::~LoRaMeshTestCase4_1 ()
+LoRaMeshTestCase4_1::~LoRaMeshTestCase4_1()
 {
 }
 
 void
-LoRaMeshTestCase4_1::DoRun (void)
+LoRaMeshTestCase4_1::DoRun(void)
 {
     NodeContainer nodes;
     Ptr<LoRaPHY> phy;
@@ -50,10 +50,10 @@ LoRaMeshTestCase4_1::DoRun (void)
     Ptr<LoRaChannel> channel = CreateObject<LoRaChannel>();
     
     Ptr<LogDistancePropagationLossModel> loss = CreateObject<LogDistancePropagationLossModel>();
-    loss->SetPathLossExponent (3.76);
-    loss->SetReference (1, 7.7);
+    loss->SetPathLossExponent(3.76);
+    loss->SetReference(1, 7.7);
     
-    Ptr<PropagationDelayModel> delay = CreateObject<ConstantSpeedPropagationDelayModel> ();
+    Ptr<PropagationDelayModel> delay = CreateObject<ConstantSpeedPropagationDelayModel>();
     
     channel->SetLossModel(loss);
     channel->SetDelayModel(delay);
@@ -145,21 +145,19 @@ LoRaMeshTestCase4_1::DoRun (void)
 class LoRaMeshTestSuite_4 : public TestSuite
 {
 public:
-    LoRaMeshTestSuite_4 ();
+    LoRaMeshTestSuite_4();
 };
 
-LoRaMeshTestSuite_4::LoRaMeshTestSuite_4 ()
-    : TestSuite ("lora-mesh-4", UNIT)
+LoRaMeshTestSuite_4::LoRaMeshTestSuite_4()
+    : TestSuite("lora-mesh-4", UNIT)
 {
-    //Time::SetResolution (Time::NS);
-    //LogComponentEnableAll(LOG_PREFIX_TIME);
     LogComponentEnable("LoRaMeshTestSuite_4", LOG_LEVEL_ALL);
     LogComponentEnable("LoRaPHY", LOG_LEVEL_ALL);
     LogComponentEnable("LoRaMAC", LOG_LEVEL_ALL);
     LogComponentEnable("LoRaChannel", LOG_LEVEL_ALL);
     
     // TestDuration for TestCase can be QUICK, EXTENSIVE or TAKES_FOREVER
-    AddTestCase (new LoRaMeshTestCase4_1, TestCase::TAKES_FOREVER);
+    AddTestCase(new LoRaMeshTestCase4_1, TestCase::TAKES_FOREVER);
 }
 
 // Do not forget to allocate an instance of this TestSuite

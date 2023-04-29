@@ -17,31 +17,31 @@
 using namespace ns3;
 using namespace lora_mesh;
 
-NS_LOG_COMPONENT_DEFINE ("LoRaMeshTestSuite_2");
+NS_LOG_COMPONENT_DEFINE("LoRaMeshTestSuite_2");
 
 /************************************************************************************/
 /*  Test Case #2.1: Channel Creation   */
 class LoRaMeshTestCase2_1 : public TestCase
 {
 public:
-    LoRaMeshTestCase2_1 ();
-    virtual ~LoRaMeshTestCase2_1 ();
+    LoRaMeshTestCase2_1();
+    virtual ~LoRaMeshTestCase2_1();
 
 private:
-    virtual void DoRun (void);
+    virtual void DoRun(void);
 };
 
-LoRaMeshTestCase2_1::LoRaMeshTestCase2_1 ()
-  : TestCase ("LoRa Mesh Test Case #2.1: Channel Creation")
+LoRaMeshTestCase2_1::LoRaMeshTestCase2_1()
+  : TestCase("LoRa Mesh Test Case #2.1: Channel Creation")
 {
 }
 
-LoRaMeshTestCase2_1::~LoRaMeshTestCase2_1 ()
+LoRaMeshTestCase2_1::~LoRaMeshTestCase2_1()
 {
 }
 
 void
-LoRaMeshTestCase2_1::DoRun (void)
+LoRaMeshTestCase2_1::DoRun(void)
 {
     Ptr<LoRaChannel> channel = CreateObject<LoRaChannel>();
     
@@ -55,24 +55,24 @@ LoRaMeshTestCase2_1::DoRun (void)
 class LoRaMeshTestCase2_2 : public TestCase
 {
 public:
-    LoRaMeshTestCase2_2 ();
-    virtual ~LoRaMeshTestCase2_2 ();
+    LoRaMeshTestCase2_2();
+    virtual ~LoRaMeshTestCase2_2();
 
 private:
-    virtual void DoRun (void);
+    virtual void DoRun(void);
 };
 
-LoRaMeshTestCase2_2::LoRaMeshTestCase2_2 ()
-  : TestCase ("LoRa Mesh Test Case #2.2: Unique Channel IDs")
+LoRaMeshTestCase2_2::LoRaMeshTestCase2_2()
+  : TestCase("LoRa Mesh Test Case #2.2: Unique Channel IDs")
 {
 }
 
-LoRaMeshTestCase2_2::~LoRaMeshTestCase2_2 ()
+LoRaMeshTestCase2_2::~LoRaMeshTestCase2_2()
 {
 }
 
 void
-LoRaMeshTestCase2_2::DoRun (void)
+LoRaMeshTestCase2_2::DoRun(void)
 {
     Ptr<LoRaChannel> channel1 = CreateObject<LoRaChannel>();
     Ptr<LoRaChannel> channel2 = CreateObject<LoRaChannel>();
@@ -87,24 +87,24 @@ LoRaMeshTestCase2_2::DoRun (void)
 class LoRaMeshTestCase2_3 : public TestCase
 {
 public:
-    LoRaMeshTestCase2_3 ();
-    virtual ~LoRaMeshTestCase2_3 ();
+    LoRaMeshTestCase2_3();
+    virtual ~LoRaMeshTestCase2_3();
 
 private:
-    virtual void DoRun (void);
+    virtual void DoRun(void);
 };
 
-LoRaMeshTestCase2_3::LoRaMeshTestCase2_3 ()
-  : TestCase ("LoRa Mesh Test Case #2.3: Setting Channel Loss Model")
+LoRaMeshTestCase2_3::LoRaMeshTestCase2_3()
+  : TestCase("LoRa Mesh Test Case #2.3: Setting Channel Loss Model")
 {
 }
 
-LoRaMeshTestCase2_3::~LoRaMeshTestCase2_3 ()
+LoRaMeshTestCase2_3::~LoRaMeshTestCase2_3()
 {
 }
 
 void
-LoRaMeshTestCase2_3::DoRun (void)
+LoRaMeshTestCase2_3::DoRun(void)
 {
     Ptr<LoRaChannel> channel = CreateObject<LoRaChannel>();
     
@@ -122,28 +122,28 @@ LoRaMeshTestCase2_3::DoRun (void)
 class LoRaMeshTestCase2_5 : public TestCase
 {
 public:
-    LoRaMeshTestCase2_5 ();
-    virtual ~LoRaMeshTestCase2_5 ();
+    LoRaMeshTestCase2_5();
+    virtual ~LoRaMeshTestCase2_5();
 
 private:
-    virtual void DoRun (void);
+    virtual void DoRun(void);
 };
 
-LoRaMeshTestCase2_5::LoRaMeshTestCase2_5 ()
-  : TestCase ("LoRa Mesh Test Case #2.5: Setting Channel Delay Model")
+LoRaMeshTestCase2_5::LoRaMeshTestCase2_5()
+  : TestCase("LoRa Mesh Test Case #2.5: Setting Channel Delay Model")
 {
 }
 
-LoRaMeshTestCase2_5::~LoRaMeshTestCase2_5 ()
+LoRaMeshTestCase2_5::~LoRaMeshTestCase2_5()
 {
 }
 
 void
-LoRaMeshTestCase2_5::DoRun (void)
+LoRaMeshTestCase2_5::DoRun(void)
 {
     Ptr<LoRaChannel> channel = CreateObject<LoRaChannel>();
     
-    Ptr<PropagationDelayModel> delay = CreateObject<ConstantSpeedPropagationDelayModel> ();
+    Ptr<PropagationDelayModel> delay = CreateObject<ConstantSpeedPropagationDelayModel>();
     
     channel->SetDelayModel(delay);
     
@@ -158,20 +158,19 @@ LoRaMeshTestCase2_5::DoRun (void)
 class LoRaMeshTestSuite_2 : public TestSuite
 {
 public:
-    LoRaMeshTestSuite_2 ();
+    LoRaMeshTestSuite_2();
 };
 
-LoRaMeshTestSuite_2::LoRaMeshTestSuite_2 ()
-    : TestSuite ("lora-mesh-2", UNIT)
+LoRaMeshTestSuite_2::LoRaMeshTestSuite_2()
+    : TestSuite("lora-mesh-2", UNIT)
 {
     LogComponentEnable("LoRaMeshTestSuite_2", LOG_LEVEL_ALL);
     
     // TestDuration for TestCase can be QUICK, EXTENSIVE or TAKES_FOREVER
-    AddTestCase (new LoRaMeshTestCase2_1, TestCase::QUICK);
-    AddTestCase (new LoRaMeshTestCase2_2, TestCase::QUICK);
-    AddTestCase (new LoRaMeshTestCase2_3, TestCase::QUICK);
-    //skipped obstruction test
-    AddTestCase (new LoRaMeshTestCase2_5, TestCase::QUICK);
+    AddTestCase(new LoRaMeshTestCase2_1, TestCase::QUICK);
+    AddTestCase(new LoRaMeshTestCase2_2, TestCase::QUICK);
+    AddTestCase(new LoRaMeshTestCase2_3, TestCase::QUICK);
+    AddTestCase(new LoRaMeshTestCase2_5, TestCase::QUICK);
 }
 
 // Do not forget to allocate an instance of this TestSuite

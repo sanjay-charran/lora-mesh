@@ -17,31 +17,31 @@
 using namespace ns3;
 using namespace lora_mesh;
 
-NS_LOG_COMPONENT_DEFINE ("LoRaMeshTestSuite_3");
+NS_LOG_COMPONENT_DEFINE("LoRaMeshTestSuite_3");
 
 /************************************************************************************/
 /*  Test Case #3.1: Routing Table Info  */
 class LoRaMeshTestCase3_1 : public TestCase
 {
 public:
-    LoRaMeshTestCase3_1 ();
-    virtual ~LoRaMeshTestCase3_1 ();
+    LoRaMeshTestCase3_1();
+    virtual ~LoRaMeshTestCase3_1();
 
 private:
-    virtual void DoRun (void);
+    virtual void DoRun(void);
 };
 
-LoRaMeshTestCase3_1::LoRaMeshTestCase3_1 ()
-  : TestCase ("LoRa Mesh Test Case #3.1: Routing Table Info")
+LoRaMeshTestCase3_1::LoRaMeshTestCase3_1()
+  : TestCase("LoRa Mesh Test Case #3.1: Routing Table Info")
 {
 }
 
-LoRaMeshTestCase3_1::~LoRaMeshTestCase3_1 ()
+LoRaMeshTestCase3_1::~LoRaMeshTestCase3_1()
 {
 }
 
 void
-LoRaMeshTestCase3_1::DoRun (void)
+LoRaMeshTestCase3_1::DoRun(void)
 {
     NodeContainer nodes;
     Ptr<LoRaPHY> phy;
@@ -50,10 +50,10 @@ LoRaMeshTestCase3_1::DoRun (void)
     Ptr<LoRaChannel> channel = CreateObject<LoRaChannel>();
     
     Ptr<LogDistancePropagationLossModel> loss = CreateObject<LogDistancePropagationLossModel>();
-    loss->SetPathLossExponent (3.76);
-    loss->SetReference (1, 7.7);
+    loss->SetPathLossExponent(3.76);
+    loss->SetReference(1, 7.7);
     
-    Ptr<PropagationDelayModel> delay = CreateObject<ConstantSpeedPropagationDelayModel> ();
+    Ptr<PropagationDelayModel> delay = CreateObject<ConstantSpeedPropagationDelayModel>();
     
     channel->SetLossModel(loss);
     channel->SetDelayModel(delay);
@@ -65,7 +65,7 @@ LoRaMeshTestCase3_1::DoRun (void)
     nodes.Create(2);
     mobility.Install(nodes);
     
-    for (NodeContainer::Iterator i = nodes.Begin();i != nodes.End();++i)
+    for(NodeContainer::Iterator i = nodes.Begin();i != nodes.End();++i)
     {
         Ptr<Node> node = *i;
         device = Create<LoRaNetDevice>();
@@ -120,24 +120,24 @@ LoRaMeshTestCase3_1::DoRun (void)
 class LoRaMeshTestCase3_2 : public TestCase
 {
 public:
-    LoRaMeshTestCase3_2 ();
-    virtual ~LoRaMeshTestCase3_2 ();
+    LoRaMeshTestCase3_2();
+    virtual ~LoRaMeshTestCase3_2();
 
 private:
-    virtual void DoRun (void);
+    virtual void DoRun(void);
 };
 
-LoRaMeshTestCase3_2::LoRaMeshTestCase3_2 ()
-  : TestCase ("LoRa Mesh Test Case #3.2: Initial Routing Entry for Nodes")
+LoRaMeshTestCase3_2::LoRaMeshTestCase3_2()
+  : TestCase("LoRa Mesh Test Case #3.2: Initial Routing Entry for Nodes")
 {
 }
 
-LoRaMeshTestCase3_2::~LoRaMeshTestCase3_2 ()
+LoRaMeshTestCase3_2::~LoRaMeshTestCase3_2()
 {
 }
 
 void
-LoRaMeshTestCase3_2::DoRun (void)
+LoRaMeshTestCase3_2::DoRun(void)
 {
     NodeContainer nodes;
     Ptr<LoRaPHY> phy;
@@ -146,10 +146,10 @@ LoRaMeshTestCase3_2::DoRun (void)
     Ptr<LoRaChannel> channel = CreateObject<LoRaChannel>();
     
     Ptr<LogDistancePropagationLossModel> loss = CreateObject<LogDistancePropagationLossModel>();
-    loss->SetPathLossExponent (3.76);
-    loss->SetReference (1, 7.7);
+    loss->SetPathLossExponent(3.76);
+    loss->SetReference(1, 7.7);
     
-    Ptr<PropagationDelayModel> delay = CreateObject<ConstantSpeedPropagationDelayModel> ();
+    Ptr<PropagationDelayModel> delay = CreateObject<ConstantSpeedPropagationDelayModel>();
     
     channel->SetLossModel(loss);
     channel->SetDelayModel(delay);
@@ -203,24 +203,24 @@ LoRaMeshTestCase3_2::DoRun (void)
 class LoRaMeshTestCase3_3 : public TestCase
 {
 public:
-    LoRaMeshTestCase3_3 ();
-    virtual ~LoRaMeshTestCase3_3 ();
+    LoRaMeshTestCase3_3();
+    virtual ~LoRaMeshTestCase3_3();
 
 private:
-    virtual void DoRun (void);
+    virtual void DoRun(void);
 };
 
-LoRaMeshTestCase3_3::LoRaMeshTestCase3_3 ()
-  : TestCase ("LoRa Mesh Test Case #3.3: Multihop Routing Updates")
+LoRaMeshTestCase3_3::LoRaMeshTestCase3_3()
+  : TestCase("LoRa Mesh Test Case #3.3: Multihop Routing Updates")
 {
 }
 
-LoRaMeshTestCase3_3::~LoRaMeshTestCase3_3 ()
+LoRaMeshTestCase3_3::~LoRaMeshTestCase3_3()
 {
 }
 
 void
-LoRaMeshTestCase3_3::DoRun (void)
+LoRaMeshTestCase3_3::DoRun(void)
 {
     NodeContainer nodes;
     Ptr<LoRaPHY> phy;
@@ -229,10 +229,10 @@ LoRaMeshTestCase3_3::DoRun (void)
     Ptr<LoRaChannel> channel = CreateObject<LoRaChannel>();
     
     Ptr<LogDistancePropagationLossModel> loss = CreateObject<LogDistancePropagationLossModel>();
-    loss->SetPathLossExponent (3.76);
-    loss->SetReference (1, 7.7);
+    loss->SetPathLossExponent(3.76);
+    loss->SetReference(1, 7.7);
     
-    Ptr<PropagationDelayModel> delay = CreateObject<ConstantSpeedPropagationDelayModel> ();
+    Ptr<PropagationDelayModel> delay = CreateObject<ConstantSpeedPropagationDelayModel>();
     
     channel->SetLossModel(loss);
     channel->SetDelayModel(delay);
@@ -304,24 +304,24 @@ LoRaMeshTestCase3_3::DoRun (void)
 class LoRaMeshTestCase3_4 : public TestCase
 {
 public:
-    LoRaMeshTestCase3_4 ();
-    virtual ~LoRaMeshTestCase3_4 ();
+    LoRaMeshTestCase3_4();
+    virtual ~LoRaMeshTestCase3_4();
 
 private:
-    virtual void DoRun (void);
+    virtual void DoRun(void);
 };
 
-LoRaMeshTestCase3_4::LoRaMeshTestCase3_4 ()
-  : TestCase ("LoRa Mesh Test Case #3.4: Multihop Routing Updates 2")
+LoRaMeshTestCase3_4::LoRaMeshTestCase3_4()
+  : TestCase("LoRa Mesh Test Case #3.4: Multihop Routing Updates 2")
 {
 }
 
-LoRaMeshTestCase3_4::~LoRaMeshTestCase3_4 ()
+LoRaMeshTestCase3_4::~LoRaMeshTestCase3_4()
 {
 }
 
 void
-LoRaMeshTestCase3_4::DoRun (void)
+LoRaMeshTestCase3_4::DoRun(void)
 {
     NodeContainer nodes;
     Ptr<LoRaPHY> phy;
@@ -330,10 +330,10 @@ LoRaMeshTestCase3_4::DoRun (void)
     Ptr<LoRaChannel> channel = CreateObject<LoRaChannel>();
     
     Ptr<LogDistancePropagationLossModel> loss = CreateObject<LogDistancePropagationLossModel>();
-    loss->SetPathLossExponent (3.76);
-    loss->SetReference (1, 7.7);
+    loss->SetPathLossExponent(3.76);
+    loss->SetReference(1, 7.7);
     
-    Ptr<PropagationDelayModel> delay = CreateObject<ConstantSpeedPropagationDelayModel> ();
+    Ptr<PropagationDelayModel> delay = CreateObject<ConstantSpeedPropagationDelayModel>();
     
     channel->SetLossModel(loss);
     channel->SetDelayModel(delay);
@@ -419,24 +419,24 @@ LoRaMeshTestCase3_4::DoRun (void)
 class LoRaMeshTestCase3_5 : public TestCase
 {
 public:
-    LoRaMeshTestCase3_5 ();
-    virtual ~LoRaMeshTestCase3_5 ();
+    LoRaMeshTestCase3_5();
+    virtual ~LoRaMeshTestCase3_5();
 
 private:
-    virtual void DoRun (void);
+    virtual void DoRun(void);
 };
 
-LoRaMeshTestCase3_5::LoRaMeshTestCase3_5 ()
-  : TestCase ("LoRa Mesh Test Case #3.5: Feedback from Nodes Receiving Packets")
+LoRaMeshTestCase3_5::LoRaMeshTestCase3_5()
+  : TestCase("LoRa Mesh Test Case #3.5: Feedback from Nodes Receiving Packets")
 {
 }
 
-LoRaMeshTestCase3_5::~LoRaMeshTestCase3_5 ()
+LoRaMeshTestCase3_5::~LoRaMeshTestCase3_5()
 {
 }
 
 void
-LoRaMeshTestCase3_5::DoRun (void)
+LoRaMeshTestCase3_5::DoRun(void)
 {
     NodeContainer nodes;
     Ptr<LoRaPHY> phy;
@@ -445,10 +445,10 @@ LoRaMeshTestCase3_5::DoRun (void)
     Ptr<LoRaChannel> channel = CreateObject<LoRaChannel>();
     
     Ptr<LogDistancePropagationLossModel> loss = CreateObject<LogDistancePropagationLossModel>();
-    loss->SetPathLossExponent (3.76);
-    loss->SetReference (1, 7.7);
+    loss->SetPathLossExponent(3.76);
+    loss->SetReference(1, 7.7);
     
-    Ptr<PropagationDelayModel> delay = CreateObject<ConstantSpeedPropagationDelayModel> ();
+    Ptr<PropagationDelayModel> delay = CreateObject<ConstantSpeedPropagationDelayModel>();
     
     channel->SetLossModel(loss);
     channel->SetDelayModel(delay);
@@ -534,24 +534,24 @@ LoRaMeshTestCase3_5::DoRun (void)
 class LoRaMeshTestCase3_6 : public TestCase
 {
 public:
-    LoRaMeshTestCase3_6 ();
-    virtual ~LoRaMeshTestCase3_6 ();
+    LoRaMeshTestCase3_6();
+    virtual ~LoRaMeshTestCase3_6();
 
 private:
-    virtual void DoRun (void);
+    virtual void DoRun(void);
 };
 
-LoRaMeshTestCase3_6::LoRaMeshTestCase3_6 ()
-  : TestCase ("LoRa Mesh Test Case #3.6: Adjusting min and max value for delay RNG for node")
+LoRaMeshTestCase3_6::LoRaMeshTestCase3_6()
+  : TestCase("LoRa Mesh Test Case #3.6: Adjusting min and max value for delay RNG for node")
 {
 }
 
-LoRaMeshTestCase3_6::~LoRaMeshTestCase3_6 ()
+LoRaMeshTestCase3_6::~LoRaMeshTestCase3_6()
 {
 }
 
 void
-LoRaMeshTestCase3_6::DoRun (void)
+LoRaMeshTestCase3_6::DoRun(void)
 {
     double old_min, old_max;
     
@@ -562,10 +562,10 @@ LoRaMeshTestCase3_6::DoRun (void)
     Ptr<LoRaChannel> channel = CreateObject<LoRaChannel>();
     
     Ptr<LogDistancePropagationLossModel> loss = CreateObject<LogDistancePropagationLossModel>();
-    loss->SetPathLossExponent (3.76);
-    loss->SetReference (1, 7.7);
+    loss->SetPathLossExponent(3.76);
+    loss->SetReference(1, 7.7);
     
-    Ptr<PropagationDelayModel> delay = CreateObject<ConstantSpeedPropagationDelayModel> ();
+    Ptr<PropagationDelayModel> delay = CreateObject<ConstantSpeedPropagationDelayModel>();
     
     channel->SetLossModel(loss);
     channel->SetDelayModel(delay);
@@ -613,24 +613,24 @@ LoRaMeshTestCase3_6::DoRun (void)
 class LoRaMeshTestCase3_7 : public TestCase
 {
 public:
-    LoRaMeshTestCase3_7 ();
-    virtual ~LoRaMeshTestCase3_7 ();
+    LoRaMeshTestCase3_7();
+    virtual ~LoRaMeshTestCase3_7();
 
 private:
-    virtual void DoRun (void);
+    virtual void DoRun(void);
 };
 
-LoRaMeshTestCase3_7::LoRaMeshTestCase3_7 ()
-  : TestCase ("LoRa Mesh Test Case #3.7: Out of Range for Transmission")
+LoRaMeshTestCase3_7::LoRaMeshTestCase3_7()
+  : TestCase("LoRa Mesh Test Case #3.7: Out of Range for Transmission")
 {
 }
 
-LoRaMeshTestCase3_7::~LoRaMeshTestCase3_7 ()
+LoRaMeshTestCase3_7::~LoRaMeshTestCase3_7()
 {
 }
 
 void
-LoRaMeshTestCase3_7::DoRun (void)
+LoRaMeshTestCase3_7::DoRun(void)
 {
     NodeContainer nodes;
     Ptr<LoRaPHY> phy;
@@ -639,10 +639,10 @@ LoRaMeshTestCase3_7::DoRun (void)
     Ptr<LoRaChannel> channel = CreateObject<LoRaChannel>();
     
     Ptr<LogDistancePropagationLossModel> loss = CreateObject<LogDistancePropagationLossModel>();
-    loss->SetPathLossExponent (3.76);
-    loss->SetReference (1, 7.7);
+    loss->SetPathLossExponent(3.76);
+    loss->SetReference(1, 7.7);
     
-    Ptr<PropagationDelayModel> delay = CreateObject<ConstantSpeedPropagationDelayModel> ();
+    Ptr<PropagationDelayModel> delay = CreateObject<ConstantSpeedPropagationDelayModel>();
     
     channel->SetLossModel(loss);
     channel->SetDelayModel(delay);
@@ -733,27 +733,25 @@ LoRaMeshTestCase3_7::DoRun (void)
 class LoRaMeshTestSuite_3 : public TestSuite
 {
 public:
-    LoRaMeshTestSuite_3 ();
+    LoRaMeshTestSuite_3();
 };
 
-LoRaMeshTestSuite_3::LoRaMeshTestSuite_3 ()
-    : TestSuite ("lora-mesh-3", UNIT)
+LoRaMeshTestSuite_3::LoRaMeshTestSuite_3()
+    : TestSuite("lora-mesh-3", UNIT)
 {
-//     Time::SetResolution (Time::NS);
-//     LogComponentEnableAll(LOG_PREFIX_TIME);
     LogComponentEnable("LoRaMeshTestSuite_3", LOG_LEVEL_ALL);
     LogComponentEnable("LoRaPHY", LOG_LEVEL_ALL);
     LogComponentEnable("LoRaMAC", LOG_LEVEL_ALL);
     LogComponentEnable("LoRaChannel", LOG_LEVEL_ALL);
     
     // TestDuration for TestCase can be QUICK, EXTENSIVE or TAKES_FOREVER
-    AddTestCase (new LoRaMeshTestCase3_1, TestCase::QUICK);
-    AddTestCase (new LoRaMeshTestCase3_2, TestCase::QUICK);
-    AddTestCase (new LoRaMeshTestCase3_3, TestCase::QUICK);
-    AddTestCase (new LoRaMeshTestCase3_4, TestCase::EXTENSIVE);
-    AddTestCase (new LoRaMeshTestCase3_5, TestCase::EXTENSIVE);
-    AddTestCase (new LoRaMeshTestCase3_6, TestCase::QUICK);
-    AddTestCase (new LoRaMeshTestCase3_7, TestCase::EXTENSIVE);
+    AddTestCase(new LoRaMeshTestCase3_1, TestCase::QUICK);
+    AddTestCase(new LoRaMeshTestCase3_2, TestCase::QUICK);
+    AddTestCase(new LoRaMeshTestCase3_3, TestCase::QUICK);
+    AddTestCase(new LoRaMeshTestCase3_4, TestCase::EXTENSIVE);
+    AddTestCase(new LoRaMeshTestCase3_5, TestCase::EXTENSIVE);
+    AddTestCase(new LoRaMeshTestCase3_6, TestCase::QUICK);
+    AddTestCase(new LoRaMeshTestCase3_7, TestCase::EXTENSIVE);
 }
 
 // Do not forget to allocate an instance of this TestSuite
