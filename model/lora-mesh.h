@@ -17,8 +17,8 @@
  *
  * Author: Sanjay Charran <sanjaycharran@gmail.com>
  */
-#ifndef LORA_MESH_H
-#define LORA_MESH_H
+#ifndef __LORA_MESH_H__
+#define __LORA_MESH_H__
 
 /*  Header used for convenience of using module */
 
@@ -29,5 +29,5 @@
 #include "ns3/lora-channel.h"
 #include "ns3/building-penetration-loss.h"
 
-#endif /* LORA_MESH_H */
+#endif  /*   __LORA_MESH_H__ */
 

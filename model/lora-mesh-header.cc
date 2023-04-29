@@ -26,7 +26,7 @@
 namespace ns3 {
 namespace lora_mesh {
     
-LoRaMeshHeader::LoRaMeshHeader ()
+LoRaMeshHeader::LoRaMeshHeader()
 {
     /*  init to irrational value if received by another node    */
     m_src = 0;
@@ -35,80 +35,80 @@ LoRaMeshHeader::LoRaMeshHeader ()
     m_type = DIRECTED;
 }
     
-LoRaMeshHeader::~LoRaMeshHeader ()
+LoRaMeshHeader::~LoRaMeshHeader()
 {
 }
  
 TypeId
-LoRaMeshHeader::GetTypeId (void)
+LoRaMeshHeader::GetTypeId(void)
 {
-    static TypeId tid = TypeId ("ns3::LoRaMeshHeader")
-        .SetParent<Header> ()
-        .SetGroupName ("lora_mesh");
+    static TypeId tid = TypeId("ns3::LoRaMeshHeader")
+        .SetParent<Header>()
+        .SetGroupName("lora_mesh");
         
     return tid;
 }
 
 TypeId
-LoRaMeshHeader::GetInstanceTypeId (void) const
+LoRaMeshHeader::GetInstanceTypeId(void) const
 {
     return GetTypeId();
 }
 
 void
-LoRaMeshHeader::SetSrc (uint32_t src)
+LoRaMeshHeader::SetSrc(uint32_t src)
 {
     m_src = src;
     return;
 }
 
 uint32_t
-LoRaMeshHeader::GetSrc (void) const
+LoRaMeshHeader::GetSrc(void) const
 {
     return m_src;
 }
  
 void
-LoRaMeshHeader::SetDest (uint32_t dest)
+LoRaMeshHeader::SetDest(uint32_t dest)
 {
     m_dest = dest;
     return;
 }
 
 uint32_t
-LoRaMeshHeader::GetDest (void) const
+LoRaMeshHeader::GetDest(void) const
 {
     return m_dest;
 }
  
 void 
-LoRaMeshHeader::SetType (MsgType type)
+LoRaMeshHeader::SetType(MsgType type)
 {
     m_type = type;
     return;
 }
 
 MsgType
-LoRaMeshHeader::GetType (void) const
+LoRaMeshHeader::GetType(void) const
 {
     return m_type;
 }
 
 void
-LoRaMeshHeader::SetFwd (uint32_t fwd)
+LoRaMeshHeader::SetFwd(uint32_t fwd)
 {
     m_fwd = fwd;
     return;
 }
 
 uint32_t
-LoRaMeshHeader::GetFwd (void) const
+LoRaMeshHeader::GetFwd(void) const
 {
     return m_fwd;
 }
 
 uint32_t
-LoRaMeshHeader::GetSerializedSize (void) const
+LoRaMeshHeader::GetSerializedSize(void) const
 {
     /*  4(src) + 4(dest) + 4(fwd) + 1(type)  = 13 */
     /*  type is 1 byte since only 4 options in enum  */
@@ -116,29 +116,29 @@ LoRaMeshHeader::GetSerializedSize (void) const
 }
 
 void
-LoRaMeshHeader::Serialize (Buffer::Iterator start) const
+LoRaMeshHeader::Serialize(Buffer::Iterator start) const
 {
-    start.WriteU8 ((uint8_t)m_type);
-    start.WriteU32 (m_src);
-    start.WriteU32 (m_dest);
-    start.WriteU32 (m_fwd);
+    start.WriteU8((uint8_t)m_type);
+    start.WriteU32(m_src);
+    start.WriteU32(m_dest);
+    start.WriteU32(m_fwd);
     
     return;
 }
 
 uint32_t
-LoRaMeshHeader::Deserialize (Buffer::Iterator start)
+LoRaMeshHeader::Deserialize(Buffer::Iterator start)
 {
     m_type = (MsgType)(start.ReadU8());
-    m_src = start.ReadU32 ();
-    m_dest = start.ReadU32 ();
-    m_fwd = start.ReadU32 ();
+    m_src = start.ReadU32();
+    m_dest = start.ReadU32();
+    m_fwd = start.ReadU32();
     
-    return GetSerializedSize ();
+    return GetSerializedSize();
 }
 
 void 
-LoRaMeshHeader::Print (std::ostream &os) const
+LoRaMeshHeader::Print(std::ostream &os) const
 {
     os << "Message Type: " << ((m_type == ROUTING_UPDATE)?"ROUTING_UPDATE":(m_type == DIRECTED?"DIRECTED":"FEEDBACK")) << std::endl;
     os << "Source ID: " << m_src << std::endl;

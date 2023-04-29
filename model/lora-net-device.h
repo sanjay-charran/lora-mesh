@@ -48,31 +48,31 @@ class LoRaMAC;
 class LoRaNetDevice : public NetDevice
 {
 public:
-    LoRaNetDevice ();
-    ~LoRaNetDevice ();
+    LoRaNetDevice();
+    ~LoRaNetDevice();
     
-    static TypeId GetTypeId (void);
+    static TypeId GetTypeId(void);
     
     /**
      *  Attaches LoRaMAC to this LoRaNetDevice
      * 
      *  \param  mac pointer to the LoRaMAC to be attached
      */
-    void SetMAC (Ptr<LoRaMAC> mac);
+    void SetMAC(Ptr<LoRaMAC> mac);
     
     /**
      *  Gets the attached LoRaMAC
      * 
      *  \return pointer to the attached LoRaMAC
      */
-    Ptr<LoRaMAC> GetMAC (void) const;
+    Ptr<LoRaMAC> GetMAC(void) const;
     
     /**
      *  Attaches LoRaPHY to this LoRaNetDevice
      * 
      *  \param  phy pointer to the LoRaPHY to be attached
      */
-    void SetPHY (Ptr<LoRaPHY> phy);
+    void SetPHY(Ptr<LoRaPHY> phy);
     
     /**
      *  Gets the attached LoRaPHY
@@ -81,42 +81,40 @@ public:
      */
     Ptr<LoRaPHY> GetPHY(void) const;
     
-    void SendTo (Ptr<Packet> packet, uint32_t dest);
-    void Receive (Ptr<Packet> packet);
+    void SendTo(Ptr<Packet> packet, uint32_t dest);
+    void Receive(Ptr<Packet> packet);
     
     /*  virtual funcs from NetDevice    */
-    void SetNode (Ptr<Node> node);
-    Ptr<Node> GetNode (void) const;
-    void SetAddress (Address address);
-    Address GetAddress (void) const;
-    void SetIfIndex (const uint32_t index);
-    uint32_t GetIfIndex (void) const;
-    bool SetMtu (const uint16_t mtu);
-    uint16_t GetMtu (void) const;
-    bool IsBridge (void) const;
-    bool IsBroadcast (void) const;
-    bool IsLinkUp (void) const;
-    bool IsMulticast (void) const;
-    bool IsPointToPoint (void) const;
-    Ptr<Channel> GetChannel (void) const;
-    Address GetMulticast (Ipv4Address multicastGroup) const;
-    Address GetBroadcast (void) const;
-    Address GetMulticast (Ipv6Address addr) const;
-    bool NeedsArp (void) const;
-    bool Send (Ptr<Packet> packet, const Address &dest, uint16_t protocolNumber);
-    bool SendFrom (Ptr<Packet> packet, const Address &source, const Address &dest, uint16_t protocolNumber);
-    void SetPromiscReceiveCallback (PromiscReceiveCallback cb);
-    void SetReceiveCallback (ReceiveCallback cb);
-    bool SupportsSendFrom (void) const;
-    void AddLinkChangeCallback (Callback<void> callback);
+    void SetNode(Ptr<Node> node);
+    Ptr<Node> GetNode(void) const;
+    void SetAddress(Address address);
+    Address GetAddress(void) const;
+    void SetIfIndex(const uint32_t index);
+    uint32_t GetIfIndex(void) const;
+    bool SetMtu(const uint16_t mtu);
+    uint16_t GetMtu(void) const;
+    bool IsBridge(void) const;
+    bool IsBroadcast(void) const;
+    bool IsLinkUp(void) const;
+    bool IsMulticast(void) const;
+    bool IsPointToPoint(void) const;
+    Ptr<Channel> GetChannel(void) const;
+    Address GetMulticast(Ipv4Address multicastGroup) const;
+    Address GetBroadcast(void) const;
+    Address GetMulticast(Ipv6Address addr) const;
+    bool NeedsArp(void) const;
+    bool Send(Ptr<Packet> packet, const Address &dest, uint16_t protocolNumber);
+    bool SendFrom(Ptr<Packet> packet, const Address &source, const Address &dest, uint16_t protocolNumber);
+    void SetPromiscReceiveCallback(PromiscReceiveCallback cb);
+    void SetReceiveCallback(ReceiveCallback cb);
+    bool SupportsSendFrom(void) const;
+    void AddLinkChangeCallback(Callback<void> callback);
     
 private:
     
-    Ptr<Node> m_node;
-    Ptr<LoRaPHY> m_phy;
-    Ptr<LoRaMAC> m_mac;
-    
-    //NetDevice::ReceiveCallback m_receiveCallback;
+    Ptr<Node>       m_node;
+    Ptr<LoRaPHY>    m_phy;
+    Ptr<LoRaMAC>    m_mac;
 };
 
 }

@@ -36,17 +36,17 @@ class LoRaMeshFeedbackHeader : public Header
 {
 public:
     
-    LoRaMeshFeedbackHeader ();
-    ~LoRaMeshFeedbackHeader ();
+    LoRaMeshFeedbackHeader();
+    ~LoRaMeshFeedbackHeader();
     
-    static TypeId GetTypeId (void);
-    TypeId GetInstanceTypeId (void) const;
+    static TypeId GetTypeId(void);
+    TypeId GetInstanceTypeId(void) const;
     
     /*  virtual funcs   */
-    uint32_t GetSerializedSize (void) const;
-    uint32_t Deserialize (Buffer::Iterator start);
-    void Serialize (Buffer::Iterator start) const;
-    void Print (std::ostream &os) const;
+    uint32_t GetSerializedSize(void) const;
+    uint32_t Deserialize(Buffer::Iterator start);
+    void Serialize(Buffer::Iterator start) const;
+    void Print(std::ostream &os) const;
     
     /**
      * Sets the packet ID

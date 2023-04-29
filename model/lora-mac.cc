@@ -25,27 +25,27 @@
 namespace ns3 {
 namespace lora_mesh {
  
-NS_LOG_COMPONENT_DEFINE ("LoRaMAC");
+NS_LOG_COMPONENT_DEFINE("LoRaMAC");
     
 TypeId 
-LoRaMAC::GetTypeId (void)
+LoRaMAC::GetTypeId(void)
 {
-    static TypeId tid = TypeId ("ns3::LoRaMAC")
-        .SetParent<Object> ()
-        .SetGroupName ("lora_mesh")
-        .AddTraceSource ("RxPacketSniffer",
+    static TypeId tid = TypeId("ns3::LoRaMAC")
+        .SetParent<Object>()
+        .SetGroupName("lora_mesh")
+        .AddTraceSource("RxPacketSniffer",
                         "Trace Source which simulates sniffer for received data packets",
-                        MakeTraceSourceAccessor (&LoRaMAC::m_rxPacketSniffer),
+                        MakeTraceSourceAccessor(&LoRaMAC::m_rxPacketSniffer),
                         "ns3::LoRaMAC::RxPacketSnifferTracedCallback")
-        .AddTraceSource ("TxPacketSniffer",
+        .AddTraceSource("TxPacketSniffer",
                         "Trace Source which simulates sniffer for transmitted data packets",
-                        MakeTraceSourceAccessor (&LoRaMAC::m_txPacketSniffer),
+                        MakeTraceSourceAccessor(&LoRaMAC::m_txPacketSniffer),
                         "ns3::LoRaMAC::TxPacketSnifferTracedCallback");
         
     return tid;
 }
 
-LoRaMAC::LoRaMAC ()
+LoRaMAC::LoRaMAC()
 {
     m_last_counter = 0;
     m_minDelay = 0;
@@ -54,12 +54,12 @@ LoRaMAC::LoRaMAC ()
     m_routingUpdateCounter = 0;
 }
 
-LoRaMAC::~LoRaMAC ()
+LoRaMAC::~LoRaMAC()
 {
 }
 
 void
-LoRaMAC::SetPHY (Ptr<LoRaPHY> phy)
+LoRaMAC::SetPHY(Ptr<LoRaPHY> phy)
 {
     LoRaMeshHeader header;
     LoRaMeshRoutingHeader rheader;
@@ -72,7 +72,7 @@ LoRaMAC::SetPHY (Ptr<LoRaPHY> phy)
         double temp = x->GetValue(m_minDelay, m_maxDelay);
         Time dur = Seconds(temp);
         
-        Simulator::Schedule (dur, &LoRaMAC::PacketTimeslot, this);
+        Simulator::Schedule(dur, &LoRaMAC::PacketTimeslot, this);
     }
     else
     {
@@ -119,7 +119,7 @@ LoRaMAC::GetDevice(void) const
 }
 
 uint32_t 
-LoRaMAC::GetId (void) const
+LoRaMAC::GetId(void) const
 {
     if (m_device)
     {
@@ -173,7 +173,7 @@ LoRaMAC::GetRoutingUpdateFrequency(void) const
 }
 
 void 
-LoRaMAC::AddTableEntry (RoutingTableEntry entry)
+LoRaMAC::AddTableEntry(RoutingTableEntry entry)
 {
     NS_LOG_FUNCTION (this << entry.s << entry.r);
     
@@ -209,9 +209,9 @@ LoRaMAC::AddTableEntry (RoutingTableEntry entry)
 }
 
 void 
-LoRaMAC::RemoveTableEntry (uint32_t s, uint32_t r)
+LoRaMAC::RemoveTableEntry(uint32_t s, uint32_t r)
 {
-    NS_LOG_FUNCTION (this << s << r);
+    NS_LOG_FUNCTION(this << s << r);
     
     std::deque<RoutingTableEntry>::iterator it = m_table.begin();
     
@@ -236,16 +236,16 @@ LoRaMAC::RemoveTableEntry (uint32_t s, uint32_t r)
 }
 
 void 
-LoRaMAC::UpdateTableEntry (RoutingTableEntry entry)
+LoRaMAC::UpdateTableEntry(RoutingTableEntry entry)
 {
-    NS_LOG_FUNCTION (this << entry.s << entry.r);
+    NS_LOG_FUNCTION(this << entry.s << entry.r);
     
     std::deque<RoutingTableEntry>::iterator it = m_table.begin();
     
     if (m_table.empty())
     {
         /*  update by adding    */
-        AddTableEntry (entry);
+        AddTableEntry(entry);
         return;
     }
     
@@ -261,12 +261,12 @@ LoRaMAC::UpdateTableEntry (RoutingTableEntry entry)
     }
     
     /*  could not find -- add in entry  */
-    AddTableEntry (entry);
+    AddTableEntry(entry);
     return;
 }
 
 bool
-LoRaMAC::EntryExists (RoutingTableEntry entry)
+LoRaMAC::EntryExists(RoutingTableEntry entry)
 {
     std::deque<RoutingTableEntry>::iterator it = m_table.begin();
     
@@ -389,29 +389,23 @@ LoRaMAC::Receive (Ptr<Packet> packet)
             
             m_rxPacketSniffer(packet);
             
-            //packet->AddHeader(header);
-            
             if (header.GetDest() == GetId())
             {
-                feedback = MakeFeedback (packet, header.GetFwd());
-                AddPacketToQueue (feedback, true);
-                //packet->RemoveHeader(header);
-                //m_device->Receive(packet);
-                //NS_LOG_INFO("Made Feedback");
+                feedback = MakeFeedback(packet, header.GetFwd());
+                AddPacketToQueue(feedback, true);
                 break;
             }
             
             /*  forward if not recipient    */
             if (CalcETX(GetId(), header.GetDest()) < CalcETX(header.GetFwd(), header.GetDest()))
             {
-                feedback = MakeFeedback (packet, header.GetFwd());
-                AddPacketToQueue (feedback, true);
+                feedback = MakeFeedback(packet, header.GetFwd());
+                AddPacketToQueue(feedback, true);
                 new_packet = packet->Copy();
                 new_packet->RemoveHeader(header);            
                 header.SetFwd(GetId());
                 new_packet->AddHeader(header);
-                AddPacketToQueue (new_packet, false);
-                //NS_LOG_INFO("Made Feedback");
+                AddPacketToQueue(new_packet, false);
             }
             
             break;
@@ -458,22 +452,22 @@ LoRaMAC::Receive (Ptr<Packet> packet)
 }
 
 void 
-LoRaMAC::Send (Ptr<Packet> packet)
+LoRaMAC::Send(Ptr<Packet> packet)
 {
-    NS_LOG_FUNCTION (this << packet);
+    NS_LOG_FUNCTION(this << packet);
     
     if (m_phy)
     {
-        AddPacketToQueue (packet, false);
+        AddPacketToQueue(packet, false);
     }
     
     return;
 }
 
 void 
-LoRaMAC::SendTo (Ptr<Packet> packet, uint32_t dest)
+LoRaMAC::SendTo(Ptr<Packet> packet, uint32_t dest)
 {
-    NS_LOG_FUNCTION (this << packet << dest);
+    NS_LOG_FUNCTION(this << packet << dest);
     
     /*  send from attached node to dest node ID */
     LoRaMeshHeader header;
@@ -486,16 +480,16 @@ LoRaMAC::SendTo (Ptr<Packet> packet, uint32_t dest)
         header.SetFwd(GetId());
         
         packet->AddHeader(header);
-        AddPacketToQueue (packet, false);
+        AddPacketToQueue(packet, false);
     }
     
     return;
 }
 
 void
-LoRaMAC::AddPacketToQueue (Ptr<Packet> packet, bool isFeedback)
+LoRaMAC::AddPacketToQueue(Ptr<Packet> packet, bool isFeedback)
 {
-    NS_LOG_FUNCTION (this << packet << isFeedback);
+    NS_LOG_FUNCTION(this << packet << isFeedback);
     
     std::deque<Ptr<Packet>>::iterator it;
     LoRaMeshHeader header;
@@ -524,9 +518,9 @@ LoRaMAC::AddPacketToQueue (Ptr<Packet> packet, bool isFeedback)
 }
 
 void
-LoRaMAC::RemovePacketFromQueue (uint32_t pid)
+LoRaMAC::RemovePacketFromQueue(uint32_t pid)
 {
-    NS_LOG_FUNCTION (this << pid);
+    NS_LOG_FUNCTION(this << pid);
     
     std::deque<Ptr<Packet>>::iterator it;
     
@@ -546,7 +540,7 @@ LoRaMAC::RemovePacketFromQueue (uint32_t pid)
 bool
 LoRaMAC::isPacketInQueue(uint32_t pid)
 {
-    NS_LOG_FUNCTION (this << pid);
+    NS_LOG_FUNCTION(this << pid);
     
     std::deque<Ptr<Packet>>::iterator it;
     
@@ -562,13 +556,13 @@ LoRaMAC::isPacketInQueue(uint32_t pid)
 }
 
 Ptr<Packet> 
-LoRaMAC::GetNextPacketFromQueue (void)
+LoRaMAC::GetNextPacketFromQueue(void)
 {
     return m_packet_queue.front();
 }
 
 void 
-LoRaMAC::AddToLastPacketList (Ptr<Packet> packet)
+LoRaMAC::AddToLastPacketList(Ptr<Packet> packet)
 {
     m_last_packets.push_back(packet->GetUid());
     
@@ -581,7 +575,7 @@ LoRaMAC::AddToLastPacketList (Ptr<Packet> packet)
 }
 
 float
-LoRaMAC::CalcETX (uint32_t src, uint32_t dest)
+LoRaMAC::CalcETX(uint32_t src, uint32_t dest)
 {
     std::vector<RoutingTableEntry> checked_nodes;
     std::deque<RoutingTableEntry>::iterator it, temp;
@@ -640,7 +634,7 @@ LoRaMAC::CalcETX (uint32_t src, uint32_t dest)
 }
 
 Ptr<Packet>
-LoRaMAC::MakeFeedback (Ptr<Packet> packet, uint32_t fwd)
+LoRaMAC::MakeFeedback(Ptr<Packet> packet, uint32_t fwd)
 {
     Ptr<Packet> feedback = Create<Packet>(50);
     LoRaMeshFeedbackHeader fheader;
@@ -659,9 +653,9 @@ LoRaMAC::MakeFeedback (Ptr<Packet> packet, uint32_t fwd)
 }
 
 void
-LoRaMAC::PacketTimeslot (void)
+LoRaMAC::PacketTimeslot(void)
 {
-    NS_LOG_FUNCTION (this);
+    NS_LOG_FUNCTION(this);
     
     Ptr<Packet> next;
     LoRaMeshHeader header;
@@ -729,9 +723,9 @@ LoRaMAC::PacketTimeslot (void)
 }
 
 void
-LoRaMAC::RoutingTimeslot (void)
+LoRaMAC::RoutingTimeslot(void)
 {
-    NS_LOG_FUNCTION (this);
+    NS_LOG_FUNCTION(this);
     
     m_routingUpdateCounter++;
     

@@ -29,79 +29,79 @@ LoRaMeshRoutingHeader::LoRaMeshRoutingHeader()
     m_last = 0;
 }
  
-LoRaMeshRoutingHeader::~LoRaMeshRoutingHeader ()
+LoRaMeshRoutingHeader::~LoRaMeshRoutingHeader()
 {
 }
  
 TypeId
-LoRaMeshRoutingHeader::GetTypeId (void)
+LoRaMeshRoutingHeader::GetTypeId(void)
 {
-    static TypeId tid = TypeId ("ns3::LoRaMeshRoutingHeader")
-        .SetParent<Header> ()
-        .SetGroupName ("lora_mesh");
+    static TypeId tid = TypeId("ns3::LoRaMeshRoutingHeader")
+        .SetParent<Header>()
+        .SetGroupName("lora_mesh");
         
     return tid;;
 }
 
 TypeId
-LoRaMeshRoutingHeader::GetInstanceTypeId (void) const
+LoRaMeshRoutingHeader::GetInstanceTypeId(void) const
 {
     return GetTypeId();
 }
 
 void
-LoRaMeshRoutingHeader::SetETX (float etx)
+LoRaMeshRoutingHeader::SetETX(float etx)
 {
     m_etx = etx;
     return;
 }
 
 float
-LoRaMeshRoutingHeader::GetETX (void) const
+LoRaMeshRoutingHeader::GetETX(void) const
 {
     return m_etx;
 }
 
 void
-LoRaMeshRoutingHeader::SetLast (uint8_t last)
+LoRaMeshRoutingHeader::SetLast(uint8_t last)
 {
     m_last = last;
     return;
 }
 
 uint8_t
-LoRaMeshRoutingHeader::GetLast (void) const
+LoRaMeshRoutingHeader::GetLast(void) const
 {
     return m_last;
 }
 
 uint32_t
-LoRaMeshRoutingHeader::GetSerializedSize (void) const
+LoRaMeshRoutingHeader::GetSerializedSize(void) const
 {
     /*  should be 4(etx) + 1(last) = 5 */
     return (uint32_t)(sizeof(float) + 1);
 }
 
 void
-LoRaMeshRoutingHeader::Serialize (Buffer::Iterator start) const
+LoRaMeshRoutingHeader::Serialize(Buffer::Iterator start) const
 {
-    start.Write ((uint8_t *)&m_etx, sizeof(float));
-    start.WriteU8 (m_last);
+    start.Write((uint8_t *)&m_etx, sizeof(float));
+    start.WriteU8(m_last);
     
     return;
 }
 
 uint32_t
-LoRaMeshRoutingHeader::Deserialize (Buffer::Iterator start)
+LoRaMeshRoutingHeader::Deserialize(Buffer::Iterator start)
 {
-    start.Read ((uint8_t *)&m_etx, sizeof(float));
-    m_last = start.ReadU8 ();
+    start.Read((uint8_t *)&m_etx, sizeof(float));
+    m_last = start.ReadU8();
     
-    return GetSerializedSize ();
+    return GetSerializedSize();
 }
 
 void
-LoRaMeshRoutingHeader::Print (std::ostream &os) const
+LoRaMeshRoutingHeader::Print(std::ostream &os) const
 {
     os << "ETX: " << m_etx << std::endl;
     os << "Last Counter: " << m_last << std::endl;

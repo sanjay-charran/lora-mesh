@@ -79,24 +79,24 @@ class LoRaMAC : public Object
 {
 public:
     
-    LoRaMAC ();
-    ~LoRaMAC ();
+    LoRaMAC();
+    ~LoRaMAC();
     
-    static TypeId GetTypeId (void);
+    static TypeId GetTypeId(void);
     
     /**
      *  Sets the LoRaPHY attached to this LoRaMAC
      * 
      *  \param  phy pionter to the LoRaPHY to be attached
      */
-    void SetPHY (Ptr<LoRaPHY> phy);
+    void SetPHY(Ptr<LoRaPHY> phy);
     
     /**
      *  Gets the attached LoRaPHY to this LoRaMAC
      * 
      *  \return pointer to the attached LoRaPHY
      */
-    Ptr<LoRaPHY> GetPHY (void) const;
+    Ptr<LoRaPHY> GetPHY(void) const;
     
     /**
      *  Sets the attached LoRaNetDevice to this LoRaMAC and adds itself as its first routing
@@ -104,7 +104,7 @@ public:
      * 
      *  \param  device  pointer to the LoRaNetDevice to be attached
      */
-    void SetDevice (Ptr<LoRaNetDevice> device);
+    void SetDevice(Ptr<LoRaNetDevice> device);
     
     /**
      *  Gets the attached LoRaNetDevice to this LoRaMAC
@@ -119,14 +119,14 @@ public:
      * 
      *  \return the Node ID of the Node attached to the LoRaNetDevice attached to this LoRaMAC
      */
-    uint32_t GetId (void) const;
+    uint32_t GetId(void) const;
     
     /**
      *  Adds a routing table entry to this LoRaMAC's routing table
      * 
      *  \param  entry   the routing table entry to be added
      */
-    void AddTableEntry (RoutingTableEntry entry);
+    void AddTableEntry(RoutingTableEntry entry);
     
     /**
      *  Removes a routing table entry from this LoRaMAC's routing table
@@ -134,14 +134,14 @@ public:
      *  \param  s   the sender/source Node ID in the routing entry to be removed
      *  \param  r   the receiver/destination Node ID in the routing entry to be removed
      */
-    void RemoveTableEntry (uint32_t s, uint32_t r);
+    void RemoveTableEntry(uint32_t s, uint32_t r);
     
     /**
      *  Updates the information of an already existing entry in this LoRaMAC's routing table
      * 
      *  \param  entry the entry with updated values to be used
      */
-    void UpdateTableEntry (RoutingTableEntry entry);
+    void UpdateTableEntry(RoutingTableEntry entry);
     
     /**
      *  Checks if there is an entry in this LoRaMAC's routing table with matching source and
@@ -151,7 +151,7 @@ public:
      *
      *  \return true if the entry is found in the routing table, false otherwise 
      */
-    bool EntryExists (RoutingTableEntry entry);
+    bool EntryExists(RoutingTableEntry entry);
     
     /**
      *  Checks if an entry is an "error" entry (source and destination Node IDs are equal 
@@ -161,7 +161,7 @@ public:
      * 
      *  \return true if the entry is an "error" entry, false otherwise
      */
-    bool IsErrEntry (RoutingTableEntry entry);
+    bool IsErrEntry(RoutingTableEntry entry);
     
     /**
      *  Calculates the ETX for sending a packet from a source node to a destination node based
@@ -172,7 +172,7 @@ public:
      * 
      *  \return the computed ETX for shortest known path
      */
-    float CalcETX (uint32_t src, uint32_t dest);
+    float CalcETX(uint32_t src, uint32_t dest);
   
     /**
      *  Searches for a routing table entry in this LoRaMAC's routing table with a specific source 
@@ -183,7 +183,7 @@ public:
      * 
      *  \return the entry being searched for if it exists, otherwise an "error" entry
      */
-    RoutingTableEntry TableLookup (uint32_t s, uint32_t r);
+    RoutingTableEntry TableLookup(uint32_t s, uint32_t r);
     
     /**
      *  Handles the reception of packets, based on the type of packet and if this LoRaMAC is supposed
@@ -191,7 +191,7 @@ public:
      * 
      *  \param  packet  pointer to the received packet
      */
-    void Receive (Ptr<Packet> packet);
+    void Receive(Ptr<Packet> packet);
     
     /**
      *  Adds the necessary packet header information and adds a packet to the packet queue for sending
@@ -199,14 +199,14 @@ public:
      *  \param  packet  pointer to the packet to be sent
      *  \param  dest    the Node ID of the desination of the packet
      */
-    void SendTo (Ptr<Packet> packet, uint32_t dest);
+    void SendTo(Ptr<Packet> packet, uint32_t dest);
     
     /**
      *  Adds a packet to the packet queue for sending
      * 
      *  \param  packet  pointer to the packet to be sent
      */
-    void Send (Ptr<Packet> packet);
+    void Send(Ptr<Packet> packet);
     
     /**
      *  Generates a feedback packet for a given packet
@@ -216,18 +216,18 @@ public:
      *
      *  \return pointer to the generated feedback packet
      */
-    Ptr<Packet> MakeFeedback (Ptr<Packet> packet, uint32_t fwd);
+    Ptr<Packet> MakeFeedback(Ptr<Packet> packet, uint32_t fwd);
     
     /**
      *  Sends the next packet in the packet queue (to LoRaPHY), if not empty, and schedules the 
      *  next routing timeslot and the next instance of this function after a randomised delay.
      */
-    void PacketTimeslot (void);
+    void PacketTimeslot(void);
     
     /**
      *  Creates a new routing update packet and sends it (to LoRaPHY).
      */
-    void RoutingTimeslot (void);
+    void RoutingTimeslot(void);
     
     /**
      *  Sets the minimum delay for the randomisation of the delay between packet timeslots
@@ -282,14 +282,14 @@ private:
      *  \param  packet      pointer to the packet to be added to the packet queue
      *  \param  isFeedback  true if the packet is a feedback packet, false otherwise
      */
-    void AddPacketToQueue (Ptr<Packet> packet, bool isFeedback);
+    void AddPacketToQueue(Ptr<Packet> packet, bool isFeedback);
     
     /**
      *  Remove a packet from the packet queue for sending
      * 
      *  \param  pid the packet ID of the packet to be removed
      */
-    void RemovePacketFromQueue (uint32_t pid);
+    void RemovePacketFromQueue(uint32_t pid);
     
     /**
      *  Checks is a packet is in the packet queue
@@ -305,17 +305,17 @@ private:
      * 
      *  \return pointer to the next packet in the packet queue
      */
-    Ptr<Packet> GetNextPacketFromQueue (void);
+    Ptr<Packet> GetNextPacketFromQueue(void);
     
     /**
      *  Adds a packet to the packet list of recently sent packets
      * 
      *  \param  packet a pointer to the packet to add to the packet list
      */
-    void AddToLastPacketList (Ptr<Packet> packet);
+    void AddToLastPacketList(Ptr<Packet> packet);
     
-    Ptr<LoRaPHY> m_phy;
-    Ptr<LoRaNetDevice> m_device;
+    Ptr<LoRaPHY>        m_phy;
+    Ptr<LoRaNetDevice>  m_device;
     
     /*  routing table containing info the end device is aware of    */
     std::deque<RoutingTableEntry> m_table;
@@ -342,4 +342,5 @@ private:
 
 }
 }
+
 #endif  /*  __LORA_MAC_H__  */
