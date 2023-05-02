@@ -1,5 +1,5 @@
-Example Module Documentation
-----------------------------
+LoRa Mesh Module
+----------------
 
 .. include:: replace.txt
 .. highlight:: cpp
@@ -9,29 +9,34 @@ Example Module Documentation
    ************* Section (#.#)
    ============= Subsection (#.#.#)
    ############# Paragraph (no number)
+   
+This module allows for the simulation of mesh topologies making use of LoRa
+modulation. It makes use of a custom mesh protocol which uses ETX (Estimated 
+Transmission Count) to route packets.
 
-This is a suggested outline for adding new module documentation to |ns3|.
-See ``src/click/doc/click.rst`` for an example.
+The Physical (PHY) layer of the module was ported over from the ns-3 LoRaWAN 
+module (https://github.com/signetlabdei/lorawan or 
+https://apps.nsnam.org/app/lorawan/).
+Validation
+**********
 
-The introductory paragraph is for describing what this code is trying to
-model.
-
-For consistency (italicized formatting), please use |ns3| to refer to
-ns-3 in the documentation (and likewise, |ns2| for ns-2).  These macros
-are defined in the file ``replace.txt``.
-
-Model Description
-*****************
-
+Describe how the model has been tested/validated.  What tests run in the
+test suite?  How much API and code is covered by the tests?  Again, 
+references to outside published work may help here.
+Module Design
+*************
+.. general class structure
 The source code for the new module lives in the directory ``src/lora-mesh``.
 
 Add here a basic description of what is being modeled.
 
-Design
-======
+PHY Layer Design
+================
 
-Briefly describe the software design of the model and how it fits into 
-the existing ns-3 architecture. 
+
+MAC Layer Design (Mesh Protocol)
+================================
+
 
 Scope and Limitations
 =====================
@@ -52,8 +57,8 @@ This section is principally concerned with the usage of your model, using
 the public API.  Focus first on most common usage patterns, then go
 into more advanced topics.
 
-Building New Module
-===================
+Building LoRa Mesh Module
+=========================
 
 Include this subsection only if there are special build instructions or
 platform limitations.
@@ -85,14 +90,10 @@ Examples
 
 What examples using this new code are available?  Describe them here.
 
+Tests
+=====
+
 Troubleshooting
 ===============
 
 Add any tips for avoiding pitfalls, etc.
-
-Validation
-**********
-
-Describe how the model has been tested/validated.  What tests run in the
-test suite?  How much API and code is covered by the tests?  Again, 
-references to outside published work may help here.
