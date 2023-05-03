@@ -18,9 +18,6 @@ The Physical (PHY) layer of the module was taken from the ns-3 LoRaWAN
 module (https://github.com/signetlabdei/lorawan or 
 https://apps.nsnam.org/app/lorawan/).
 
-LoRa Overview
-*************
-
 Module Design
 *************
 
