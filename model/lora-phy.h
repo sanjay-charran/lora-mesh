@@ -33,6 +33,7 @@
 #include "ns3/lora-channel.h"
 #include "ns3/lora-net-device.h"
 #include "ns3/lora-mac.h"
+#include "ns3/lora-interference-helper.h"
 
 #define MINIMUM_LORA_SPREADING_FACTOR   6
 #define MAXIMUM_LORA_SPREADING_FACTOR   12
@@ -328,7 +329,7 @@ public:
      * 
      *  \param  packet  pointer to the packet being received
      */
-    void EndReceive(Ptr<Packet> packet);
+    void EndReceive(Ptr<Packet> packet, Ptr<LoraInterferenceHelper::Event> event);
     
     /**
      *  Computes the on-air time for a packet based on the tx paramters of this LoRaPHY
@@ -357,6 +358,8 @@ private:
     
     Ptr<MobilityModel> m_mobility;
     
+    LoraInterferenceHelper m_interference;
+    
     /*  transmit parameters */
     double      m_tx_power_dBm;
     double      m_tx_freq_MHz;
@@ -372,9 +375,6 @@ private:
     double  m_rx_sens_dBm;
     double  m_rx_freq_MHz;
     uint8_t m_rx_sf;
-
-    bool    m_packet_collision;
-    EventId m_last_receive_event;
     
     TracedCallback<Ptr<const Packet>, uint32_t> m_startSending;
     TracedCallback<Ptr<const Packet>>           m_phyRxBeginTrace;

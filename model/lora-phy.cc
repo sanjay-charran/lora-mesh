@@ -83,7 +83,6 @@ LoRaPHY::GetTypeId(void)
     
 LoRaPHY::LoRaPHY()
 {
-    m_packet_collision = false;
     m_state = STANDBY;
     
     m_tx_headerDisabled = false;
@@ -407,6 +406,10 @@ LoRaPHY::StartReceive(Ptr<Packet> packet, Time duration, uint8_t sf, double rx_p
 {
     NS_LOG_FUNCTION(this << packet);
     
+    Ptr<LoraInterferenceHelper::Event> event;
+    
+    event = m_interference.Add(duration, rx_power_dBm, sf, packet, freq_MHz);
+    
     bool canLockOn = true;
     
     if (m_state != SLEEP && m_state != TX)
@@ -428,21 +431,9 @@ LoRaPHY::StartReceive(Ptr<Packet> packet, Time duration, uint8_t sf, double rx_p
         
         if (canLockOn)
         {
-            if (m_state == RX)
-            {
-                m_packet_collision = true;
-                
-                NS_LOG_INFO("Packet Collision for Packet #" << packet->GetUid());
-                
-                if (Simulator::GetDelayLeft(m_last_receive_event).GetSeconds() < duration)
-                {
-                    Simulator::Cancel(m_last_receive_event);
-                }
-            }
-            
             SwitchStateRX();
             
-            m_last_receive_event = Simulator::Schedule(duration, &LoRaPHY::EndReceive, this, packet);
+            Simulator::Schedule(duration, &LoRaPHY::EndReceive, this, packet, event);
             
             //m_phyRxBeginTrace (packet);
         }
@@ -452,21 +443,25 @@ LoRaPHY::StartReceive(Ptr<Packet> packet, Time duration, uint8_t sf, double rx_p
 }
 
 void
-LoRaPHY::EndReceive (Ptr<Packet> packet)
+LoRaPHY::EndReceive (Ptr<Packet> packet, Ptr<LoraInterferenceHelper::Event> event)
 {
     NS_LOG_FUNCTION (this << packet);
     
     SwitchStateSTANDBY ();
     
+    bool packetDestroyed = m_interference.IsDestroyedByInterference(event);
+    
     //m_phyRxEndTrace (packet);
     
-    if (m_mac && !m_packet_collision)
+    if (packetDestroyed)
+    {
+        NS_LOG_INFO("Packet collision for Packet #" << packet->GetUid());
+    }
+    else
     {
         m_rxSniffer(packet);
         m_mac->Receive(packet);
     }
-    
-    m_packet_collision = false;
     
     return;
 }

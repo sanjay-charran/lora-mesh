@@ -11,6 +11,7 @@ def build(bld):
     module.source = [
         'model/building-penetration-loss.cc',
         'model/lora-channel.cc',
+        'model/lora-interference-helper.cc',
         'model/lora-mac.cc',
         'model/lora-mesh-feedback-header.cc',
         'model/lora-mesh-header.cc',
@@ -35,6 +36,7 @@ def build(bld):
         'model/building-penetration-loss.h',
         'model/lora-mesh.h',
         'model/lora-channel.h',
+        'model/lora-interference-helper.h',
         'model/lora-mac.h',
         'model/lora-mesh-feedback-header.h',
         'model/lora-mesh-header.h',
