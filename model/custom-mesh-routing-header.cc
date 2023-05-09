@@ -18,7 +18,7 @@
  * Author: Sanjay Charran <sanjaycharran@gmail.com>
  */
 
-#include "ns3/lora-mesh-routing-header.h"
+#include "ns3/custom-mesh-routing-header.h"
 
 namespace ns3 {
 namespace lora_mesh {

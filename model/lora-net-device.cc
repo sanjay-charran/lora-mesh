@@ -69,18 +69,18 @@ LoRaNetDevice::GetPHY(void) const
     return m_phy;
 }
 
-void
-LoRaNetDevice::SendTo (Ptr<Packet> packet, uint32_t dest)
-{
-    NS_LOG_FUNCTION (this << packet << dest);
-    
-    if (m_mac != 0)
-    {
-        m_mac->SendTo(packet, dest);
-    }
-    
-    return;
-}
+// void
+// LoRaNetDevice::SendTo (Ptr<Packet> packet, uint32_t dest)
+// {
+//     NS_LOG_FUNCTION (this << packet << dest);
+//     
+//     if (m_mac != 0)
+//     {
+//         m_mac->SendTo(packet, dest);
+//     }
+//     
+//     return;
+// }
 
 void 
 LoRaNetDevice::Receive (Ptr<Packet> packet)

@@ -81,7 +81,7 @@ public:
      */
     Ptr<LoRaPHY> GetPHY(void) const;
     
-    void SendTo(Ptr<Packet> packet, uint32_t dest);
+    //void SendTo(Ptr<Packet> packet, uint32_t dest);
     void Receive(Ptr<Packet> packet);
     
     /*  virtual funcs from NetDevice    */

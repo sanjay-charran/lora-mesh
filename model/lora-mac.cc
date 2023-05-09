@@ -93,6 +93,8 @@ LoRaMAC::GetId(void) const
 void 
 LoRaMAC::Receive (Ptr<Packet> packet)
 {
+    Vector3D pos = m_phy->GetMobility()->GetPosition();
+    
     NS_LOG_INFO("(receive MAC)Node (x=" << pos.x << " y=" << pos.y << " z=" << pos.z << ") Packet #" << packet->GetUid());
     
     m_device->Receive(packet);

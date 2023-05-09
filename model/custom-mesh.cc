@@ -23,7 +23,7 @@
 #include "ns3/custom-mesh.h"
 
 namespace ns3 {
-namspace lora_mesh {
+namespace lora_mesh {
 
 NS_LOG_COMPONENT_DEFINE("CustomMesh");
 

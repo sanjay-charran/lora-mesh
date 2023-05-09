@@ -18,25 +18,25 @@
  * Author: Sanjay Charran <sanjaycharran@gmail.com>
  */
 
-#include "ns3/ascii-helper-for-lora.h"
+#include "ns3/ascii-helper-for-custom-mesh.h"
 
 namespace ns3 {
 namespace lora_mesh {
     
-AsciiHelperForLoRa::AsciiHelperForLoRa()
+AsciiHelperForCustomMesh::AsciiHelperForCustomMesh()
 {
     m_sent = 0;
     m_received = 0;
     
-    Simulator::ScheduleDestroy(&AsciiHelperForLoRa::DisplayPDR, this);
+    Simulator::ScheduleDestroy(&AsciiHelperForCustomMesh::DisplayPDR, this);
 }
  
-AsciiHelperForLoRa::~AsciiHelperForLoRa()
+AsciiHelperForCustomMesh::~AsciiHelperForCustomMesh()
 {
 }
 
 void
-AsciiHelperForLoRa::EnableAsciiInternal(Ptr<OutputStreamWrapper> stream, std::string prefix, Ptr<NetDevice> nd, bool explicitFilename)
+AsciiHelperForCustomMesh::EnableAsciiInternal(Ptr<OutputStreamWrapper> stream, std::string prefix, Ptr<NetDevice> nd, bool explicitFilename)
 {
     AsciiTraceHelper ascii;
     std::string filename;
@@ -73,15 +73,15 @@ AsciiHelperForLoRa::EnableAsciiInternal(Ptr<OutputStreamWrapper> stream, std::st
         osw = stream;
     }
     
-    mac->TraceConnectWithoutContext("RxPacketSniffer", MakeBoundCallback(&AsciiHelperForLoRa::AsciiRxSniffer, this, osw, device));
+    mac->TraceConnectWithoutContext("RxPacketSniffer", MakeBoundCallback(&AsciiHelperForCustomMesh::AsciiRxSniffer, this, osw, device));
     
-    mac->TraceConnectWithoutContext("TxPacketSniffer", MakeBoundCallback(&AsciiHelperForLoRa::AsciiTxSniffer, this, osw, device));
+    mac->TraceConnectWithoutContext("TxPacketSniffer", MakeBoundCallback(&AsciiHelperForCustomMesh::AsciiTxSniffer, this, osw, device));
     
     return;
 }
  
 void
-AsciiHelperForLoRa::AsciiRxSniffer(AsciiHelperForLoRa *ascii, Ptr<OutputStreamWrapper> stream, Ptr<LoRaNetDevice> device, Ptr<Packet> packet)
+AsciiHelperForCustomMesh::AsciiRxSniffer(AsciiHelperForCustomMesh *ascii, Ptr<OutputStreamWrapper> stream, Ptr<LoRaNetDevice> device, Ptr<Packet> packet)
 {
     CustomMeshHeader header;
     std::ostream *os = stream->GetStream();
@@ -108,9 +108,9 @@ AsciiHelperForLoRa::AsciiRxSniffer(AsciiHelperForLoRa *ascii, Ptr<OutputStreamWr
 }
  
 void
-AsciiHelperForLoRa::AsciiTxSniffer(AsciiHelperForLoRa *ascii, Ptr<OutputStreamWrapper> stream, Ptr<LoRaNetDevice> device, Ptr<Packet> packet)
+AsciiHelperForCustomMesh::AsciiTxSniffer(AsciiHelperForCustomMesh *ascii, Ptr<OutputStreamWrapper> stream, Ptr<LoRaNetDevice> device, Ptr<Packet> packet)
 {
-    LoRaMeshHeader header;
+    CustomMeshHeader header;
     std::ostream *os = stream->GetStream();
     Vector3D pos = device->GetNode()->GetObject<MobilityModel>()->GetPosition();
     
@@ -135,7 +135,7 @@ AsciiHelperForLoRa::AsciiTxSniffer(AsciiHelperForLoRa *ascii, Ptr<OutputStreamWr
 }
  
 void
-AsciiHelperForLoRa::IncrementSent(Ptr<Packet> packet)
+AsciiHelperForCustomMesh::IncrementSent(Ptr<Packet> packet)
 {
     m_sent++;
     m_sent_ids.push_back(packet->GetUid());
@@ -143,7 +143,7 @@ AsciiHelperForLoRa::IncrementSent(Ptr<Packet> packet)
 }
 
 void
-AsciiHelperForLoRa::IncrementReceived(Ptr<Packet> packet)
+AsciiHelperForCustomMesh::IncrementReceived(Ptr<Packet> packet)
 {
     m_received++;
     m_received_ids.push_back(packet->GetUid());
@@ -151,7 +151,7 @@ AsciiHelperForLoRa::IncrementReceived(Ptr<Packet> packet)
 }
 
 bool
-AsciiHelperForLoRa::PreviouslySent(uint32_t pid)
+AsciiHelperForCustomMesh::PreviouslySent(uint32_t pid)
 {
     for (unsigned int i = 0;i < m_sent_ids.size();i++)
     {
@@ -165,7 +165,7 @@ AsciiHelperForLoRa::PreviouslySent(uint32_t pid)
 }
 
 bool
-AsciiHelperForLoRa::PreviouslyReceived(uint32_t pid)
+AsciiHelperForCustomMesh::PreviouslyReceived(uint32_t pid)
 {
     for (unsigned int i = 0;i < m_received_ids.size();i++)
     {
@@ -179,7 +179,7 @@ AsciiHelperForLoRa::PreviouslyReceived(uint32_t pid)
 }
  
 void
-AsciiHelperForLoRa::DisplayPDR(void)
+AsciiHelperForCustomMesh::DisplayPDR(void)
 {
     AsciiTraceHelper ascii;
     std::string filename = "pdr.tr";

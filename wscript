@@ -35,7 +35,7 @@ def build(bld):
     headers.module = 'lora-mesh'
     headers.source = [
         'model/building-penetration-loss.h',
-        'model,custom-mesh.h',
+        'model/custom-mesh.h',
         'model/custom-mesh-feedback-header.h',
         'model/custom-mesh-header.h',
         'model/custom-mesh-routing-header.h',

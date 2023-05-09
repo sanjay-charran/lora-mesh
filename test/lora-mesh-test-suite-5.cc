@@ -354,7 +354,7 @@ LoRaMeshTestCase5_4::DoRun(void)
     pos.x += 10;
     nodes.Get(0)->GetObject<MobilityModel>()->SetPosition(pos);
     
-    AsciiHelperForLoRa ascii;
+    AsciiHelperForCustomMesh ascii;
     ascii.EnableAscii("Test5_4", nodes);
     
     /*  make packet to send */
@@ -455,7 +455,7 @@ LoRaMeshTestCase5_5::DoRun(void)
         (*i)->AddApplication(app);
     }
     
-    AsciiHelperForLoRa ascii;
+    AsciiHelperForCustomMesh ascii;
     ascii.EnableAscii("Test5_5_", nodes);
     
     for (unsigned int i = 0;i < 10;i++)

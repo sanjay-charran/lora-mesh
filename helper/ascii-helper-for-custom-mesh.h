@@ -29,13 +29,15 @@
 #include "ns3/vector.h"
 
 #include "ns3/lora-net-device.h"
-#include "ns3/lora-mac.h"
+#include "ns3/custom-mesh.h"
 
 #include <vector>
 
 namespace ns3 {
 namespace lora_mesh {
 
+class CustomMeshHeader;
+    
 class AsciiHelperForCustomMesh : public AsciiTraceHelperForDevice
 {
 public:
@@ -49,8 +51,8 @@ public:
     bool PreviouslySent(uint32_t pid);
     bool PreviouslyReceived(uint32_t pid);
 private:
-    static void AsciiRxSniffer(AsciiHelperForLoRa *ascii, Ptr<OutputStreamWrapper> stream, Ptr<LoRaNetDevice> device, Ptr<Packet> packet);
-    static void AsciiTxSniffer(AsciiHelperForLoRa *ascii, Ptr<OutputStreamWrapper> stream, Ptr<LoRaNetDevice> device, Ptr<Packet> packet);
+    static void AsciiRxSniffer(AsciiHelperForCustomMesh *ascii, Ptr<OutputStreamWrapper> stream, Ptr<LoRaNetDevice> device, Ptr<Packet> packet);
+    static void AsciiTxSniffer(AsciiHelperForCustomMesh *ascii, Ptr<OutputStreamWrapper> stream, Ptr<LoRaNetDevice> device, Ptr<Packet> packet);
     
     void DisplayPDR(void);
     //

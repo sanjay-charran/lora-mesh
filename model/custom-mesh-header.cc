@@ -20,7 +20,7 @@
 
 #include "ns3/log.h"
 
-#include "ns3/lora-mesh-header.h"
+#include "ns3/custom-mesh-header.h"
 
 
 namespace ns3 {

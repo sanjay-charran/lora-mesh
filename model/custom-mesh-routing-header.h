@@ -18,8 +18,8 @@
  * Author: Sanjay Charran <sanjaycharran@gmail.com>
  */
 
-#ifndef __LORA_MESH_ROUTING_HEADER_H__
-#define __LORA_MESH_ROUTING_HEADER_H__
+#ifndef __CUSTOM_MESH_ROUTING_HEADER_H__
+#define __CUSTOM_MESH_ROUTING_HEADER_H__
 
 #include "ns3/header.h"
 
@@ -86,4 +86,4 @@ private:
 }
 }
 
-#endif  /*  __LORA_MESH_ROUTING_HEADER_H__  */
+#endif  /*  __CUSTOM_MESH_ROUTING_HEADER_H__  */

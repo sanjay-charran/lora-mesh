@@ -18,8 +18,8 @@
  * Author: Sanjay Charran <sanjaycharran@gmail.com>
  */
 
-#ifndef __LORA_MESH_FEEDBACK_HEADER__
-#define __LORA_MESH_FEEDBACK_HEADER__
+#ifndef __CUSTOM_MESH_FEEDBACK_HEADER__
+#define __CUSTOM_MESH_FEEDBACK_HEADER__
 
 #include "ns3/header.h"
 
@@ -69,4 +69,4 @@ private:
 }
 }
 
-#endif /*   __LORA_MESH_FEEDBACK_HEADER__   */
+#endif /*   __CUSTOM_MESH_FEEDBACK_HEADER__   */
