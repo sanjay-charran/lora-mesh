@@ -1,6 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 
 #include "ns3/lora-mesh.h"
+#include "ns3/custom-mesh.h"
 
 #include "ns3/ptr.h"
 #include "ns3/core-module.h"
@@ -45,7 +46,7 @@ LoRaMeshTestCase3_1::DoRun(void)
 {
     NodeContainer nodes;
     Ptr<LoRaPHY> phy;
-    Ptr<LoRaMAC> mac;
+    Ptr<CustomMesh> mac;
     Ptr<LoRaNetDevice> device;
     Ptr<LoRaChannel> channel = CreateObject<LoRaChannel>();
     
@@ -70,7 +71,7 @@ LoRaMeshTestCase3_1::DoRun(void)
         Ptr<Node> node = *i;
         device = Create<LoRaNetDevice>();
         phy = CreateObject<LoRaPHY>();
-        mac = CreateObject<LoRaMAC>();
+        mac = CreateObject<CustomMesh>();
         
         mac->SetMinDelay(0);
         mac->SetMaxDelay(5);
@@ -141,7 +142,7 @@ LoRaMeshTestCase3_2::DoRun(void)
 {
     NodeContainer nodes;
     Ptr<LoRaPHY> phy;
-    Ptr<LoRaMAC> mac;
+    Ptr<CustomMesh> mac;
     Ptr<LoRaNetDevice> device;
     Ptr<LoRaChannel> channel = CreateObject<LoRaChannel>();
     
@@ -166,7 +167,7 @@ LoRaMeshTestCase3_2::DoRun(void)
         Ptr<Node> node = *i;
         device = Create<LoRaNetDevice>();
         phy = CreateObject<LoRaPHY>();
-        mac = CreateObject<LoRaMAC>();
+        mac = CreateObject<CustomMesh>();
         
         mac->SetMinDelay(0);
         mac->SetMaxDelay(5);
@@ -224,7 +225,7 @@ LoRaMeshTestCase3_3::DoRun(void)
 {
     NodeContainer nodes;
     Ptr<LoRaPHY> phy;
-    Ptr<LoRaMAC> mac;
+    Ptr<CustomMesh> mac;
     Ptr<LoRaNetDevice> device;
     Ptr<LoRaChannel> channel = CreateObject<LoRaChannel>();
     
@@ -249,7 +250,7 @@ LoRaMeshTestCase3_3::DoRun(void)
         Ptr<Node> node = *i;
         device = Create<LoRaNetDevice>();
         phy = CreateObject<LoRaPHY>();
-        mac = CreateObject<LoRaMAC>();
+        mac = CreateObject<CustomMesh>();
         
         mac->SetMinDelay(0);
         mac->SetMaxDelay(5);
@@ -325,7 +326,7 @@ LoRaMeshTestCase3_4::DoRun(void)
 {
     NodeContainer nodes;
     Ptr<LoRaPHY> phy;
-    Ptr<LoRaMAC> mac;
+    Ptr<CustomMesh> mac;
     Ptr<LoRaNetDevice> device;
     Ptr<LoRaChannel> channel = CreateObject<LoRaChannel>();
     
@@ -350,7 +351,7 @@ LoRaMeshTestCase3_4::DoRun(void)
         Ptr<Node> node = *i;
         device = Create<LoRaNetDevice>();
         phy = CreateObject<LoRaPHY>();
-        mac = CreateObject<LoRaMAC>();
+        mac = CreateObject<CustomMesh>();
         
         mac->SetMinDelay(0);
         mac->SetMaxDelay(10);
@@ -398,7 +399,7 @@ LoRaMeshTestCase3_4::DoRun(void)
     nodes.Get(3)->GetObject<MobilityModel>()->SetPosition(pos);
     
     Ptr<Packet> packet = Create<Packet>(50);
-    LoRaMeshHeader header;
+    CustomMeshHeader header;
     header.SetType(DIRECTED);
     header.SetSrc(nodes.Get(1)->GetId());
     header.SetFwd(nodes.Get(1)->GetId());
@@ -440,7 +441,7 @@ LoRaMeshTestCase3_5::DoRun(void)
 {
     NodeContainer nodes;
     Ptr<LoRaPHY> phy;
-    Ptr<LoRaMAC> mac;
+    Ptr<CustomMesh> mac;
     Ptr<LoRaNetDevice> device;
     Ptr<LoRaChannel> channel = CreateObject<LoRaChannel>();
     
@@ -465,7 +466,7 @@ LoRaMeshTestCase3_5::DoRun(void)
         Ptr<Node> node = *i;
         device = Create<LoRaNetDevice>();
         phy = CreateObject<LoRaPHY>();
-        mac = CreateObject<LoRaMAC>();
+        mac = CreateObject<CustomMesh>();
         
         mac->SetMinDelay(0);
         mac->SetMaxDelay(5);
@@ -513,7 +514,7 @@ LoRaMeshTestCase3_5::DoRun(void)
     nodes.Get(3)->GetObject<MobilityModel>()->SetPosition(pos);
     
     Ptr<Packet> packet = Create<Packet>(50);
-    LoRaMeshHeader header;
+    CustomMeshHeader header;
     header.SetType(DIRECTED);
     header.SetSrc(nodes.Get(1)->GetId());
     header.SetFwd(nodes.Get(1)->GetId());
@@ -557,7 +558,7 @@ LoRaMeshTestCase3_6::DoRun(void)
     
     NodeContainer nodes;
     Ptr<LoRaPHY> phy;
-    Ptr<LoRaMAC> mac;
+    Ptr<CustomMesh> mac;
     Ptr<LoRaNetDevice> device;
     Ptr<LoRaChannel> channel = CreateObject<LoRaChannel>();
     
@@ -582,7 +583,7 @@ LoRaMeshTestCase3_6::DoRun(void)
         Ptr<Node> node = *i;
         device = Create<LoRaNetDevice>();
         phy = CreateObject<LoRaPHY>();
-        mac = CreateObject<LoRaMAC>();
+        mac = CreateObject<CustomMesh>();
         
         old_min = mac->GetMinDelay();
         old_max = mac->GetMaxDelay();
@@ -634,7 +635,7 @@ LoRaMeshTestCase3_7::DoRun(void)
 {
     NodeContainer nodes;
     Ptr<LoRaPHY> phy;
-    Ptr<LoRaMAC> mac;
+    Ptr<CustomMesh> mac;
     Ptr<LoRaNetDevice> device;
     Ptr<LoRaChannel> channel = CreateObject<LoRaChannel>();
     
@@ -659,7 +660,7 @@ LoRaMeshTestCase3_7::DoRun(void)
         Ptr<Node> node = *i;
         device = Create<LoRaNetDevice>();
         phy = CreateObject<LoRaPHY>();
-        mac = CreateObject<LoRaMAC>();
+        mac = CreateObject<CustomMesh>();
         
         mac->SetMinDelay(0);
         mac->SetMaxDelay(10);
@@ -702,7 +703,7 @@ LoRaMeshTestCase3_7::DoRun(void)
     nodes.Get(2)->GetObject<MobilityModel>()->SetPosition(pos);
     
     Ptr<Packet> packet = Create<Packet>(50);
-    LoRaMeshHeader header;
+    CustomMeshHeader header;
     header.SetType(DIRECTED);
     header.SetSrc(nodes.Get(0)->GetId());
     header.SetFwd(nodes.Get(0)->GetId());
@@ -710,7 +711,7 @@ LoRaMeshTestCase3_7::DoRun(void)
     packet->AddHeader(header);
     
     Ptr<Packet> packet2 = Create<Packet>(50);
-    LoRaMeshHeader header2;
+    CustomMeshHeader header2;
     header2.SetType(DIRECTED);
     header2.SetSrc(nodes.Get(2)->GetId());
     header2.SetFwd(nodes.Get(2)->GetId());
@@ -741,7 +742,7 @@ LoRaMeshTestSuite_3::LoRaMeshTestSuite_3()
 {
     LogComponentEnable("LoRaMeshTestSuite_3", LOG_LEVEL_ALL);
     LogComponentEnable("LoRaPHY", LOG_LEVEL_ALL);
-    LogComponentEnable("LoRaMAC", LOG_LEVEL_ALL);
+    LogComponentEnable("CustomMesh", LOG_LEVEL_ALL);
     LogComponentEnable("LoRaChannel", LOG_LEVEL_ALL);
     
     // TestDuration for TestCase can be QUICK, EXTENSIVE or TAKES_FOREVER

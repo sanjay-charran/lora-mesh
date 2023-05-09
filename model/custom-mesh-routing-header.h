@@ -34,12 +34,12 @@ namespace lora_mesh {
  *  missing parameters are the expected transmission count (ETX) and the counter value the last time 
  *  this entry was sent by the node
  */
-class LoRaMeshRoutingHeader : public Header
+class CustomMeshRoutingHeader : public Header
 {
 public:
 
-    LoRaMeshRoutingHeader();
-    ~LoRaMeshRoutingHeader();
+    CustomMeshRoutingHeader();
+    ~CustomMeshRoutingHeader();
     
     static TypeId GetTypeId(void);
     TypeId GetInstanceTypeId(void) const;

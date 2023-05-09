@@ -19,7 +19,7 @@
 #include "ns3/vector.h"
 
 #include "ns3/lora-phy.h"
-#include "ns3/lora-mac.h"
+#include "ns3/custom-mesh.h"
 #include "ns3/lora-net-device.h"
 #include "ns3/lora-channel.h"
 
@@ -43,6 +43,7 @@ main(int argc, char *argv[])
     LogComponentEnableAll(LOG_PREFIX_TIME);
     LogComponentEnable("LoRaMAC", LOG_LEVEL_ALL);
     LogComponentEnable("LoRaPHY", LOG_LEVEL_ALL);
+    LogComponentEnable("CustomMesh", LOG_LEVEL_ALL);
     NS_LOG_UNCOND ("LoRa Mesh Animal Tracking Scenario Example...");
     
     //create channel
@@ -61,7 +62,7 @@ main(int argc, char *argv[])
     MobilityHelper mobility, mobility_centre;
     
     Ptr<RandomDiscPositionAllocator> position = CreateObject<RandomDiscPositionAllocator>();
-    position->SetAttribute("Rho", StringValue("ns3::UniformRandomVariable[Min=0|Max=2000]"));
+    position->SetAttribute("Rho", StringValue("ns3::UniformRandomVariable[Min=0|Max=1000]"));
     
     mobility.SetPositionAllocator(position);
     mobility.SetMobilityModel(  "ns3::RandomWaypointMobilityModel",
@@ -88,14 +89,14 @@ main(int argc, char *argv[])
     
     Ptr<LoRaNetDevice> device;
     Ptr<LoRaPHY> phy;
-    Ptr<LoRaMAC> mac;
+    Ptr<CustomMesh> mac;
     
     for (NodeContainer::Iterator i = loranodes.Begin(); i != loranodes.End(); ++i)
     {
         Ptr<Node> node = *i;
         device = Create<LoRaNetDevice>();
         phy = CreateObject<LoRaPHY>();
-        mac = CreateObject<LoRaMAC>();
+        mac = CreateObject<CustomMesh>();
         
         phy->SetChannel(channel);
         phy->SetNetDevice(device);
@@ -126,7 +127,7 @@ main(int argc, char *argv[])
         Ptr<Node> node = *i;
         device = Create<LoRaNetDevice>();
         phy = CreateObject<LoRaPHY>();
-        mac = CreateObject<LoRaMAC>();
+        mac = CreateObject<CustomMesh>();
         
         phy->SetChannel(channel);
         phy->SetNetDevice(device);
@@ -150,7 +151,8 @@ main(int argc, char *argv[])
         //device params
         
         mac->SetMinDelay(0);
-        mac->SetMaxDelay(NUM_NODES*5);
+        mac->SetMaxDelay(NUM_NODES);
+        mac->SetRoutingUpdateFrequency(1);
         mac->SetPHY(phy);
         mac->SetDevice(device);
     }
@@ -186,7 +188,7 @@ main(int argc, char *argv[])
     pos.z = 0;
     centre.Get(0)->GetObject<MobilityModel>()->SetPosition(pos);
     
-    AsciiHelperForLoRa ascii;
+    AsciiHelperForCustomMesh ascii;
     ascii.EnableAscii("AnimalTracking", loranodes);
     ascii.EnableAscii("AnimalTracking", centre);
     
@@ -197,7 +199,7 @@ main(int argc, char *argv[])
         for (unsigned int j = 0;j < 10;j++)
         {
             Ptr<Packet> packet = Create<Packet>(50);
-            LoRaMeshHeader header;
+            CustomMeshHeader header;
         
             header.SetType(DIRECTED);
             header.SetSrc(node->GetId());
@@ -209,7 +211,7 @@ main(int argc, char *argv[])
         }
     }
     
-    Simulator::Stop(Hours(10));
+    Simulator::Stop(Hours(100));
     Simulator::Run ();
     Simulator::Destroy ();
     

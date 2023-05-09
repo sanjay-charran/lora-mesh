@@ -1,6 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 
 #include "ns3/lora-mesh.h"
+#include "ns3/custom-mesh.h"
 
 #include "ns3/ptr.h"
 #include "ns3/core-module.h"
@@ -45,7 +46,7 @@ LoRaMeshTestCase4_1::DoRun(void)
 {
     NodeContainer nodes;
     Ptr<LoRaPHY> phy;
-    Ptr<LoRaMAC> mac;
+    Ptr<CustomMesh> mac;
     Ptr<LoRaNetDevice> device;
     Ptr<LoRaChannel> channel = CreateObject<LoRaChannel>();
     
@@ -70,7 +71,7 @@ LoRaMeshTestCase4_1::DoRun(void)
         Ptr<Node> node = *i;
         device = Create<LoRaNetDevice>();
         phy = CreateObject<LoRaPHY>();
-        mac = CreateObject<LoRaMAC>();
+        mac = CreateObject<CustomMesh>();
         
         mac->SetMinDelay(0);
         mac->SetMaxDelay(2);
@@ -114,7 +115,7 @@ LoRaMeshTestCase4_1::DoRun(void)
     
     /*  make packet to send */
     Ptr<Packet> packet = Create<Packet>(50);
-    LoRaMeshHeader header;
+    CustomMeshHeader header;
     header.SetType(DIRECTED);
     header.SetSrc(nodes.Get(0)->GetId());
     header.SetFwd(nodes.Get(0)->GetId());
@@ -122,7 +123,7 @@ LoRaMeshTestCase4_1::DoRun(void)
     packet->AddHeader(header);
     
     Ptr<Packet> packet2 = Create<Packet>(50);
-    LoRaMeshHeader header2;
+    CustomMeshHeader header2;
     header2.SetType(DIRECTED);
     header2.SetSrc(nodes.Get(2)->GetId());
     header2.SetFwd(nodes.Get(2)->GetId());
@@ -153,7 +154,7 @@ LoRaMeshTestSuite_4::LoRaMeshTestSuite_4()
 {
     LogComponentEnable("LoRaMeshTestSuite_4", LOG_LEVEL_ALL);
     LogComponentEnable("LoRaPHY", LOG_LEVEL_ALL);
-    LogComponentEnable("LoRaMAC", LOG_LEVEL_ALL);
+    LogComponentEnable("CustomMesh", LOG_LEVEL_ALL);
     LogComponentEnable("LoRaChannel", LOG_LEVEL_ALL);
     
     // TestDuration for TestCase can be QUICK, EXTENSIVE or TAKES_FOREVER

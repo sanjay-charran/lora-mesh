@@ -32,12 +32,12 @@ namespace lora_mesh {
  *  This header is used to add the packet ID of the packet for which the feedback packet was
  *  made which is not included in the general LoRa mesh header.
  */
-class LoRaMeshFeedbackHeader : public Header
+class CustomMeshFeedbackHeader : public Header
 {
 public:
     
-    LoRaMeshFeedbackHeader();
-    ~LoRaMeshFeedbackHeader();
+    CustomMeshFeedbackHeader();
+    ~CustomMeshFeedbackHeader();
     
     static TypeId GetTypeId(void);
     TypeId GetInstanceTypeId(void) const;

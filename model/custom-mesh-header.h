@@ -46,11 +46,11 @@ enum MsgType
  *  the header is the packet type which can be used identify the existence of other LoRa mesh 
  *  headers
  */
-class LoRaMeshHeader : public Header
+class CustomMeshHeader : public Header
 {
 public:
-    LoRaMeshHeader();
-    ~LoRaMeshHeader();
+    CustomMeshHeader();
+    ~CustomMeshHeader();
     
     static TypeId GetTypeId(void);
     TypeId GetInstanceTypeId(void) const;

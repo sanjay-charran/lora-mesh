@@ -1,6 +1,7 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 
 #include "ns3/lora-mesh.h"
+#include "ns3/custom-mesh.h"
 
 #include "ns3/ptr.h"
 #include "ns3/core-module.h"
@@ -192,7 +193,7 @@ LoRaMeshTestCase1_5::DoRun(void)
     
     Ptr<Node> node = CreateObject<Node>();
     Ptr<LoRaPHY> phy = CreateObject<LoRaPHY>();
-    Ptr<LoRaMAC> mac = CreateObject<LoRaMAC>();
+    Ptr<CustomMesh> mac = CreateObject<CustomMesh>();
     Ptr<LoRaNetDevice> device = Create<LoRaNetDevice>();
     
     phy->SetNetDevice(device);
@@ -241,7 +242,7 @@ LoRaMeshTestCase1_6::DoRun(void)
     
     Ptr<Node> node = CreateObject<Node>();
     Ptr<LoRaPHY> phy = CreateObject<LoRaPHY>();
-    Ptr<LoRaMAC> mac = CreateObject<LoRaMAC>();
+    Ptr<CustomMesh> mac = CreateObject<CustomMesh>();
     Ptr<LoRaNetDevice> device = Create<LoRaNetDevice>();
     
     phy->SetNetDevice(device);
@@ -289,7 +290,7 @@ LoRaMeshTestCase1_7::DoRun(void)
     
     Ptr<Node> node = CreateObject<Node>();
     Ptr<LoRaPHY> phy = CreateObject<LoRaPHY>();
-    Ptr<LoRaMAC> mac = CreateObject<LoRaMAC>();
+    Ptr<CustomMesh> mac = CreateObject<CustomMesh>();
     Ptr<LoRaNetDevice> device = Create<LoRaNetDevice>();
     
     phy->SetNetDevice(device);
@@ -337,7 +338,7 @@ LoRaMeshTestCase1_8::DoRun(void)
     
     Ptr<Node> node = CreateObject<Node>();
     Ptr<LoRaPHY> phy = CreateObject<LoRaPHY>();
-    Ptr<LoRaMAC> mac = CreateObject<LoRaMAC>();
+    Ptr<CustomMesh> mac = CreateObject<CustomMesh>();
     Ptr<LoRaNetDevice> device = Create<LoRaNetDevice>();
     
     phy->SetNetDevice(device);
@@ -385,7 +386,7 @@ LoRaMeshTestCase1_9::DoRun(void)
     
     Ptr<Node> node = CreateObject<Node>();
     Ptr<LoRaPHY> phy = CreateObject<LoRaPHY>();
-    Ptr<LoRaMAC> mac = CreateObject<LoRaMAC>();
+    Ptr<CustomMesh> mac = CreateObject<CustomMesh>();
     Ptr<LoRaNetDevice> device = Create<LoRaNetDevice>();
     
     phy->SetNetDevice(device);
@@ -433,7 +434,7 @@ LoRaMeshTestCase1_10::DoRun(void)
     
     Ptr<Node> node = CreateObject<Node>();
     Ptr<LoRaPHY> phy = CreateObject<LoRaPHY>();
-    Ptr<LoRaMAC> mac = CreateObject<LoRaMAC>();
+    Ptr<CustomMesh> mac = CreateObject<CustomMesh>();
     Ptr<LoRaNetDevice> device = Create<LoRaNetDevice>();
     
     phy->SetNetDevice(device);
@@ -479,7 +480,7 @@ LoRaMeshTestCase1_11::DoRun(void)
 {
     Ptr<Node> node = CreateObject<Node>();
     Ptr<LoRaPHY> phy = CreateObject<LoRaPHY>();
-    Ptr<LoRaMAC> mac = CreateObject<LoRaMAC>();
+    Ptr<CustomMesh> mac = CreateObject<CustomMesh>();
     Ptr<LoRaNetDevice> device = Create<LoRaNetDevice>();
     Ptr<LoRaChannel> channel = CreateObject<LoRaChannel>();
     
@@ -529,7 +530,7 @@ LoRaMeshTestCase1_12::DoRun(void)
 {
     NodeContainer nodes;
     Ptr<LoRaPHY> phy = CreateObject<LoRaPHY>();
-    Ptr<LoRaMAC> mac = CreateObject<LoRaMAC>();
+    Ptr<CustomMesh> mac = CreateObject<CustomMesh>();
     Ptr<LoRaNetDevice> device = Create<LoRaNetDevice>();
     Ptr<LoRaChannel> channel = CreateObject<LoRaChannel>();
     Ptr<Application> app = CreateObject<Application>();
@@ -565,7 +566,7 @@ LoRaMeshTestCase1_12::DoRun(void)
     
     /*  make packet to send */
     Ptr<Packet> packet = Create<Packet>(50);
-    LoRaMeshHeader header;
+    CustomMeshHeader header;
     header.SetType(DIRECTED);
     header.SetSrc(nodes.Get(0)->GetId());
     header.SetFwd(nodes.Get(0)->GetId());
@@ -617,7 +618,7 @@ LoRaMeshTestCase1_13::DoRun(void)
 {
     NodeContainer nodes;
     Ptr<LoRaPHY> phy;
-    Ptr<LoRaMAC> mac;
+    Ptr<CustomMesh> mac;
     Ptr<LoRaNetDevice> device;
     Ptr<LoRaChannel> channel = CreateObject<LoRaChannel>();
     
@@ -642,7 +643,7 @@ LoRaMeshTestCase1_13::DoRun(void)
         Ptr<Node> node = *i;
         device = Create<LoRaNetDevice>();
         phy = CreateObject<LoRaPHY>();
-        mac = CreateObject<LoRaMAC>();
+        mac = CreateObject<CustomMesh>();
         
         phy->SetNetDevice(device);
         phy->SetMAC(mac);
@@ -669,7 +670,7 @@ LoRaMeshTestCase1_13::DoRun(void)
     
     /*  make packet to send */
     Ptr<Packet> packet = Create<Packet>(50);
-    LoRaMeshHeader header;
+    CustomMeshHeader header;
     header.SetType(DIRECTED);
     header.SetSrc(nodes.Get(0)->GetId());
     header.SetFwd(nodes.Get(0)->GetId());

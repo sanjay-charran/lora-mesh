@@ -23,19 +23,19 @@
 namespace ns3 {
 namespace lora_mesh {
 
-LoRaMeshFeedbackHeader::LoRaMeshFeedbackHeader()
+CustomMeshFeedbackHeader::CustomMeshFeedbackHeader()
 {
     m_packetid = 0;
 }
     
-LoRaMeshFeedbackHeader::~LoRaMeshFeedbackHeader()
+CustomMeshFeedbackHeader::~CustomMeshFeedbackHeader()
 {
 }
     
 TypeId
-LoRaMeshFeedbackHeader::GetTypeId(void)
+CustomMeshFeedbackHeader::GetTypeId(void)
 {
-    static TypeId tid = TypeId("ns3::LoRaMeshFeedbackHeader")
+    static TypeId tid = TypeId("ns3::CustomMeshFeedbackHeader")
         .SetParent<Header>()
         .SetGroupName("lora_mesh");
         
@@ -43,39 +43,39 @@ LoRaMeshFeedbackHeader::GetTypeId(void)
 }
 
 TypeId 
-LoRaMeshFeedbackHeader::GetInstanceTypeId(void) const
+CustomMeshFeedbackHeader::GetInstanceTypeId(void) const
 {
     return GetTypeId();
 }
     
 void
-LoRaMeshFeedbackHeader::SetPacketId(uint64_t packet_id)
+CustomMeshFeedbackHeader::SetPacketId(uint64_t packet_id)
 {
     m_packetid = packet_id;
     return;
 }
     
 uint64_t
-LoRaMeshFeedbackHeader::GetPacketId(void) const
+CustomMeshFeedbackHeader::GetPacketId(void) const
 {
     return m_packetid;
 }
     
 uint32_t
-LoRaMeshFeedbackHeader::GetSerializedSize(void) const
+CustomMeshFeedbackHeader::GetSerializedSize(void) const
 {
     return 8;
 }
  
 void
-LoRaMeshFeedbackHeader::Serialize(Buffer::Iterator start) const
+CustomMeshFeedbackHeader::Serialize(Buffer::Iterator start) const
 {
     start.WriteU64(m_packetid);
     return;
 }
  
 uint32_t
-LoRaMeshFeedbackHeader::Deserialize(Buffer::Iterator start)
+CustomMeshFeedbackHeader::Deserialize(Buffer::Iterator start)
 {
     m_packetid = start.ReadU64();
     
@@ -83,7 +83,7 @@ LoRaMeshFeedbackHeader::Deserialize(Buffer::Iterator start)
 }
 
 void 
-LoRaMeshFeedbackHeader::Print(std::ostream &os) const
+CustomMeshFeedbackHeader::Print(std::ostream &os) const
 {
     os << "Feedback for Packet: " << m_packetid << std::endl;
     

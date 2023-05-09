@@ -20,7 +20,7 @@
 #include "ns3/buildings-helper.h"
 
 #include "ns3/lora-phy.h"
-#include "ns3/lora-mac.h"
+#include "ns3/custom-mesh.h"
 #include "ns3/lora-net-device.h"
 #include "ns3/lora-channel.h"
 
@@ -28,7 +28,7 @@
 #include <vector>
 
 #define NUM_NODES       21
-#define SIMULATION_SF   12
+#define SIMULATION_SF   6
 
 using namespace ns3;
 using namespace lora_mesh;
@@ -44,6 +44,7 @@ main (int argc, char *argv[])
     LogComponentEnableAll(LOG_PREFIX_TIME);
     LogComponentEnable("LoRaMAC", LOG_LEVEL_ALL);
     LogComponentEnable("LoRaPHY", LOG_LEVEL_ALL);
+    LogComponentEnable("CustomMesh", LOG_LEVEL_ALL);
     NS_LOG_UNCOND ("LoRa Mesh Urban Scenario Example..." << std::endl);
     
     //create channel
@@ -149,14 +150,14 @@ main (int argc, char *argv[])
     
     Ptr<LoRaNetDevice> device;
     Ptr<LoRaPHY> phy;
-    Ptr<LoRaMAC> mac;
+    Ptr<CustomMesh> mac;
     
     for (NodeContainer::Iterator i = loranodes.Begin(); i != loranodes.End(); ++i)
     {
         Ptr<Node> node = *i;
         device = Create<LoRaNetDevice>();
         phy = CreateObject<LoRaPHY>();
-        mac = CreateObject<LoRaMAC>();
+        mac = CreateObject<CustomMesh>();
         
         phy->SetChannel(channel);
         phy->SetNetDevice(device);
@@ -177,7 +178,7 @@ main (int argc, char *argv[])
         node->AddDevice(device);        
         mac->SetMinDelay(0);
         mac->SetMaxDelay(20);
-        mac->SetRoutingUpdateFrequency(2);
+        mac->SetRoutingUpdateFrequency(3);
         mac->SetPHY(phy);
         mac->SetDevice(device);
     }
@@ -282,7 +283,7 @@ main (int argc, char *argv[])
     
     //install applications
     
-    AsciiHelperForLoRa ascii;
+    AsciiHelperForCustomMesh ascii;
     ascii.EnableAscii("UrbanScenario", loranodes);
     
     for (NodeContainer::Iterator i = loranodes.Begin() + 1;i != loranodes.End();++i)
@@ -292,7 +293,7 @@ main (int argc, char *argv[])
         for (unsigned int j = 0;j < 10;j++)
         {
             Ptr<Packet> packet = Create<Packet>(50);
-            LoRaMeshHeader header;
+            CustomMeshHeader header;
                 
             header.SetType(DIRECTED);
             header.SetSrc(node->GetId());

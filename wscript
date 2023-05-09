@@ -10,15 +10,16 @@ def build(bld):
     module = bld.create_ns3_module('lora-mesh', ['core', 'propagation', 'mobility', 'network', 'buildings'])
     module.source = [
         'model/building-penetration-loss.cc',
+        'model/custom-mesh.cc',
+        'model/custom-mesh-feedback-header.cc',
+        'model/custom-mesh-header.cc',
+        'model/custom-mesh-routing-header.cc',
         'model/lora-channel.cc',
         'model/lora-interference-helper.cc',
         'model/lora-mac.cc',
-        'model/lora-mesh-feedback-header.cc',
-        'model/lora-mesh-header.cc',
-        'model/lora-mesh-routing-header.cc',
         'model/lora-net-device.cc',
         'model/lora-phy.cc',
-        'helper/ascii-helper-for-lora.cc'
+        'helper/ascii-helper-for-custom-mesh.cc'
         ]
 
     module_test = bld.create_ns3_module_test_library('lora-mesh')
@@ -34,16 +35,17 @@ def build(bld):
     headers.module = 'lora-mesh'
     headers.source = [
         'model/building-penetration-loss.h',
+        'model,custom-mesh.h',
+        'model/custom-mesh-feedback-header.h',
+        'model/custom-mesh-header.h',
+        'model/custom-mesh-routing-header.h',
         'model/lora-mesh.h',
         'model/lora-channel.h',
         'model/lora-interference-helper.h',
         'model/lora-mac.h',
-        'model/lora-mesh-feedback-header.h',
-        'model/lora-mesh-header.h',
-        'model/lora-mesh-routing-header.h',
         'model/lora-net-device.h',
         'model/lora-phy.h',
-        'helper/ascii-helper-for-lora.h'
+        'helper/ascii-helper-for-custom-mesh.h'
         ]
 
     if bld.env.ENABLE_EXAMPLES:

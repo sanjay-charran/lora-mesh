@@ -83,7 +83,7 @@ AsciiHelperForLoRa::EnableAsciiInternal(Ptr<OutputStreamWrapper> stream, std::st
 void
 AsciiHelperForLoRa::AsciiRxSniffer(AsciiHelperForLoRa *ascii, Ptr<OutputStreamWrapper> stream, Ptr<LoRaNetDevice> device, Ptr<Packet> packet)
 {
-    LoRaMeshHeader header;
+    CustomMeshHeader header;
     std::ostream *os = stream->GetStream();
     Vector3D pos = device->GetNode()->GetObject<MobilityModel>()->GetPosition();
     

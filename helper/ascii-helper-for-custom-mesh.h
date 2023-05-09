@@ -18,8 +18,8 @@
  * Author: Sanjay Charran <sanjaycharran@gmail.com>
  */
 
-#ifndef __ASCII_HELPER_FOR_LORA_H__
-#define __ASCII_HELPER_FOR_LORA_H__
+#ifndef __ASCII_HELPER_FOR_CUSTOM_MESH_H__
+#define __ASCII_HELPER_FOR_CUSTOM_MESH_H__
 
 #include "ns3/trace-helper.h"
 #include "ns3/ptr.h"
@@ -36,11 +36,11 @@
 namespace ns3 {
 namespace lora_mesh {
 
-class AsciiHelperForLoRa : public AsciiTraceHelperForDevice
+class AsciiHelperForCustomMesh : public AsciiTraceHelperForDevice
 {
 public:
-    AsciiHelperForLoRa();
-    ~AsciiHelperForLoRa();
+    AsciiHelperForCustomMesh();
+    ~AsciiHelperForCustomMesh();
     
     void EnableAsciiInternal(Ptr<OutputStreamWrapper> stream, std::string prefix, Ptr<NetDevice> nd, bool explicitFilename);
     
@@ -64,4 +64,4 @@ private:
 }
 }
 
-#endif  /*  __ASCII_HELPER_FOR_LORA_H__ */
+#endif  /*  __ASCII_HELPER_FOR_CUSTOM_MESH_H__ */
