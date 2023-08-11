@@ -43,11 +43,180 @@
  * 
  * @brief    the low-power wireless bus (LWB)
  */
- 
+
+/*  Modified By: Sanjay Charran <sanjaycharran@gmail.com>   */
+
 #ifndef __LWB_H__
 #define __LWB_H__
 
+#include "ns3/lora-mac.h"
 
+namespace ns3 {
+namespace lora_mesh {
+
+/**
+ * @brief keep some statistics
+ */
+typedef struct {
+  uint8_t  relay_cnt;
+  uint8_t  unsynced_cnt;
+  uint8_t  bootstrap_cnt;
+  uint8_t  sleep_cnt;   /* #times node went into LPM due to rf silence */
+  uint8_t  reset_cnt;
+  uint8_t  reserved;
+  int16_t  drift;
+  uint16_t pck_cnt;     /* total number of received packets */
+  uint16_t t_sched_max; /* max. time needed to calc new schedule */
+  uint16_t t_proc_max;  /* max. time needed to process rcvd data pkts */
+  uint32_t t_slot_last; /* last slot assignment (in seconds) */
+  uint32_t rx_total;    /* total amount of received bytes (payload) */
+  uint16_t rxbuf_drop;  /* packets dropped due to input buffer full */
+  uint16_t txbuf_drop;  /* packets dropped due to output buffer full */
+  /* crc must be the last element! */
+  uint16_t crc;         /* crc of this struct (without the crc) */
+} lwb_statistics_t;
+
+/**
+ * @brief simplified 'connection state' of a source node
+ * When a source node first boots, it is in LWB_STATE_INIT state. The node 
+ * then tries to connect to a host. Upon successful reception of a schedule 
+ * packet, its state chances to LWB_STATE_CONNECTED. When no schedule packet
+ * is received for a certain amount of time, the node's state is degraded to 
+ * LWB_STATE_CONN_LOST.
+ */
+typedef enum {
+  LWB_STATE_INIT = 0, /* bootstrap */
+  LWB_STATE_CONNECTED, 
+  LWB_STATE_CONN_LOST,
+} lwb_conn_state_t;
+    
+class LWB : public LoRaMAC
+{
+public:
+    /**
+     * @brief start the Low-Power Wireless Bus
+     * @param pre_lwb_func a pointer to a function that needs to be executed
+     * before an LWB round. Set LWB_T_PREPROCESS to the worst-case 
+     * execution time of this function.
+     * @param post_lwb_proc a pointer to the application task process control
+     * block (struct process), this process will be called (polled) at the end
+     * of an LWB round
+     */
+    void lwb_start(void (*pre_lwb_func)(void), void *post_lwb_proc);
+    
+    /**
+     * @brief pause the LWB by stopping the rtimer
+     */
+    void lwb_pause(void);
+
+    /**
+     * @brief resume the LWB by scheduling the rtimer
+     */
+    void lwb_resume(void);
+
+    /**
+     * @brief query the connection status of the LWB
+     * @return the LWB state, lwb_conn_state_t 
+     */
+    lwb_conn_state_t lwb_get_state(void) const;
+    
+    /**
+     * @brief schedule a packet for transmission over the LWB
+     * @param data a pointer to the data packet to send
+     * @param len the length of the data packet (must be less or equal 
+     * LWB_CONF_MAX_PKT_LEN)
+     * @return 1 if successful, 0 otherwise (queue full)
+     */
+#if LWB_VERSION == 2
+    uint8_t lwb_send_pkt(const uint8_t * const data,
+                     uint8_t len);
+#else
+    uint8_t lwb_send_pkt(uint16_t recipient,
+                     uint8_t stream_id, 
+                     const uint8_t * const data, 
+                     uint8_t len);
+#endif
+    
+    /** 
+     * @brief get a data packet that have been received during the previous LWB
+     * rounds
+     * @param out_data A valid memory block that can hold one data packet. The 
+     * buffer must be at least LWB_CONF_MAX_PKT_LEN bytes long.
+     * @param out_node_id the ID of the node that sent the message (optional 
+     * parameter, pass 0 if not interested in this data)
+     * @param out_stream_id the stream ID (optional parameter, pass 0 if not 
+     * interested in this data)
+     * @return the length of the data packet in bytes or 0 if the queue is empty
+     * @note once a data packet was requested, it will be removed from the internal
+     * buffer
+     */
+#if LWB_VERSION == 2
+    uint8_t lwb_rcv_pkt(uint8_t* out_data);
+#else
+    uint8_t lwb_rcv_pkt(uint8_t* out_data,
+                        uint16_t * const out_node_id, 
+                        uint8_t * const out_stream_id);
+#endif
+    
+    /**
+     * @brief check the status of the receive buffer (incoming messages)
+     * @return the number of packets in the queue
+     */
+    uint8_t lwb_get_rcv_buffer_state(void);
+
+    /**
+     * @brief check the status of the send buffer (outgoing messages)
+     * @return the number of remaining packets in the queue
+     */
+     uint8_t lwb_get_send_buffer_state(void);
+
+    /**
+     * @brief schedules a stream request to be sent during the contention slot#include "ns3/glossy.h"
+     * @param stream_request a pointer to the structure containing the stream 
+     * information
+     * @param urgent if you set this parameter to 1, the LWB tries to piggyback 
+     * the stream request onto a data packet#include "ns3/glossy.h"
+     * @return 0 if an error occurred (e.g. queue full), 1 otherwise
+     * @note: the stream info data to which stream_request points will be copied
+     * into an internal buffer and may be deleted after calling 
+     * lwb_request_stream().
+     */
+    uint8_t lwb_request_stream(lwb_stream_req_t* stream_request, uint8_t urgent);
+
+    /**
+     * @brief get the LWB statistics
+     */
+    const lwb_statistics_t * const lwb_get_stats(void);
+
+    /**
+     * @brief reset the statistics
+     */
+    void lwb_stats_reset(void);
+
+    /**
+     * @brief get the time of the LWB, i.e. the network-wide scheduler time 
+     * @param reception_time timestamp of the reception of the last schedule,
+     * optional parameter (pass 0 if not needed)
+     * @return the relative time in seconds since the host started
+     * @note If the node is not synchronized, the time may not be valid. Use
+     * lwb_get_timestamp() instead to get an estimate of the current time even
+     * if the node is not synchronized.
+     */
+    uint32_t lwb_get_time(rtimer_clock_t* reception_time);
+
+    /**
+     * @brief get a high-res timestamp in us (based on the LWB time)
+     * @return timestamp
+     * @note if the node is not synced, the current time is estimated based on
+     * the elapsed LFXT clock ticks (max. accuracy: ~100us)
+     */
+    uint64_t lwb_get_timestamp(void);
+    
+private:
+    lwb_conn_state_t m_state;
+    lwb_statistics_t m_stats;
+};
+    
 //#include "contiki.h"
 //#include "platform.h"   /* necessary for SMCLK_SPEED in clock.h */
 
@@ -350,168 +519,9 @@
 #define MAX(x, y)                   ((x) > (y) ? (x) : (y))
 
 
-/**
- * @brief keep some statistics
- */
-typedef struct {
-  uint8_t  relay_cnt;
-  uint8_t  unsynced_cnt;
-  uint8_t  bootstrap_cnt;
-  uint8_t  sleep_cnt;   /* #times node went into LPM due to rf silence */
-  uint8_t  reset_cnt;
-  uint8_t  reserved;
-  int16_t  drift;
-  uint16_t pck_cnt;     /* total number of received packets */
-  uint16_t t_sched_max; /* max. time needed to calc new schedule */
-  uint16_t t_proc_max;  /* max. time needed to process rcvd data pkts */
-  uint32_t t_slot_last; /* last slot assignment (in seconds) */
-  uint32_t rx_total;    /* total amount of received bytes (payload) */
-  uint16_t rxbuf_drop;  /* packets dropped due to input buffer full */
-  uint16_t txbuf_drop;  /* packets dropped due to output buffer full */
-  /* crc must be the last element! */
-  uint16_t crc;         /* crc of this struct (without the crc) */
-} lwb_statistics_t;
-
-/**
- * @brief simplified 'connection state' of a source node
- * When a source node first boots, it is in LWB_STATE_INIT state. The node 
- * then tries to connect to a host. Upon successful reception of a schedule 
- * packet, its state chances to LWB_STATE_CONNECTED. When no schedule packet
- * is received for a certain amount of time, the node's state is degraded to 
- * LWB_STATE_CONN_LOST.
- */
-typedef enum {
-  LWB_STATE_INIT = 0, /* bootstrap */
-  LWB_STATE_CONNECTED, 
-  LWB_STATE_CONN_LOST,
-} lwb_conn_state_t;
-
 
 #include "scheduler.h"
 #include "stream.h"
-
-
-/**
- * @brief start the Low-Power Wireless Bus
- * @param pre_lwb_func a pointer to a function that needs to be executed
- * before an LWB round. Set LWB_T_PREPROCESS to the worst-case 
- * execution time of this function.
- * @param post_lwb_proc a pointer to the application task process control
- * block (struct process), this process will be called (polled) at the end
- * of an LWB round
- */
-void lwb_start(void (*pre_lwb_func)(void), void *post_lwb_proc);
-
-
-/**
- * @brief pause the LWB by stopping the rtimer
- */
-void lwb_pause(void);
-
-/**
- * @brief resume the LWB by scheduling the rtimer
- */
-void lwb_resume(void);
-
-
-/**
- * @brief query the connection status of the LWB
- * @return the LWB state, lwb_conn_state_t 
- */
-lwb_conn_state_t lwb_get_state(void);
-
-/**
- * @brief schedule a packet for transmission over the LWB
- * @param data a pointer to the data packet to send
- * @param len the length of the data packet (must be less or equal 
- * LWB_CONF_MAX_PKT_LEN)
- * @return 1 if successful, 0 otherwise (queue full)
- */
-#if LWB_VERSION == 2
-uint8_t lwb_send_pkt(const uint8_t * const data,
-                     uint8_t len);
-#else
-uint8_t lwb_send_pkt(uint16_t recipient,
-                     uint8_t stream_id, 
-                     const uint8_t * const data, 
-                     uint8_t len);
-#endif
-
-/** 
- * @brief get a data packet that have been received during the previous LWB
- * rounds
- * @param out_data A valid memory block that can hold one data packet. The 
- * buffer must be at least LWB_CONF_MAX_PKT_LEN bytes long.
- * @param out_node_id the ID of the node that sent the message (optional 
- * parameter, pass 0 if not interested in this data)
- * @param out_stream_id the stream ID (optional parameter, pass 0 if not 
- * interested in this data)
- * @return the length of the data packet in bytes or 0 if the queue is empty
- * @note once a data packet was requested, it will be removed from the internal
- * buffer
- */
-#if LWB_VERSION == 2
-uint8_t lwb_rcv_pkt(uint8_t* out_data);
-#else
-uint8_t lwb_rcv_pkt(uint8_t* out_data,
-                     uint16_t * const out_node_id, 
-                     uint8_t * const out_stream_id);
-#endif
-
-/**
- * @brief check the status of the receive buffer (incoming messages)
- * @return the number of packets in the queue
- */
-uint8_t lwb_get_rcv_buffer_state(void);
-
-/**
- * @brief check the status of the send buffer (outgoing messages)
- * @return the number of remaining packets in the queue
- */
-uint8_t lwb_get_send_buffer_state(void);
-
-/**
- * @brief schedules a stream request to be sent during the contention slot
- * @param stream_request a pointer to the structure containing the stream 
- * information
- * @param urgent if you set this parameter to 1, the LWB tries to piggyback 
- * the stream request onto a data packet
- * @return 0 if an error occurred (e.g. queue full), 1 otherwise
- * @note: the stream info data to which stream_request points will be copied
- * into an internal buffer and may be deleted after calling 
- * lwb_request_stream().
- */
-uint8_t lwb_request_stream(lwb_stream_req_t* stream_request, uint8_t urgent);
-
-/**
- * @brief get the LWB statistics
- */
-const lwb_statistics_t * const lwb_get_stats(void);
-
-/**
- * @brief reset the statistics
- */
-void lwb_stats_reset(void);
-
-/**
- * @brief get the time of the LWB, i.e. the network-wide scheduler time 
- * @param reception_time timestamp of the reception of the last schedule,
- * optional parameter (pass 0 if not needed)
- * @return the relative time in seconds since the host started
- * @note If the node is not synchronized, the time may not be valid. Use
- * lwb_get_timestamp() instead to get an estimate of the current time even
- * if the node is not synchronized.
- */
-uint32_t lwb_get_time(rtimer_clock_t* reception_time);
-
-/**
- * @brief get a high-res timestamp in us (based on the LWB time)
- * @return timestamp
- * @note if the node is not synced, the current time is estimated based on
- * the elapsed LFXT clock ticks (max. accuracy: ~100us)
- */
-uint64_t lwb_get_timestamp(void);
-
 
 #endif /* __LWB_H__ */
 
@@ -519,3 +529,5 @@ uint64_t lwb_get_timestamp(void);
  * @}
  * @}
  */
+}
+}
