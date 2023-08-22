@@ -57,7 +57,8 @@ namespace lora_mesh {
 /**
  * @brief keep some statistics
  */
-typedef struct {
+typedef struct 
+{
   uint8_t  relay_cnt;
   uint8_t  unsynced_cnt;
   uint8_t  bootstrap_cnt;
@@ -84,15 +85,33 @@ typedef struct {
  * is received for a certain amount of time, the node's state is degraded to 
  * LWB_STATE_CONN_LOST.
  */
-typedef enum {
+typedef enum 
+{
   LWB_STATE_INIT = 0, /* bootstrap */
   LWB_STATE_CONNECTED, 
   LWB_STATE_CONN_LOST,
 } lwb_conn_state_t;
     
+typedef enum 
+{
+  BOOTSTRAP = 0,
+  QUASI_SYNCED,
+  SYNCED,
+  SYNCED_2,
+  MISSED,
+  UNSYNCED,
+  UNSYNCED2,
+  NUM_OF_SYNC_STATES
+} lwb_sync_state_t;
+
 class LWB : public LoRaMAC
 {
 public:
+    LWB();
+    ~LWB();
+    
+    TypeId GetTypeId(void)
+    
     /**
      * @brief start the Low-Power Wireless Bus
      * @param pre_lwb_func a pointer to a function that needs to be executed
@@ -102,7 +121,7 @@ public:
      * block (struct process), this process will be called (polled) at the end
      * of an LWB round
      */
-    void lwb_start(void (*pre_lwb_func)(void), void *post_lwb_proc);
+    void LWBStart(void (*pre_lwb_func)(void), void *post_lwb_proc);
     
     /**
      * @brief pause the LWB by stopping the rtimer
@@ -118,7 +137,7 @@ public:
      * @brief query the connection status of the LWB
      * @return the LWB state, lwb_conn_state_t 
      */
-    lwb_conn_state_t lwb_get_state(void) const;
+    lwb_conn_state_t LWBGetState(void) const;
     
     /**
      * @brief schedule a packet for transmission over the LWB
@@ -213,8 +232,9 @@ public:
     uint64_t lwb_get_timestamp(void);
     
 private:
-    lwb_conn_state_t m_state;
+    //lwb_conn_state_t m_state;
     lwb_statistics_t m_stats;
+    lwb_sync_state_t m_sync_state;
 };
     
 //#include "contiki.h"
