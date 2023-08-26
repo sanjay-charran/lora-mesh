@@ -121,23 +121,23 @@ public:
      * block (struct process), this process will be called (polled) at the end
      * of an LWB round
      */
-    void LWBStart(void (*pre_lwb_func)(void), void *post_lwb_proc);
+    void Start(void (*pre_lwb_func)(void), void *post_lwb_proc);
     
     /**
      * @brief pause the LWB by stopping the rtimer
      */
-    void lwb_pause(void);
+    void Pause(void);
 
     /**
      * @brief resume the LWB by scheduling the rtimer
      */
-    void lwb_resume(void);
+    void Resume(void);
 
     /**
      * @brief query the connection status of the LWB
      * @return the LWB state, lwb_conn_state_t 
      */
-    lwb_conn_state_t LWBGetState(void) const;
+    lwb_conn_state_t GetState(void) const;
     
     /**
      * @brief schedule a packet for transmission over the LWB
@@ -147,10 +147,10 @@ public:
      * @return 1 if successful, 0 otherwise (queue full)
      */
 #if LWB_VERSION == 2
-    uint8_t lwb_send_pkt(const uint8_t * const data,
+    uint8_t SendPacket(const uint8_t * const data,
                      uint8_t len);
 #else
-    uint8_t lwb_send_pkt(uint16_t recipient,
+    uint8_t SendPacket(uint16_t recipient,
                      uint8_t stream_id, 
                      const uint8_t * const data, 
                      uint8_t len);
@@ -170,9 +170,9 @@ public:
      * buffer
      */
 #if LWB_VERSION == 2
-    uint8_t lwb_rcv_pkt(uint8_t* out_data);
+    uint8_t ReceivePacket(uint8_t* out_data);
 #else
-    uint8_t lwb_rcv_pkt(uint8_t* out_data,
+    uint8_t ReceivePacket(uint8_t* out_data,
                         uint16_t * const out_node_id, 
                         uint8_t * const out_stream_id);
 #endif
@@ -181,13 +181,13 @@ public:
      * @brief check the status of the receive buffer (incoming messages)
      * @return the number of packets in the queue
      */
-    uint8_t lwb_get_rcv_buffer_state(void);
+    uint8_t GetReceiveBufferState(void);
 
     /**
      * @brief check the status of the send buffer (outgoing messages)
      * @return the number of remaining packets in the queue
      */
-     uint8_t lwb_get_send_buffer_state(void);
+     uint8_t GetSendBufferState(void);
 
     /**
      * @brief schedules a stream request to be sent during the contention slot#include "ns3/glossy.h"
@@ -200,17 +200,17 @@ public:
      * into an internal buffer and may be deleted after calling 
      * lwb_request_stream().
      */
-    uint8_t lwb_request_stream(lwb_stream_req_t* stream_request, uint8_t urgent);
+    uint8_t RequestStream(lwb_stream_req_t* stream_request, uint8_t urgent);
 
     /**
      * @brief get the LWB statistics
      */
-    const lwb_statistics_t * const lwb_get_stats(void);
+    const lwb_statistics_t * const GetStats(void);
 
     /**
      * @brief reset the statistics
      */
-    void lwb_stats_reset(void);
+    void StatsReset(void);
 
     /**
      * @brief get the time of the LWB, i.e. the network-wide scheduler time 
@@ -221,7 +221,7 @@ public:
      * lwb_get_timestamp() instead to get an estimate of the current time even
      * if the node is not synchronized.
      */
-    uint32_t lwb_get_time(rtimer_clock_t* reception_time);
+    uint32_t GetTime(rtimer_clock_t* reception_time);
 
     /**
      * @brief get a high-res timestamp in us (based on the LWB time)
@@ -229,7 +229,7 @@ public:
      * @note if the node is not synced, the current time is estimated based on
      * the elapsed LFXT clock ticks (max. accuracy: ~100us)
      */
-    uint64_t lwb_get_timestamp(void);
+    uint64_t GetTimeStamp(void);
     
 private:
     //lwb_conn_state_t m_state;

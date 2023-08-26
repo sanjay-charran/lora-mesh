@@ -24,7 +24,7 @@ LWB::~LWB()
 }
 
 void
-LWB::LWBStart(void (*pre_lwb_func)(void), void *post_lwb_proc)
+LWB::Start(void (*pre_lwb_func)(void), void *post_lwb_proc)
 {
     NS_LOG_FUNCTION(this << pre_lwb_func << post_lwb_proc);
     //
@@ -32,8 +32,10 @@ LWB::LWBStart(void (*pre_lwb_func)(void), void *post_lwb_proc)
 }
 
 lwb_conn_state_t 
-LWB::LWBGetState(void) const
+LWB::GetState(void) const
 {
+    NS_LOG_FUNCTION_NOARGS();
+    
     if (m_sync_state < SYNCED)  /*  BOOTSTRAP or QUASI_SYNCED   */
     {
         return LWB_STATE_INIT;
@@ -44,6 +46,20 @@ LWB::LWBGetState(void) const
     }
     
     return LWB_STATE_CONN_LOST; /*  UNSYNCED or UNSYNCED2   */
+}
+
+void
+LWB::Pause(void)
+{
+    //cancel timers
+    return;
+}
+
+void
+LWB::Resume(void)
+{
+    //start timers
+    return;
 }
 
     
