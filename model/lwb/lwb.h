@@ -50,6 +50,7 @@
 #define __LWB_H__
 
 #include "ns3/lora-mac.h"
+#include "ns3/glossy.h"
 
 /* whether the initiator should retransmit the packet after a certain
  * time of no reception */
@@ -120,44 +121,6 @@ typedef enum
   UNSYNCED2,
   NUM_OF_SYNC_STATES
 } lwb_sync_state_t;
-
-typedef enum {
-  GLOSSY_WITHOUT_RF_CAL = 0,
-  GLOSSY_WITH_RF_CAL = 1,
-} glossy_rf_cal_t;
-
-typedef enum {
-  GLOSSY_UNKNOWN_SYNC = 0x00,
-  GLOSSY_WITH_SYNC = 0x10,
-  GLOSSY_WITHOUT_SYNC = 0x20,
-  GLOSSY_ONLY_RELAY_CNT = 0x30
-} glossy_sync_t;
-
-typedef struct {
-  uint16_t initiator_id;
-  uint8_t pkt_type;
-  uint8_t relay_cnt;
-} glossy_header_t;
-
-typedef struct {
-  rtimer_clock_t t_ref, t_tx_stop, t_rx_start, t_rx_stop, t_tx_start;
-  rtimer_clock_t T_slot_sum;
-  rtimer_clock_t T_slot_estimated;
-  rtimer_clock_t t_timeout;
-  glossy_header_t header;
-  uint8_t *payload;
-  uint8_t payload_len;
-  uint8_t n_T_slot;
-  uint8_t active;
-  uint8_t t_ref_updated;
-  uint8_t header_ok;
-  uint8_t  relay_cnt_last_rx;
-  uint8_t  relay_cnt_last_tx;
-  uint8_t  relay_cnt_t_ref;
-  uint8_t  relay_cnt_timeout;
-  uint8_t  n_rx;                                /* rx counter for last flood */
-  uint8_t  n_tx;
-} glossy_state_t;
 
 class LWB : public LoRaMAC
 {
@@ -286,74 +249,11 @@ public:
      */
     uint64_t GetTimeStamp(void);
     
-    /************************************************************************************
-     *  Glossy Functions
-     */
-    
-    /**
-     * @brief       start Glossy
-     * @param[in]   initiator_id node ID of the initiator, use
-     *              GLOSSY_UNKNOWN_INITIATOR if the initiator is unknown
-     * @param[in]   payload pointer to the packet data
-     * @param[in]   payload_len length of the data, must not exceed PACKET_LEN_MAX
-     * @param[in]   n_tx_max maximum number of retransmissions
-     * @param[in]   sync synchronization mode
-     * @note        n_tx_max must be at most 15!
-     *
-     * start Glossy, i.e. initiate a flood (if node is initiator) or switch to RX
-     * mode (receive/relay packets)
-     */
-     void glossy_start(uint16_t initiator_id,
-                       uint8_t *payload,
-                       uint8_t payload_len,
-                       uint8_t n_tx_max,
-                       glossy_sync_t sync,
-                       glossy_rf_cal_t rf_cal);
-
-     /**
-     * @brief stop glossy
-     */
-     uint8_t glossy_stop(void);
-
-     /**
-     * @brief query activity of glossy
-     * @return the number of received bytes since glossy_start was called
-     */
-     uint8_t glossy_is_active(void);
-
-     /**
-     * @brief get the number of received packets
-     * during the last flood
-     */
-     uint8_t glossy_get_n_rx(void);
-
-     /**
-     * @brief get the number of transmitted packets during the last flood
-     */
-     uint8_t glossy_get_n_tx(void);
-
-     /**
-     * @brief get the length of the payload of the received/transmitted packet
-     */
-     uint8_t glossy_get_payload_len(void);
-
-     /**
-     * @brief checks whether the reference time has been updated in the last
-     * glossy flood
-     */
-     uint8_t glossy_is_t_ref_updated(void);
-
-     /**
-     * @brief get the reference time (timestamp of the reception of the first byte)
-     * @return 64-bit timestamp (type rtimer_clock_t)
-     */
-     uint64_t glossy_get_t_ref(void);
-    
 private:
     //lwb_conn_state_t m_state;
     lwb_statistics_t    m_stats;
     lwb_sync_state_t    m_sync_state;
-    glossy_state_t      m_glossy_state;
+    Glossy              m_glossy;
 };
     
 /**
