@@ -48,9 +48,12 @@
 #ifndef __GLOSSY_H__
 #define __GLOSSY_H__
 
-
 #include <stdlib.h>
 
+#include "ns3/ptr.h"
+#include "ns3/node.h"
+
+#include "ns3/lwb.h"
 
 /* whether the initiator should retransmit the packet after a certain
  * time of no reception */
@@ -69,9 +72,15 @@
 /* max. header length (with sync) */
 #define GLOSSY_MAX_HEADER_LEN                   4
 
+#define RF_CONF_MAX_PKT_LEN  63
+#define GLOSSY_COMMON_HEADER 0x80
+#define TIMEOUT_EXTRA_TICKS 70
+
 namespace ns3 {
 namespace lora_mesh {
 
+class LWB;
+    
 enum {
   GLOSSY_UNKNOWN_INITIATOR = 0
 };
@@ -103,10 +112,10 @@ typedef struct {
 } glossy_header_t;
 
 typedef struct {
-  rtimer_clock_t t_ref, t_tx_stop, t_rx_start, t_rx_stop, t_tx_start;
-  rtimer_clock_t T_slot_sum;
-  rtimer_clock_t T_slot_estimated;
-  rtimer_clock_t t_timeout;
+  uint64_t t_ref, t_tx_stop, t_rx_start, t_rx_stop, t_tx_start;
+  uint64_t T_slot_sum;
+  uint64_t T_slot_estimated;
+  uint64_t t_timeout;
   glossy_header_t header;
   uint8_t *payload;
   uint8_t payload_len;
@@ -126,6 +135,9 @@ typedef struct {
 class Glossy
 {
 public:
+    Glossy();
+    ~Glossy();
+    
    /**
     * @brief       start Glossy
     * @param[in]   initiator_id node ID of the initiator, use
@@ -139,12 +151,12 @@ public:
     * start Glossy, i.e. initiate a flood (if node is initiator) or switch to RX
     * mode (receive/relay packets)
     */
-    void glossy_start(uint16_t initiator_id,
-                    uint8_t *payload,
-                    uint8_t payload_len,
-                    uint8_t n_tx_max,
-                    glossy_sync_t sync,
-                    glossy_rf_cal_t rf_cal);
+    void Start( uint16_t initiator_id,
+                uint8_t *payload,
+                uint8_t payload_len,
+                uint8_t n_tx_max,
+                glossy_sync_t sync,
+                glossy_rf_cal_t rf_cal);
 
     /**
      * @brief stop glossy
@@ -181,13 +193,15 @@ public:
 
     /**
      * @brief get the reference time (timestamp of the reception of the first byte)
-     * @return 64-bit timestamp (type rtimer_clock_t)
+     * @return 64-bit timestamp (type uint64_t)
      */
     uint64_t GetTRef(void);
     
     
 private:
     glossy_state_t      m_glossy_state;
+    Ptr<Node>           m_node;
+    Ptr<LWB>            m_lwb;
 };
 
 
