@@ -48,9 +48,12 @@ Glossy::~Glossy()
 {
 }
 
+void
 Glossy::Start(uint16_t initiator_id, uint8_t *payload, uint8_t payload_len, uint8_t n_tx_max,
               glossy_sync_t sync, glossy_rf_cal_t rf_cal)
 {
+    NS_LOG_FUCNTION(this << initiator_id << payload << payload_len << n_tx_max << sync << rf_cal);
+    
     /* reset the data structure */
     m_glossy_state.active = 1;
     m_glossy_state.payload = payload;
@@ -99,5 +102,97 @@ Glossy::Start(uint16_t initiator_id, uint8_t *payload, uint8_t payload_len, uint
     //while(RF1AIN & BIT0);
 }
  
+uint8_t
+Glossy::Stop(void)
+{
+    NS_LOG_FUCNTION_NOARGS();
+    
+    if (m_glossy_state.active)
+    {
+        //stop the timeout
+        
+        m_glossy_state.active = 0;
+        
+        if (m_glossy_state.t_ref_updated)
+        {
+            if (m_glossy_state.n_T_slot > 0)
+            {
+                m_glossy_state.t_ref -= (m_glossy_state.relay_cnt_t_ref * m_glossy_state.T_slot_sum) /
+                                        m_glossy_state.n_T_slot;
+            }
+            else
+            {
+                m_glossy_state.t_ref -= m_glossy_state.relay_cnt_t_ref * m_glossy_state.T_slot_estimated;
+            }
+        }
+    }
+    
+    return m_glossy_state.n_rx;
+}
+ 
+uint8_t
+Glossy::IsActive(void) const
+{
+    return m_glossy_state.active;
+}
+
+uint8_t
+Glossy::GetNRx(void) const
+{
+    return m_glossy_state.n_rx;
+}
+
+uint8_t
+Glossy::GetNTx(void) const
+{
+    return m_glossy_state.n_tx;
+}
+
+uint8_t
+Glossy::GetPayloadLength(void) const
+{
+    return m_glossy_state.payload_len;
+}
+
+void
+Glossy::SetNode(Ptr<Node> node)
+{
+    m_node = node;
+    
+    return;
+}
+
+Ptr<Node>
+Glossy::GetNode(void) const
+{
+    return m_node;
+}
+
+void
+Glossy::SetLWB(Ptr<LWB> lwb)
+{
+    m_lwb = lwb;
+    
+    return;
+}
+
+Ptr<LWB>
+Glossy::GetLWB(void) const
+{
+    return m_lwb;
+}
+
+uint8_t
+Glossy::IsTRefUpdated(void) const
+{
+    return m_glossy_state.t_ref_updated;
+}
+
+uint64_t
+Glossy::GetTRef(void) const
+{
+    return m_glossy_state.t_ref;
+}
+
 }
 }

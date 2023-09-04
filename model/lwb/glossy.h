@@ -52,6 +52,7 @@
 
 #include "ns3/ptr.h"
 #include "ns3/node.h"
+#include "ns3/object.h"
 
 #include "ns3/lwb.h"
 
@@ -132,7 +133,7 @@ typedef struct {
 } glossy_state_t;
 
 
-class Glossy
+class Glossy : public Object
 {
 public:
     Glossy();
@@ -167,36 +168,41 @@ public:
      * @brief query activity of glossy
      * @return the number of received bytes since glossy_start was called
      */
-    uint8_t IsActive(void);
+    uint8_t IsActive(void) const;
 
     /**
      * @brief get the number of received packets
      * during the last flood
      */
-    uint8_t GetNRx(void);
+    uint8_t GetNRx(void) const;
 
     /**
      * @brief get the number of transmitted packets during the last flood
      */
-    uint8_t GetTRx(void);
+    uint8_t GetNTx(void) const;
 
     /**
      * @brief get the length of the payload of the received/transmitted packet
      */
-    uint8_t GetPayloadLength(void);
+    uint8_t GetPayloadLength(void) const;
 
     /**
      * @brief checks whether the reference time has been updated in the last
      * glossy flood
      */
-    uint8_t IsTRefUpdated(void);
+    uint8_t IsTRefUpdated(void) const;
 
     /**
      * @brief get the reference time (timestamp of the reception of the first byte)
      * @return 64-bit timestamp (type uint64_t)
      */
-    uint64_t GetTRef(void);
+    uint64_t GetTRef(void) const;
     
+    void SetNode(Ptr<Node> node);
+    Ptr<Node> GetNode(void) const;
+    
+    void SetLWB(Ptr<LWB> lwb);
+    Ptr<LWB> GetLWB(void) const;
     
 private:
     glossy_state_t      m_glossy_state;
