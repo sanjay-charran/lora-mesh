@@ -33,19 +33,35 @@
  *          Marco Zimmerling
  */
 
+/*  Modified by: Sanjay Charran <sanjaycharran@gmail.com>   */
+
 #include "ns3/glossy.h"
+
 #include "ns3/log.h"
 #include "ns3/simulator.h"
+#include "ns3/packet.h"
 
 namespace ns3 {
 namespace lora_mesh {
  
+TypeId 
+Glossy::GetTypeId(void)
+{
+    static TypeId tid = TypeId("ns3::Glossy")
+        .SetParent<Object>()
+        .SetGroupName("lora_mesh");
+        
+    return tid;
+}
+    
 Glossy::Glossy()
 {    
+    m_timeout_delay_seconds = 1;
 }
  
 Glossy::~Glossy()
 {
+    Stop();
 }
 
 void
@@ -66,28 +82,36 @@ Glossy::Start(uint16_t initiator_id, uint8_t *payload, uint8_t payload_len, uint
     m_glossy_state.T_slot_sum = 0;
     m_glossy_state.n_T_slot = 0;
     
-    m_glossy_state.header.initiator_id = initiator_id;
-    m_glossy_state.header.relay_cnt = 0;
+    /* prepare the Glossy header, with the information known so far */
+    m_glossy_state.header->SetInitiatorId(initiator_id);
+    m_glossy_state.header->SetPktType(GLOSSY_COMMON_HEADER | ((sync) & 0x30) | ((n_tx_max) & 0x0f));
+    m_glossy_state.header->SetRelayCnt(0);
     
-    m_glossy_state.header.pkt_type = GLOSSY_COMMON_HEADER | ((sync) & 0x30) | ((n_tx_max) & 0x0f);
-    
-    if (m_glossy_state.header.initiator_id == m_node->GetId())
+    if (m_glossy_state.header->GetInitiatorId() == m_node->GetId())
     {
         /*  Glossy initiator    */
-        if (((m_glossy_state.header.pkt_type & 0x30) == GLOSSY_UNKNOWN_SYNC) ||
-            (m_glossy_state.payload_len + 
-            (((m_glossy_state.header.pkt_type & 0x30) == GLOSSY_WITHOUT_SYNC) ? 3 : 4)) + 1 > RF_CONF_MAX_PKT_LEN)
+        if (((m_glossy_state.header->GetPktType() & 0x30) == GLOSSY_UNKNOWN_SYNC) ||
+            ((m_glossy_state.payload_len + 
+            (((m_glossy_state.header->GetPktType() & 0x30) == GLOSSY_WITHOUT_SYNC) ? 3 : 4)) + 1 > RF_CONF_MAX_PKT_LEN))
         {
             /** 
              * the initiator must know whether there will be synchronization or
-             * not and the packet length may not exceed the max. length 
+             * not and the packet length may not exceed the max length 
              */
             Stop();
         }
         else
         {
-            m_glossy_state.t_timeout = Simulator::Now() + TIMEOUT_EXTRA_TICKS;
-            //add glossy transmission
+            /*  start the first transmission    */
+            m_glossy_state.t_timeout = Simulator::Now().GetSeconds() + m_timeout_delay_seconds;
+            
+            if (m_lwb && m_lwb->GetPHY())
+            {
+                //need to setup packet for tx
+                //Ptr<Packet> packet;
+                //m_lwb->GetPHY->Send(packet);
+            }
+            
             m_glossy_state.relay_cnt_timeout = 0;
         }
     }
@@ -192,6 +216,19 @@ uint64_t
 Glossy::GetTRef(void) const
 {
     return m_glossy_state.t_ref;
+}
+
+void
+Glossy::SetTimeoutDelay(double timeout)
+{
+    m_timeout_delay_seconds = timeout;
+    return;
+}
+
+double
+Glossy::GetTimeoutDelay(void) const
+{
+    return m_timeout_delay_seconds;
 }
 
 }

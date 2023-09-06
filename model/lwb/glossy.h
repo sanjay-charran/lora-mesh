@@ -33,6 +33,8 @@
  *          Marco Zimmerling
  */
 
+/*  Modified by: Sanjay Charran <sanjaycharran@gmail.com>   */
+
 /**
  * @addtogroup  Net
  * @{
@@ -55,6 +57,7 @@
 #include "ns3/object.h"
 
 #include "ns3/lwb.h"
+#include "ns3/glossy-header.h"
 
 /* whether the initiator should retransmit the packet after a certain
  * time of no reception */
@@ -62,13 +65,13 @@
 #define GLOSSY_CONF_RETRANSMISSION_TIMEOUT      1
 #endif /* GLOSSY_CONF_RETRANSMISSION_TIMEOUT */
 
-#ifndef GLOSSY_CONF_RTIMER_ID
-#define GLOSSY_CONF_RTIMER_ID                   RTIMER_HF_3
-#endif /* GLOSSY_CONF_RTIMER_ID */
+// #ifndef GLOSSY_CONF_RTIMER_ID
+// #define GLOSSY_CONF_RTIMER_ID                   RTIMER_HF_3
+// #endif /* GLOSSY_CONF_RTIMER_ID */
 
-#ifndef GLOSSY_CONF_COLLECT_STATS
-#define GLOSSY_CONF_COLLECT_STATS               1
-#endif /* GLOSSY_CONF_COLLECT_STATS */
+// #ifndef GLOSSY_CONF_COLLECT_STATS
+// #define GLOSSY_CONF_COLLECT_STATS               1
+// #endif /* GLOSSY_CONF_COLLECT_STATS */
 
 /* max. header length (with sync) */
 #define GLOSSY_MAX_HEADER_LEN                   4
@@ -82,17 +85,17 @@ namespace lora_mesh {
 
 class LWB;
     
-enum {
-  GLOSSY_UNKNOWN_INITIATOR = 0
-};
-
-enum {
-  GLOSSY_UNKNOWN_N_TX_MAX = 0
-};
-
-enum {
-  GLOSSY_UNKNOWN_PAYLOAD_LEN = 0
-};
+// enum {
+//   GLOSSY_UNKNOWN_INITIATOR = 0
+// };
+// 
+// enum {
+//   GLOSSY_UNKNOWN_N_TX_MAX = 0
+// };
+// 
+// enum {
+//   GLOSSY_UNKNOWN_PAYLOAD_LEN = 0
+// };
 
 typedef enum {
   GLOSSY_WITHOUT_RF_CAL = 0,
@@ -107,17 +110,11 @@ typedef enum {
 } glossy_sync_t;
 
 typedef struct {
-  uint16_t initiator_id;
-  uint8_t pkt_type;
-  uint8_t relay_cnt;
-} glossy_header_t;
-
-typedef struct {
   uint64_t t_ref, t_tx_stop, t_rx_start, t_rx_stop, t_tx_start;
   uint64_t T_slot_sum;
   uint64_t T_slot_estimated;
   uint64_t t_timeout;
-  glossy_header_t header;
+  GlossyHeader header;
   uint8_t *payload;
   uint8_t payload_len;
   uint8_t n_T_slot;
@@ -136,6 +133,8 @@ typedef struct {
 class Glossy : public Object
 {
 public:
+    TypeId GetTypeId(void);
+    
     Glossy();
     ~Glossy();
     
@@ -204,10 +203,14 @@ public:
     void SetLWB(Ptr<LWB> lwb);
     Ptr<LWB> GetLWB(void) const;
     
+    void SetTimeoutDelay(double timeout);
+    double GetTimeoutDelay(void) const;
+    
 private:
     glossy_state_t      m_glossy_state;
     Ptr<Node>           m_node;
     Ptr<LWB>            m_lwb;
+    double              m_timeout_delay_seconds;
 };
 
 
