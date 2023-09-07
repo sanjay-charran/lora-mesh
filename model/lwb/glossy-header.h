@@ -58,6 +58,9 @@ public:
     void Serialize(Buffer::Iterator start) const;
     void Print(std::ostream &os) const;
     
+    void SetPacketLen(uint8_t packet_len);
+    uint8_t GetPacketLen(void) const;
+    
     void SetInitiatorId(uint16_t initiator_id);
     uint16_t GetInitiatorId(void) const;
     
@@ -68,6 +71,7 @@ public:
     uint8_t GetRelayCnt(void) const;
     
 private:
+    uint8_t     m_packet_len;
     uint16_t    m_initiator_id;
     uint8_t     m_pkt_type;
     uint8_t     m_relay_cnt;

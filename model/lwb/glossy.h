@@ -84,6 +84,7 @@ namespace ns3 {
 namespace lora_mesh {
 
 class LWB;
+class LoRaPHY;
     
 // enum {
 //   GLOSSY_UNKNOWN_INITIATOR = 0
@@ -212,8 +213,6 @@ private:
     Ptr<LWB>            m_lwb;
     double              m_timeout_delay_seconds;
 };
-
-
 
 }
 }

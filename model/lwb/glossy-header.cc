@@ -67,6 +67,19 @@ GlossyHeader::GetInstanceTypeId(void) const
 }
 
 void
+GlossyHeader::SetPacketLen(uint8_t packet_len)
+{
+    m_packet_len = packet_len;
+    return;
+}
+
+uint8_t
+GlossyHeader::GetPacketLen(void) const
+{
+    return m_packet_len;
+}
+
+void
 GlossyHeader::SetInitiatorId(uint16_t initiator_id)
 {
     m_initiator_id = initiator_id;
@@ -108,7 +121,7 @@ GlossyHeader::GetRelayCnt(void) const
 uint32_t
 GlossyHeader::GetSerializedSize(void) const
 {
-    return (uint32_t)4;
+    return (uint32_t)5;
 }
 
 void

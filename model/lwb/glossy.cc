@@ -87,12 +87,16 @@ Glossy::Start(uint16_t initiator_id, uint8_t *payload, uint8_t payload_len, uint
     m_glossy_state.header->SetPktType(GLOSSY_COMMON_HEADER | ((sync) & 0x30) | ((n_tx_max) & 0x0f));
     m_glossy_state.header->SetRelayCnt(0);
     
+    if (m_lwb && m_lwb->GetPHY())
+    {
+        m_lwb->GetPH()->SwitchStateSTANDBY();
+    }
+    
     if (m_glossy_state.header->GetInitiatorId() == m_node->GetId())
     {
         /*  Glossy initiator    */
         if (((m_glossy_state.header->GetPktType() & 0x30) == GLOSSY_UNKNOWN_SYNC) ||
-            ((m_glossy_state.payload_len + 
-            (((m_glossy_state.header->GetPktType() & 0x30) == GLOSSY_WITHOUT_SYNC) ? 3 : 4)) + 1 > RF_CONF_MAX_PKT_LEN))
+            ((m_glossy_state.payload_len + m_glossy_state.header.GetSerializedSize() + 1) > RF_CONF_MAX_PKT_LEN))
         {
             /** 
              * the initiator must know whether there will be synchronization or
@@ -107,9 +111,11 @@ Glossy::Start(uint16_t initiator_id, uint8_t *payload, uint8_t payload_len, uint
             
             if (m_lwb && m_lwb->GetPHY())
             {
-                //need to setup packet for tx
-                //Ptr<Packet> packet;
-                //m_lwb->GetPHY->Send(packet);
+                GlossyHeader new_header = m_glossy_state.header;
+                new_header.SetPacketLen(payload_len + new_header.GetSerializedSize());
+                Ptr<Packet> packet = Create<Packet>(RF_CONF_MAX_PKT_LEN);
+                packet->AddHeader(new_header);
+                m_lwb->GetPHY->Send(packet);
             }
             
             m_glossy_state.relay_cnt_timeout = 0;
