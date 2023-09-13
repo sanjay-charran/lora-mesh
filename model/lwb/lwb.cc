@@ -96,7 +96,36 @@ LWB::Resume(void)
     return;
 }
 
-
+void
+LWB::Send(Ptr<Packet> packet)
+{
+    /*  placeholder func call   */
+    m_glossy->Start(GetId(), packet, 3, GLOSSY_WITHOUT_SYNC, GLOSSY_WITHOUT_RF_CAL);
+    return;
+}
     
+void
+LWB::Receive(Ptr<Packet> packet)
+{
+    m_glossy->RxHandler(packet);
+    return;
+}
+
+uint8_t
+LWB::GetReceiveBufferState(void)
+{
+    //
+    return 0;
+}
+
+uint8_t
+LWB::GetSendBufferState(void)
+{
+    //
+    return 0;
+}
+
+
+
 }
 }

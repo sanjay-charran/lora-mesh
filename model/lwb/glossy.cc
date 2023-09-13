@@ -57,22 +57,26 @@ Glossy::GetTypeId(void)
 Glossy::Glossy()
 {    
     m_timeout_delay_seconds = 1;
+    m_glossy_state.payload = callod(RF_CONF_MAX_PKT_LEN, sizeof(uint8_t));
 }
  
 Glossy::~Glossy()
 {
     Stop();
+    free(m_glossy_state.payload);
 }
 
 void
-Glossy::Start(uint16_t initiator_id, uint8_t *payload, uint8_t payload_len, uint8_t n_tx_max,
+Glossy::Start(uint16_t initiator_id, Ptr<Packet> packet, uint8_t n_tx_max,
               glossy_sync_t sync, glossy_rf_cal_t rf_cal)
 {
     NS_LOG_FUCNTION(this << initiator_id << payload << payload_len << n_tx_max << sync << rf_cal);
     
+    GlossyHeader new_header;
+    
     /* reset the data structure */
     m_glossy_state.active = 1;
-    m_glossy_state.payload = payload;
+    packet->CopyData(m_glossy_state.payload, packet->GetSize());
     m_glossy_state.payload_len = payload_len;
     m_glossy_state.n_rx = 0;
     m_glossy_state.n_tx = 0;
@@ -111,9 +115,8 @@ Glossy::Start(uint16_t initiator_id, uint8_t *payload, uint8_t payload_len, uint
             
             if (m_lwb && m_lwb->GetPHY())
             {
-                GlossyHeader new_header = m_glossy_state.header;
+                new_header = m_glossy_state.header;
                 new_header.SetPacketLen(payload_len + new_header.GetSerializedSize());
-                Ptr<Packet> packet = Create<Packet>(RF_CONF_MAX_PKT_LEN);
                 packet->AddHeader(new_header);
                 m_lwb->GetPHY->Send(packet);
             }
@@ -252,11 +255,15 @@ Glossy::RxHandler(Ptr<Packet> packet)
             if ((m_glossy_state.relay_cnt_last_rx == m_glossy_state.relay_cnt_last_tx + 1) &&
                 (m_glossy_state.n_tx > 0))
             {
-                //
+                //meaesure Tslot
             }
         }
         
         NS_LOG_INFO("Node #" << m_lwb->GetId() << ": Received Packet(#" << packet->GetUId() << ")");
+    }
+    else
+    {
+        //some header fields are wrong
     }
     
     return;

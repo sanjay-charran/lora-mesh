@@ -55,6 +55,7 @@
 #include "ns3/ptr.h"
 #include "ns3/node.h"
 #include "ns3/object.h"
+#include "ns3/packet.h"
 
 #include "ns3/lwb.h"
 #include "ns3/glossy-header.h"
