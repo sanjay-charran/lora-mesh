@@ -159,7 +159,109 @@ Glossy::Stop(void)
     
     return m_glossy_state.n_rx;
 }
- 
+
+bool
+Glossy::ProcessGlossyHeader(Ptr<Packet> packet)
+{
+    GlossyHeader header = packet->PeakHeader();
+    
+    if (!m_glossy_state.header_ok)
+    {
+        if ((header.GetPktType() & 0xc0) != GLOSSY_COMMON_HEADER)
+        {
+            return false;
+        }
+        
+        if (((m_glossy_state.header.GetPktType() & 0x30) != GLOSSY_UNKNOWN_SYNC) &&
+            ((m_glossy_state.header.GetPktType() & 0x30) != (header.GetPktType() & 0x30)))
+        {
+            return false;
+        }
+        
+        if (((m_glossy_state.header.GetPktType()) & 0x0f) != GLOSSY_UNKNOWN_N_TX_MAX) &&
+            (m_glossy_state.header.GetPktType() & 0x30) != (header.GetPktType() & 0x30))
+        {
+            return false;
+        }
+        
+        if ((m_glossy_state.header.GetInitiatorId() != GLOSSY_UNKNOWN_INITIATOR) &&
+            (m_glossy_state.header.GetInitiatorId() != header.GetInitiatorId()))
+        {
+            return false;
+        }
+        
+        if ((m_glossy_state.payload_len != GLOSSY_UNKNOWN_PAYLOAD_LEN) && 
+            (m_glossy_state.payload_len != (packet->GetSize() - 
+            ((((m_glossy_state.header.GetPktType()) & 0x30) == GLOSSY_WITHOUT_SYNC) ? 3 : 4))))
+        {
+            return false;
+        }
+        
+        m_glossy_state.header_ok = 1;
+    }
+    
+    m_glossy_state.header = header;
+    m_glossy_state.payload_len = packet->GetSize() - ((((m_glossy_state.header.GetPktType()) & 0x30) ==
+                                GLOSSY_WITHOUT_SYNC) ? 3 : 4);
+    
+    return true;
+}
+
+void
+Glossy::RxHandler(Ptr<Packet> packet)
+{
+    m_glossy_state.t_rx_stop = (uint64_t) Simulator::Now().GetSeconds();
+    
+    if (ProcessGlossyHeader(packet))
+    {
+        //get payload?
+        
+        /*  inc relay counter*/
+        m_glossy_state.header.SetRelayCnt(m_glossy_state.header.GetRelayCnt() + 1);
+        
+        if (((m_glossy_state.header.GetPktType() & 0x0f) == 0) ||
+            (m_glossy_state.n_tx < (m_glossy_state.header.GetPktType() & 0x0f)))
+        {
+            /*  retransmit  */
+            m_lwb->GetPHY()->Send(packet);
+        }
+        else
+        {
+            Stop();
+        }
+        
+        m_glossy_state.n_rx++;
+        
+        if ((g.header.GetInitiatorId() == m_lwb->GetId()) && (m_glossy_state.n_rx == 1))
+        {
+            /*  this node is a receiver and this is the first reception */
+            //
+        }
+        
+        if (m_glossy_state.header.GetPktType() & 0x30 == GLOSSY_WITH_SYNC)
+        {
+            m_glossy_state.relay_cnt_last_rx = m_glossy_state.header.GetRelayCnt() - 1;
+            
+            if (m_glossy_state.t_ref_updated == 0)
+            {
+               //m_glossy_state.t_ref = m_glossy_state.t_rx_start - NS_TO_RTIMER_HF(TAU1);
+                m_glossy_state.t_ref_updated = 1;
+                m_glossy_state.relay_cnt_t_ref = m_glossy_state.header.GetRelayCnt() - 1;
+            }
+            
+            if ((m_glossy_state.relay_cnt_last_rx == m_glossy_state.relay_cnt_last_tx + 1) &&
+                (m_glossy_state.n_tx > 0))
+            {
+                //
+            }
+        }
+        
+        NS_LOG_INFO("Node #" << m_lwb->GetId() << ": Received Packet(#" << packet->GetUId() << ")");
+    }
+    
+    return;
+}
+
 uint8_t
 Glossy::IsActive(void) const
 {

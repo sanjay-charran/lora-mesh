@@ -73,30 +73,19 @@
 // #define GLOSSY_CONF_COLLECT_STATS               1
 // #endif /* GLOSSY_CONF_COLLECT_STATS */
 
-/* max. header length (with sync) */
-#define GLOSSY_MAX_HEADER_LEN                   4
-
-#define RF_CONF_MAX_PKT_LEN  63
-#define GLOSSY_COMMON_HEADER 0x80
-#define TIMEOUT_EXTRA_TICKS 70
+#define GLOSSY_MAX_HEADER_LEN       4
+#define GLOSSY_UNKNOWN_N_TX_MAX     0
+#define GLOSSY_UNKNOWN_INITIATOR    0
+#define GLOSSY_UNKNOWN_PAYLOAD_LEN  0
+#define RF_CONF_MAX_PKT_LEN         63
+#define GLOSSY_COMMON_HEADER        0x80
+#define TIMEOUT_EXTRA_TICKS         70
 
 namespace ns3 {
 namespace lora_mesh {
 
 class LWB;
 class LoRaPHY;
-    
-// enum {
-//   GLOSSY_UNKNOWN_INITIATOR = 0
-// };
-// 
-// enum {
-//   GLOSSY_UNKNOWN_N_TX_MAX = 0
-// };
-// 
-// enum {
-//   GLOSSY_UNKNOWN_PAYLOAD_LEN = 0
-// };
 
 typedef enum {
   GLOSSY_WITHOUT_RF_CAL = 0,
@@ -198,6 +187,8 @@ public:
      */
     uint64_t GetTRef(void) const;
     
+    void RxHandler(Ptr<Packet> packet);
+    
     void SetNode(Ptr<Node> node);
     Ptr<Node> GetNode(void) const;
     
@@ -208,6 +199,8 @@ public:
     double GetTimeoutDelay(void) const;
     
 private:
+    bool ProcessGlossyHeader(Ptr<Packet> packet);
+    
     glossy_state_t      m_glossy_state;
     Ptr<Node>           m_node;
     Ptr<LWB>            m_lwb;
