@@ -19,6 +19,9 @@ def build(bld):
         'model/lora-mac.cc',
         'model/lora-net-device.cc',
         'model/lora-phy.cc',
+        'model/lwb/glossy.cc',
+        'model/lwb/glossy-header.cc',
+        'model/lwb/lwb.cc',
         'helper/ascii-helper-for-custom-mesh.cc'
         ]
 
@@ -45,6 +48,9 @@ def build(bld):
         'model/lora-mac.h',
         'model/lora-net-device.h',
         'model/lora-phy.h',
+        'model/lwb/glossy.h',
+        'model/lwb/glossy-header.h',
+        'model/lwb/lwb.h',
         'helper/ascii-helper-for-custom-mesh.h'
         ]
 
