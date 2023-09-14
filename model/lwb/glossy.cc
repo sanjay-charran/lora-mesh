@@ -39,11 +39,12 @@
 
 #include "ns3/log.h"
 #include "ns3/simulator.h"
-#include "ns3/packet.h"
 
 namespace ns3 {
 namespace lora_mesh {
  
+NS_LOG_COMPONENT_DEFINE("Glossy");
+    
 TypeId 
 Glossy::GetTypeId(void)
 {
@@ -57,7 +58,7 @@ Glossy::GetTypeId(void)
 Glossy::Glossy()
 {    
     m_timeout_delay_seconds = 1;
-    m_glossy_state.payload = callod(RF_CONF_MAX_PKT_LEN, sizeof(uint8_t));
+    m_glossy_state.payload = (uint8_t *)calloc(RF_CONF_MAX_PKT_LEN, sizeof(uint8_t));
 }
  
 Glossy::~Glossy()
@@ -70,14 +71,14 @@ void
 Glossy::Start(uint16_t initiator_id, Ptr<Packet> packet, uint8_t n_tx_max,
               glossy_sync_t sync, glossy_rf_cal_t rf_cal)
 {
-    NS_LOG_FUCNTION(this << initiator_id << payload << payload_len << n_tx_max << sync << rf_cal);
+    NS_LOG_FUNCTION (this << initiator_id << packet << n_tx_max << sync << rf_cal);
     
     GlossyHeader new_header;
     
     /* reset the data structure */
     m_glossy_state.active = 1;
     packet->CopyData(m_glossy_state.payload, packet->GetSize());
-    m_glossy_state.payload_len = payload_len;
+    m_glossy_state.payload_len = packet->GetSize() - new_header.GetSerializedSize();
     m_glossy_state.n_rx = 0;
     m_glossy_state.n_tx = 0;
     m_glossy_state.relay_cnt_last_rx = 0;
@@ -87,19 +88,19 @@ Glossy::Start(uint16_t initiator_id, Ptr<Packet> packet, uint8_t n_tx_max,
     m_glossy_state.n_T_slot = 0;
     
     /* prepare the Glossy header, with the information known so far */
-    m_glossy_state.header->SetInitiatorId(initiator_id);
-    m_glossy_state.header->SetPktType(GLOSSY_COMMON_HEADER | ((sync) & 0x30) | ((n_tx_max) & 0x0f));
-    m_glossy_state.header->SetRelayCnt(0);
+    m_glossy_state.header.SetInitiatorId(initiator_id);
+    m_glossy_state.header.SetPktType(GLOSSY_COMMON_HEADER | ((sync) & 0x30) | ((n_tx_max) & 0x0f));
+    m_glossy_state.header.SetRelayCnt(0);
     
     if (m_lwb && m_lwb->GetPHY())
     {
-        m_lwb->GetPH()->SwitchStateSTANDBY();
+        m_lwb->GetPHY()->SwitchStateSTANDBY();
     }
     
-    if (m_glossy_state.header->GetInitiatorId() == m_node->GetId())
+    if (m_glossy_state.header.GetInitiatorId() == m_node->GetId())
     {
         /*  Glossy initiator    */
-        if (((m_glossy_state.header->GetPktType() & 0x30) == GLOSSY_UNKNOWN_SYNC) ||
+        if (((m_glossy_state.header.GetPktType() & 0x30) == GLOSSY_UNKNOWN_SYNC) ||
             ((m_glossy_state.payload_len + m_glossy_state.header.GetSerializedSize() + 1) > RF_CONF_MAX_PKT_LEN))
         {
             /** 
@@ -116,9 +117,9 @@ Glossy::Start(uint16_t initiator_id, Ptr<Packet> packet, uint8_t n_tx_max,
             if (m_lwb && m_lwb->GetPHY())
             {
                 new_header = m_glossy_state.header;
-                new_header.SetPacketLen(payload_len + new_header.GetSerializedSize());
+                new_header.SetPacketLen(m_glossy_state.payload_len + new_header.GetSerializedSize());
                 packet->AddHeader(new_header);
-                m_lwb->GetPHY->Send(packet);
+                m_lwb->GetPHY()->Send(packet);
             }
             
             m_glossy_state.relay_cnt_timeout = 0;
@@ -138,7 +139,7 @@ Glossy::Start(uint16_t initiator_id, Ptr<Packet> packet, uint8_t n_tx_max,
 uint8_t
 Glossy::Stop(void)
 {
-    NS_LOG_FUCNTION_NOARGS();
+    NS_LOG_FUNCTION_NOARGS();
     
     if (m_glossy_state.active)
     {
@@ -166,7 +167,8 @@ Glossy::Stop(void)
 bool
 Glossy::ProcessGlossyHeader(Ptr<Packet> packet)
 {
-    GlossyHeader header = packet->PeakHeader();
+    GlossyHeader header;
+    packet->PeekHeader(header);
     
     if (!m_glossy_state.header_ok)
     {
@@ -181,8 +183,8 @@ Glossy::ProcessGlossyHeader(Ptr<Packet> packet)
             return false;
         }
         
-        if (((m_glossy_state.header.GetPktType()) & 0x0f) != GLOSSY_UNKNOWN_N_TX_MAX) &&
-            (m_glossy_state.header.GetPktType() & 0x30) != (header.GetPktType() & 0x30))
+        if (((m_glossy_state.header.GetPktType() & 0x0f) != GLOSSY_UNKNOWN_N_TX_MAX) &&
+            ((m_glossy_state.header.GetPktType() & 0x30) != (header.GetPktType() & 0x30)))
         {
             return false;
         }
@@ -235,13 +237,13 @@ Glossy::RxHandler(Ptr<Packet> packet)
         
         m_glossy_state.n_rx++;
         
-        if ((g.header.GetInitiatorId() == m_lwb->GetId()) && (m_glossy_state.n_rx == 1))
+        if ((m_glossy_state.header.GetInitiatorId() == m_lwb->GetId()) && (m_glossy_state.n_rx == 1))
         {
             /*  this node is a receiver and this is the first reception */
             //
         }
         
-        if (m_glossy_state.header.GetPktType() & 0x30 == GLOSSY_WITH_SYNC)
+        if ((m_glossy_state.header.GetPktType() & 0x30) == GLOSSY_WITH_SYNC)
         {
             m_glossy_state.relay_cnt_last_rx = m_glossy_state.header.GetRelayCnt() - 1;
             
@@ -259,7 +261,7 @@ Glossy::RxHandler(Ptr<Packet> packet)
             }
         }
         
-        NS_LOG_INFO("Node #" << m_lwb->GetId() << ": Received Packet(#" << packet->GetUId() << ")");
+        NS_LOG_INFO("Node #" << m_lwb->GetId() << ": Received Packet(#" << packet->GetUid() << ")");
     }
     else
     {

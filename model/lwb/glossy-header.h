@@ -75,7 +75,7 @@ private:
     uint16_t    m_initiator_id;
     uint8_t     m_pkt_type;
     uint8_t     m_relay_cnt;
-}
+};
 
 }
 }

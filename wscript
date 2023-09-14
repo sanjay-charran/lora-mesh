@@ -31,7 +31,8 @@ def build(bld):
         'test/lora-mesh-test-suite-2.cc',
         'test/lora-mesh-test-suite-3.cc',
         'test/lora-mesh-test-suite-4.cc',
-        'test/lora-mesh-test-suite-5.cc'
+        'test/lora-mesh-test-suite-5.cc',
+        'test/lwb-test-suite.cc'
         ]
 
     headers = bld(features='ns3header')

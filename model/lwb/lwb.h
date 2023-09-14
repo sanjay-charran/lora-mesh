@@ -76,6 +76,8 @@
 namespace ns3 {
 namespace lora_mesh {
 
+class Glossy;
+    
 /**
  * @brief keep some statistics
  */
@@ -132,7 +134,7 @@ public:
     LWB();
     ~LWB();
     
-    TypeId GetTypeId(void)
+    static TypeId GetTypeId(void);
     
     /**
      * @brief start the Low-Power Wireless Bus
@@ -232,11 +234,14 @@ public:
 //      */
 //     uint64_t GetTimeStamp(void);
     
+    void SetGlossy(Ptr<Glossy> glossy);
+    Ptr<Glossy> GetGlossy(void) const;
+    
 private:
     //lwb_conn_state_t m_state;
-    lwb_statistics_t    m_stats;
+    //lwb_statistics_t    m_stats;
     lwb_sync_state_t    m_sync_state;
-    Glossy              m_glossy;
+    Ptr<Glossy>         m_glossy;
 };
     
 /**
@@ -396,8 +401,8 @@ private:
 // 
 // #ifndef LWB_CONF_MAX_PKT_LEN
 //  #ifdef RF_CONF_MAX_PKT_LEN
-//   #define LWB_CONF_MAX_PKT_LEN          (RF_CONF_MAX_PKT_LEN - \
-//                                          GLOSSY_MAX_HEADER_LEN)
+/*  #define LWB_CONF_MAX_PKT_LEN          (RF_CONF_MAX_PKT_LEN - \
+                                         GLOSSY_MAX_HEADER_LEN)*/
 //  #else /* RF_CONF_MAX_PKT_LEN */
 //   /* the max. length of a packet (limits the message size as well as the max. 
 //    * size of a LWB packet and the schedule); do not change this value before
@@ -517,25 +522,25 @@ private:
 // 
 // /* important values, do not modify */
 // 
-// #define LWB_T_ROUND_MAX             ((LWB_CONF_MAX_DATA_SLOTS + 1 + \
-//                                       LWB_CONF_DATA_ACK) * \
-//                                      (LWB_CONF_T_DATA + LWB_CONF_T_GAP) + \
-//                                      (LWB_CONF_T_SCHED + LWB_CONF_T_GAP) + \
-//                                      (LWB_CONF_T_CONT + LWB_CONF_T_GAP))
+/*#define LWB_T_ROUND_MAX             ((LWB_CONF_MAX_DATA_SLOTS + 1 + \
+                                      LWB_CONF_DATA_ACK) * \
+                                     (LWB_CONF_T_DATA + LWB_CONF_T_GAP) + \
+                                     (LWB_CONF_T_SCHED + LWB_CONF_T_GAP) + \
+                                     (LWB_CONF_T_CONT + LWB_CONF_T_GAP))*/
 // 
 // /* min. duration of 1 packet transmission with glossy (approx. values, taken 
 //  * from TelosB platform measurements) -> for 127b packets ~4.5ms, for 50b 
 //  * packets just over 2ms */
-// #define LWB_T_HOP(len)              ((RTIMER_SECOND_HF * \
-//                                      (3 + 24 + 192 + 192 + ((1000000 * \
-//                                      (len) * 8) / RF_CONF_TX_BITRATE))) \
-//                                      / 1000000)  
+/*#define LWB_T_HOP(len)              ((RTIMER_SECOND_HF * \
+                                     (3 + 24 + 192 + 192 + ((1000000 * \
+                                     (len) * 8) / RF_CONF_TX_BITRATE))) \
+                                     / 1000000)  */
 // /* minimum duration of a data slot according to "Energy-efficient Real-time 
 //  * Communication in Multi-hop Low-power Wireless Networks" (Zimmerling et al.),
 //  * Appendix I. For 127b packets ~22.5ms, for 50b packets just over 10ms */
-// #define LWB_T_SLOT_MIN(len)         ((LWB_CONF_MAX_HOPS + \
-//                                      (2 * LWB_CONF_TX_CNT_DATA) - 2) * \
-//                                      LWB_T_HOP(len))
+/*#define LWB_T_SLOT_MIN(len)         ((LWB_CONF_MAX_HOPS + \
+                                     (2 * LWB_CONF_TX_CNT_DATA) - 2) * \
+                                     LWB_T_HOP(len))*/
 //                                                                          
 // #define LWB_RECIPIENT_SINK          0x0000  /* to all sinks and the host */
 // #define LWB_RECIPIENT_BROADCAST     0xffff  /* to all nodes / sinks */

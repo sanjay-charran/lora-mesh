@@ -124,7 +124,7 @@ typedef struct {
 class Glossy : public Object
 {
 public:
-    TypeId GetTypeId(void);
+    static TypeId GetTypeId(void);
     
     Glossy();
     ~Glossy();
@@ -143,8 +143,7 @@ public:
     * mode (receive/relay packets)
     */
     void Start( uint16_t initiator_id,
-                uint8_t *payload,
-                uint8_t payload_len,
+                Ptr<Packet> packet,
                 uint8_t n_tx_max,
                 glossy_sync_t sync,
                 glossy_rf_cal_t rf_cal);

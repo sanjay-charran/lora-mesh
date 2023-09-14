@@ -39,6 +39,8 @@
 namespace ns3 {
 namespace lora_mesh {
         
+NS_LOG_COMPONENT_DEFINE("LWB");
+    
 TypeId 
 LWB::GetTypeId(void)
 {
@@ -125,7 +127,18 @@ LWB::GetSendBufferState(void)
     return 0;
 }
 
+void
+LWB::SetGlossy(Ptr<Glossy> glossy)
+{
+    m_glossy = glossy;
+    return;
+}
 
+Ptr<Glossy>
+LWB::GetGlossy(void) const
+{
+    return m_glossy;
+}
 
 }
 }
