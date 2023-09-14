@@ -1,7 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 
 #include "ns3/core-module.h"
-#include "ns3/lora-mesh-helper.h"
 #include "ns3/simulator.h"
 #include "ns3/log.h"
 #include "ns3/application.h"
@@ -18,6 +17,7 @@
 #include "ns3/object-factory.h"
 #include "ns3/vector.h"
 
+#include "ns3/ascii-helper-for-custom-mesh.h"
 #include "ns3/lora-phy.h"
 #include "ns3/custom-mesh.h"
 #include "ns3/lora-net-device.h"
