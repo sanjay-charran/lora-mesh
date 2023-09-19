@@ -27,7 +27,8 @@
 #include "ns3/traced-callback.h"
 #include "ns3/callback.h"
 #include "ns3/packet.h"
-#include "ns3/logical-lora-channel.h"
+#include "ns3/simple-ref-count.h"
+
 #include <list>
 
 namespace ns3 {
@@ -40,7 +41,7 @@ namespace lora_mesh {
  * device, in order to compute which ones can be correctly received and which
  * ones are lost due to interference.
  */
-class LoraInterferenceHelper
+class LoraInterferenceHelper : public Object
 {
 public:
   /**
@@ -224,7 +225,7 @@ private:
  * Allow easy logging of LoraInterferenceHelper Events
  */
 std::ostream &operator<< (std::ostream &os, const LoraInterferenceHelper::Event &event);
-} // namespace lorawan
+} // namespace lora_mesh
 
 } // namespace ns3
 #endif /* LORA_INTERFERENCE_HELPER_H */

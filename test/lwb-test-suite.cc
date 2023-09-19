@@ -117,11 +117,12 @@ public:
 LWBTestSuite::LWBTestSuite()
     : TestSuite("lwb-test", UNIT)
 {
-    LogComponentEnable("LWBTetstSuite", LOG_LEVEL_ALL);
+    LogComponentEnable("LWBTestSuite", LOG_LEVEL_ALL);
+    LogComponentEnable("LoRaPHY", LOG_LEVEL_ALL);
     
 //     TestDuration for TestCase can be QUICK, EXTENSIVE or TAKES_FOREVER
     AddTestCase(new GlossyTestCase, TestCase::QUICK);
 }
 
 // Do not forget to allocate an instance of this TestSuite
-static LWBTestSuite LWB_test_suite;
+static LWBTestSuite lWBTestSuite;

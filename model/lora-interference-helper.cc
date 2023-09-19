@@ -164,8 +164,9 @@ LoraInterferenceHelper::SetCollisionMatrix (
 TypeId
 LoraInterferenceHelper::GetTypeId (void)
 {
-  static TypeId tid =
-      TypeId ("ns3::LoraInterferenceHelper").SetParent<Object> ().SetGroupName ("lorawan");
+  static TypeId tid = TypeId ("ns3::LoraInterferenceHelper")
+                    .SetParent<Object>()
+                    .SetGroupName ("lora_mesh");
 
   return tid;
 }

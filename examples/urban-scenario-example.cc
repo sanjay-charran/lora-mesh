@@ -6,7 +6,6 @@
 #include "ns3/application-container.h"
 #include "ns3/constant-position-mobility-model.h"
 #include "ns3/propagation-loss-model.h"
-#include "ns3/correlated-shadowing-propagation-loss-model.h"
 #include "ns3/propagation-delay-model.h"
 #include "ns3/mobility-helper.h"
 #include "ns3/node-container.h"

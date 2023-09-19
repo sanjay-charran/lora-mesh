@@ -357,7 +357,6 @@ private:
     Ptr<LoRaMAC>        m_mac;
     
     Ptr<MobilityModel> m_mobility;
-    
     LoraInterferenceHelper m_interference;
     
     /*  transmit parameters */
