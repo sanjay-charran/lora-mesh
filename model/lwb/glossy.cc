@@ -58,7 +58,10 @@ Glossy::GetTypeId(void)
 Glossy::Glossy()
 {    
     m_timeout_delay_seconds = 1;
+    m_glossy_state.active = 0;
+    m_glossy_state.header.SetPktType(0);
     m_glossy_state.payload = (uint8_t *)calloc(RF_CONF_MAX_PKT_LEN, sizeof(uint8_t));
+    m_glossy_state.n_tx = 0;
 }
  
 Glossy::~Glossy()
@@ -80,7 +83,6 @@ Glossy::Start(uint16_t initiator_id, Ptr<Packet> packet, uint8_t n_tx_max,
     packet->CopyData(m_glossy_state.payload, packet->GetSize());
     m_glossy_state.payload_len = packet->GetSize() - new_header.GetSerializedSize();
     m_glossy_state.n_rx = 0;
-    m_glossy_state.n_tx = 0;
     m_glossy_state.relay_cnt_last_rx = 0;
     m_glossy_state.relay_cnt_last_tx = 0;
     m_glossy_state.t_ref_updated = 0;
@@ -108,6 +110,8 @@ Glossy::Start(uint16_t initiator_id, Ptr<Packet> packet, uint8_t n_tx_max,
              * not and the packet length may not exceed the max length 
              */
             Stop();
+            m_glossy_state.n_tx = 0;
+            return;
         }
         else
         {
@@ -123,6 +127,13 @@ Glossy::Start(uint16_t initiator_id, Ptr<Packet> packet, uint8_t n_tx_max,
             }
             
             m_glossy_state.relay_cnt_timeout = 0;
+            m_glossy_state.n_tx = 0;
+            
+            if (n_tx_max)
+            {
+                m_last_event = Simulator::Schedule(Seconds(m_timeout_delay_seconds), &Glossy::RxHandler, this, packet);
+                m_last_packet_id = packet->GetUid();
+            }
         }
     }
     else
@@ -133,13 +144,14 @@ Glossy::Start(uint16_t initiator_id, Ptr<Packet> packet, uint8_t n_tx_max,
         
     }
     
+    return;
     //while(RF1AIN & BIT0);
 }
  
 uint8_t
 Glossy::Stop(void)
 {
-    NS_LOG_FUNCTION_NOARGS();
+    NS_LOG_FUNCTION(this);
     
     if (m_glossy_state.active)
     {
@@ -160,6 +172,8 @@ Glossy::Stop(void)
             }
         }
     }
+    
+    m_glossy_state.header.SetPktType(0);
     
     return m_glossy_state.n_rx;
 }
@@ -215,6 +229,8 @@ Glossy::ProcessGlossyHeader(Ptr<Packet> packet)
 void
 Glossy::RxHandler(Ptr<Packet> packet)
 {
+    NS_LOG_FUNCTION(this << packet);
+    
     m_glossy_state.t_rx_stop = (uint64_t) Simulator::Now().GetSeconds();
     
     if (ProcessGlossyHeader(packet))
@@ -229,9 +245,30 @@ Glossy::RxHandler(Ptr<Packet> packet)
         {
             /*  retransmit  */
             m_lwb->GetPHY()->Send(packet);
+            m_glossy_state.n_tx++;
+            
+            if (m_glossy_state.n_tx < (m_glossy_state.header.GetPktType() & 0x0f))
+            {
+                if (!m_last_event.IsExpired())
+                {
+                    if (packet->GetUid() != m_last_packet_id)
+                    {
+                        m_last_event.Cancel();
+                        m_last_event = Simulator::Schedule(Seconds(m_timeout_delay_seconds), &Glossy::RxHandler, this, packet);
+                        m_glossy_state.n_tx = 0;
+                    }
+                }
+                else
+                {
+                    m_last_event = Simulator::Schedule(Seconds(m_timeout_delay_seconds), &Glossy::RxHandler, this, packet);
+                }
+            }
+            
+            m_last_packet_id = packet->GetUid();
         }
         else
         {
+            //m_glossy_state.n_tx = 0;
             Stop();
         }
         
@@ -299,6 +336,7 @@ void
 Glossy::SetNode(Ptr<Node> node)
 {
     m_node = node;
+    m_glossy_state.header.SetInitiatorId(node->GetId());
     
     return;
 }

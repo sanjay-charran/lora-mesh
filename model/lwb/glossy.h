@@ -56,6 +56,8 @@
 #include "ns3/node.h"
 #include "ns3/object.h"
 #include "ns3/packet.h"
+#include "ns3/simulator.h"
+#include "ns3/event-id.h"
 
 #include "ns3/lwb.h"
 #include "ns3/glossy-header.h"
@@ -205,6 +207,9 @@ private:
     Ptr<Node>           m_node;
     Ptr<LWB>            m_lwb;
     double              m_timeout_delay_seconds;
+    
+    EventId             m_last_event;
+    uint64_t            m_last_packet_id;
 };
 
 }
