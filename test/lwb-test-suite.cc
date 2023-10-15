@@ -55,6 +55,7 @@ GlossyTestCase::DoRun(void)
     
     Ptr<PropagationDelayModel> delay = CreateObject<ConstantSpeedPropagationDelayModel>();
     
+    channel = CreateObject<LoRaChannel>();
     channel->SetLossModel(loss);
     channel->SetDelayModel(delay);
     
@@ -96,7 +97,7 @@ GlossyTestCase::DoRun(void)
         (*i)->AddApplication(app);
     }
     
-    Ptr<Packet> packet = Create<Packet>(RF_CONF_MAX_PKT_LEN);
+    Ptr<Packet> packet = Create<Packet>(RF_CONF_MAX_PKT_LEN - 1);
     nodes.Get(0)->GetDevice(0)->Send(packet, Address(), 0);
     
     Simulator::Stop(Seconds(10));
@@ -119,6 +120,9 @@ LWBTestSuite::LWBTestSuite()
 {
     LogComponentEnable("LWBTestSuite", LOG_LEVEL_ALL);
     LogComponentEnable("LoRaPHY", LOG_LEVEL_ALL);
+    LogComponentEnable("LoRaMAC", LOG_LEVEL_ALL);
+    LogComponentEnable("LWB", LOG_LEVEL_ALL);
+    LogComponentEnable("Glossy", LOG_LEVEL_ALL);
     
 //     TestDuration for TestCase can be QUICK, EXTENSIVE or TAKES_FOREVER
     AddTestCase(new GlossyTestCase, TestCase::QUICK);

@@ -62,6 +62,17 @@
 #define LWB_VERSION     1       /* default version */
 #endif /* LWB_VERSION */
 
+#ifndef LWB_CONF_MAX_DATA_SLOTS
+/* max. number of data slots per round, must not exceed MIN(63, 
+ * (LWB_CONF_MAX_PKT_LEN - LWB_SCHED_PKT_HEADER_LEN) / 2), 
+ * must be at least 2 */
+#define LWB_CONF_MAX_DATA_SLOTS         20        
+#endif /* LWB_CONF_MAX_DATA_SLOTS */
+
+#ifndef LWB_CONF_HEADER_LEN
+#define LWB_CONF_HEADER_LEN             3       /* default header size */
+#endif /* LWB_CONF_HEADER_LEN */
+
 // #ifndef GLOSSY_CONF_RTIMER_ID
 // #define GLOSSY_CONF_RTIMER_ID                   RTIMER_HF_3
 // #endif /* GLOSSY_CONF_RTIMER_ID */
