@@ -1,5 +1,4 @@
 #include "ns3/core-module.h"
-#include "ns3/lora-mesh-helper.h"
 #include "ns3/simulator.h"
 #include "ns3/log.h"
 #include "ns3/application.h"
@@ -7,7 +6,6 @@
 #include "ns3/application-container.h"
 #include "ns3/constant-position-mobility-model.h"
 #include "ns3/propagation-loss-model.h"
-#include "ns3/correlated-shadowing-propagation-loss-model.h"
 #include "ns3/propagation-delay-model.h"
 #include "ns3/mobility-helper.h"
 #include "ns3/node-container.h"
@@ -23,6 +21,8 @@
 #include "ns3/lora-mac.h"
 #include "ns3/lora-net-device.h"
 #include "ns3/lora-channel.h"
+#include "ns3/ascii-helper-for-lora.h"
+#include "ns3/building-penetration-loss.h"
 
 #include <iterator>
 #include <vector>

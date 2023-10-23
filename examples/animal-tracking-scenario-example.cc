@@ -1,7 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 
 #include "ns3/core-module.h"
-#include "ns3/lora-mesh-helper.h"
 #include "ns3/simulator.h"
 #include "ns3/log.h"
 #include "ns3/application.h"
@@ -22,6 +21,7 @@
 #include "ns3/lora-mac.h"
 #include "ns3/lora-net-device.h"
 #include "ns3/lora-channel.h"
+#include "ns3/ascii-helper-for-lora.h"
 
 #include <iterator>
 

@@ -27,7 +27,6 @@
 #include "ns3/traced-callback.h"
 #include "ns3/callback.h"
 #include "ns3/packet.h"
-#include "ns3/logical-lora-channel.h"
 #include <list>
 
 namespace ns3 {
