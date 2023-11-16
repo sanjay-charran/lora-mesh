@@ -71,10 +71,10 @@ Glossy::~Glossy()
 }
 
 void
-Glossy::Start(uint16_t initiator_id, Ptr<Packet> packet, uint8_t n_tx_max,
+Glossy::Start(uint16_t initiator_id, Ptr<Packet> packet,
               glossy_sync_t sync, glossy_rf_cal_t rf_cal)
 {
-    NS_LOG_FUNCTION (this << initiator_id << packet << n_tx_max << sync << rf_cal);
+    NS_LOG_FUNCTION (this << initiator_id << packet << sync << rf_cal);
     
     GlossyHeader new_header;
     
@@ -91,17 +91,17 @@ Glossy::Start(uint16_t initiator_id, Ptr<Packet> packet, uint8_t n_tx_max,
     
     /* prepare the Glossy header, with the information known so far */
     m_glossy_state.header.SetInitiatorId(initiator_id);
-    m_glossy_state.header.SetPktType(GLOSSY_COMMON_HEADER | ((sync) & 0x30) | ((n_tx_max) & 0x0f));
+    m_glossy_state.header.SetPktType(GLOSSY_COMMON_HEADER | ((sync) & 0x30) | ((m_n_tx_max) & 0x0f));
     m_glossy_state.header.SetRelayCnt(0);
     
-    if (m_lwb && m_lwb->GetPHY())
-    {
-        m_lwb->GetPHY()->SwitchStateSTANDBY();
-    }
+//     if (m_lwb && m_lwb->GetPHY())
+//     {
+//         m_lwb->GetPHY()->SwitchStateSTANDBY();
+//     }
     
+    /*  Glossy initiator    */
     if (m_glossy_state.header.GetInitiatorId() == m_node->GetId())
     {
-        /*  Glossy initiator    */
         if (((m_glossy_state.header.GetPktType() & 0x30) == GLOSSY_UNKNOWN_SYNC) ||
             ((m_glossy_state.payload_len + m_glossy_state.header.GetSerializedSize() + 1) > RF_CONF_MAX_PKT_LEN))
         {
@@ -110,13 +110,13 @@ Glossy::Start(uint16_t initiator_id, Ptr<Packet> packet, uint8_t n_tx_max,
              * not and the packet length may not exceed the max length 
              */
             Stop();
-            m_glossy_state.n_tx = 0;
+            m_n_tx = 0;
             return;
         }
         else
         {
             /*  start the first transmission    */
-            m_glossy_state.t_timeout = Simulator::Now().GetSeconds() + m_timeout_delay_seconds;
+            //m_glossy_state.t_timeout = Simulator::Now().GetSeconds() + m_timeout_delay_seconds;
             
             if (m_lwb && m_lwb->GetPHY())
             {
@@ -126,12 +126,12 @@ Glossy::Start(uint16_t initiator_id, Ptr<Packet> packet, uint8_t n_tx_max,
                 m_lwb->GetPHY()->Send(packet);
             }
             
-            m_glossy_state.relay_cnt_timeout = 0;
-            m_glossy_state.n_tx = 0;
+            //m_glossy_state.relay_cnt_timeout = 0;
+            m_n_tx = 0;
             
             if (n_tx_max)
             {
-                m_last_event = Simulator::Schedule(Seconds(m_timeout_delay_seconds), &Glossy::RxHandler, this, packet);
+                //m_last_event = Simulator::Schedule(Seconds(m_timeout_delay_seconds), &Glossy::RxHandler, this, packet);
                 m_last_packet_id = packet->GetUid();
             }
         }
@@ -140,12 +140,11 @@ Glossy::Start(uint16_t initiator_id, Ptr<Packet> packet, uint8_t n_tx_max,
     {
         /*  Glossy receiver */
         
-        //add glossy receive stuff if needded
+        //glossy receiver init (shouldn't be anything)
         
     }
     
     return;
-    //while(RF1AIN & BIT0);
 }
  
 uint8_t
@@ -231,40 +230,46 @@ Glossy::RxHandler(Ptr<Packet> packet)
 {
     NS_LOG_FUNCTION(this << packet);
     
-    m_glossy_state.t_rx_stop = (uint64_t) Simulator::Now().GetSeconds();
+    GlossyHeader new_header;
+    Ptr<Packet> new_packet;
+    
+    //m_glossy_state.t_rx_stop = (uint64_t) Simulator::Now().GetSeconds();
     
     if (ProcessGlossyHeader(packet))
     {
         //get payload?
         
         /*  inc relay counter*/
-        m_glossy_state.header.SetRelayCnt(m_glossy_state.header.GetRelayCnt() + 1);
+        new_packet =  = packet->Copy();
+        new_packet->RemoveHeader(new_header);
+        new_header.SetRelayCnt(new_header.GetRelayCnt() + 1);
+        new_packet->AddHeader(new_header);
         
-        if (((m_glossy_state.header.GetPktType() & 0x0f) == 0) ||
-            (m_glossy_state.n_tx < (m_glossy_state.header.GetPktType() & 0x0f)))
+        if (((new_header.GetPktType() & 0x0f) == 0) ||
+            (m_n_tx < m_n_tx_max))
         {
             /*  retransmit  */
             m_lwb->GetPHY()->Send(packet);
-            m_glossy_state.n_tx++;
+            m_n_tx++;
             
-            if (m_glossy_state.n_tx < (m_glossy_state.header.GetPktType() & 0x0f))
-            {
-                if (!m_last_event.IsExpired())
-                {
-                    if (packet->GetUid() != m_last_packet_id)
-                    {
-                        m_last_event.Cancel();
-                        m_last_event = Simulator::Schedule(Seconds(m_timeout_delay_seconds), &Glossy::RxHandler, this, packet);
-                        m_glossy_state.n_tx = 0;
-                    }
-                }
-                else
-                {
-                    m_last_event = Simulator::Schedule(Seconds(m_timeout_delay_seconds), &Glossy::RxHandler, this, packet);
-                }
-            }
+//             if (m_n_tx < m_n_tx_max)
+//             {
+//                 if (!m_last_event.IsExpired())
+//                 {
+//                     if (packet->GetUid() != m_last_packet_id)
+//                     {
+//                         m_last_event.Cancel();
+//                         m_last_event = Simulator::Schedule(Seconds(m_timeout_delay_seconds), &Glossy::RxHandler, this, packet);
+//                         m_n_tx = 0;
+//                     }
+//                 }
+//                 else
+//                 {
+//                     m_last_event = Simulator::Schedule(Seconds(m_timeout_delay_seconds), &Glossy::RxHandler, this, packet);
+//                 }
+//             }
             
-            m_last_packet_id = packet->GetUid();
+//             m_last_packet_id = packet->GetUid();
         }
         else
         {
@@ -292,7 +297,7 @@ Glossy::RxHandler(Ptr<Packet> packet)
             }
             
             if ((m_glossy_state.relay_cnt_last_rx == m_glossy_state.relay_cnt_last_tx + 1) &&
-                (m_glossy_state.n_tx > 0))
+                (m_n_tx > 0))
             {
                 //meaesure Tslot
             }
@@ -384,6 +389,26 @@ double
 Glossy::GetTimeoutDelay(void) const
 {
     return m_timeout_delay_seconds;
+}
+
+void
+Glossy::SetNTxMax(uint8_t n_tx_max)
+{
+    if (n_tx_max < 1)
+    {
+        m_n_tx_max = 1;
+    }
+    else
+    {
+        m_n_tx_max = n_tx_max;
+    }
+    return;
+}
+
+uint8_t
+Glossy::GetNTxMax(void) const
+{
+    return m_n_tx_max;
 }
 
 }

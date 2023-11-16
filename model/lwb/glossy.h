@@ -146,7 +146,6 @@ public:
     */
     void Start( uint16_t initiator_id,
                 Ptr<Packet> packet,
-                uint8_t n_tx_max,
                 glossy_sync_t sync,
                 glossy_rf_cal_t rf_cal);
 
@@ -200,6 +199,9 @@ public:
     void SetTimeoutDelay(double timeout);
     double GetTimeoutDelay(void) const;
     
+    void SetNTxMax(uint8_t n_tx_max);
+    uint8_t GetNTxMax(void) const;
+    
 private:
     bool ProcessGlossyHeader(Ptr<Packet> packet);
     
@@ -207,6 +209,8 @@ private:
     Ptr<Node>           m_node;
     Ptr<LWB>            m_lwb;
     double              m_timeout_delay_seconds;
+    uint8_t             m_n_tx;
+    uint8_t             m_n_tx_max;
     
     EventId             m_last_event;
     uint64_t            m_last_packet_id;
