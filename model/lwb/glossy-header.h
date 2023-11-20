@@ -43,6 +43,18 @@
 namespace ns3 {
 namespace lora_mesh {
     
+typedef enum 
+{
+    GLOSSY_COMMON_HEADER = 0x80,
+} glossy_header_t;
+    
+typedef enum {
+  GLOSSY_UNKNOWN_SYNC = 0x00,
+  GLOSSY_WITH_SYNC = 0x10,
+  GLOSSY_WITHOUT_SYNC = 0x20,
+  GLOSSY_ONLY_RELAY_CNT = 0x30
+} glossy_sync_t;
+
 class GlossyHeader : public Header
 {
 public:
@@ -63,18 +75,26 @@ public:
     
     void SetInitiatorId(uint16_t initiator_id);
     uint16_t GetInitiatorId(void) const;
+   
+    void SetHeaderType(glossy_header_t header_type);
+    glossy_header_t GetHeaderType(void) const;
     
-    void SetPktType(uint8_t pkt_type);
-    uint8_t GetPktType(void) const;
+    void SetSync(glossy_sync_t sync);
+    glossy_sync_t GetSync(void) const;
+    
+    void SetNTxMax(uint8_t n_tx_max);
+    uint8_t GetNTxMax(void) const;
     
     void SetRelayCnt(uint8_t relay_cnt);
     uint8_t GetRelayCnt(void) const;
     
 private:
-    uint8_t     m_packet_len;
-    uint16_t    m_initiator_id;
-    uint8_t     m_pkt_type;
-    uint8_t     m_relay_cnt;
+    uint8_t         m_packet_len;
+    uint16_t        m_initiator_id;
+    glossy_header_t m_header_type;
+    glossy_sync_t   m_sync;
+    uint8_t         m_n_tx_max;
+    uint8_t         m_relay_cnt;
 };
 
 }

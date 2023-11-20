@@ -58,16 +58,16 @@ Glossy::GetTypeId(void)
 Glossy::Glossy()
 {    
     m_timeout_delay_seconds = 1;
-    m_glossy_state.active = 0;
-    m_glossy_state.header.SetPktType(0);
-    m_glossy_state.payload = (uint8_t *)calloc(RF_CONF_MAX_PKT_LEN, sizeof(uint8_t));
-    m_glossy_state.n_tx = 0;
+    m_active = false;
+    m_n_tx_max = 0;
+    m_n_tx = 0;
+    m_Tslot = 0;
+    m_Tref = 0;
 }
  
 Glossy::~Glossy()
 {
     Stop();
-    free(m_glossy_state.payload);
 }
 
 void
@@ -77,40 +77,35 @@ Glossy::Start(uint16_t initiator_id, Ptr<Packet> packet,
     NS_LOG_FUNCTION (this << initiator_id << packet << sync << rf_cal);
     
     GlossyHeader new_header;
+
+    m_active = true;
+    uint8_t payload_len = packet->GetSize() - new_header.GetSerializedSize();
+    m_n_rx = 0;
+    m_T_slot = 0;
     
-    /* reset the data structure */
-    m_glossy_state.active = 1;
-    packet->CopyData(m_glossy_state.payload, packet->GetSize());
-    m_glossy_state.payload_len = packet->GetSize() - new_header.GetSerializedSize();
-    m_glossy_state.n_rx = 0;
-    m_glossy_state.relay_cnt_last_rx = 0;
-    m_glossy_state.relay_cnt_last_tx = 0;
-    m_glossy_state.t_ref_updated = 0;
-    m_glossy_state.T_slot_sum = 0;
-    m_glossy_state.n_T_slot = 0;
+    /*  prepare the Glossy header    */
+    new_header.SetInitiatorId(initiator_id);
+    new_header.SetHeaderType(GLOSSY_COMMON_HEADER);
+    new_header.SetSync(sync);
+    new_header.SetNTxMax(m_n_tx_max);
+    new_header.SetRelayCnt(0);
     
-    /* prepare the Glossy header, with the information known so far */
-    m_glossy_state.header.SetInitiatorId(initiator_id);
-    m_glossy_state.header.SetPktType(GLOSSY_COMMON_HEADER | ((sync) & 0x30) | ((m_n_tx_max) & 0x0f));
-    m_glossy_state.header.SetRelayCnt(0);
-    
-//     if (m_lwb && m_lwb->GetPHY())
-//     {
-//         m_lwb->GetPHY()->SwitchStateSTANDBY();
-//     }
+    if (m_lwb && m_lwb->GetPHY())
+    {
+        m_lwb->GetPHY()->SwitchStateSTANDBY();
+    }
     
     /*  Glossy initiator    */
-    if (m_glossy_state.header.GetInitiatorId() == m_node->GetId())
+    if (initiator_id == m_node->GetId())
     {
-        if (((m_glossy_state.header.GetPktType() & 0x30) == GLOSSY_UNKNOWN_SYNC) ||
-            ((m_glossy_state.payload_len + m_glossy_state.header.GetSerializedSize() + 1) > RF_CONF_MAX_PKT_LEN))
+        if ((new_header.GetSync() == GLOSSY_UNKNOWN_SYNC) || 
+            ((packet->GetSize() + 1) > RF_CONF_MAX_PKT_LEN))
         {
             /** 
              * the initiator must know whether there will be synchronization or
              * not and the packet length may not exceed the max length 
              */
             Stop();
-            m_n_tx = 0;
             return;
         }
         else
@@ -120,11 +115,15 @@ Glossy::Start(uint16_t initiator_id, Ptr<Packet> packet,
             
             if (m_lwb && m_lwb->GetPHY())
             {
-                new_header = m_glossy_state.header;
-                new_header.SetPacketLen(m_glossy_state.payload_len + new_header.GetSerializedSize());
+                new_header.SetPacketLen(packet->GetSize());
                 packet->AddHeader(new_header);
+                
+                /*  calc Tslot from difference in time for sending  */
+                m_T_ref = Simulator::Now().GetSeconds();
                 m_lwb->GetPHY()->Send(packet);
+                m_T_slot = Simulator::Now().GetSeconds() - m_Tref;
             }
+            
             
             //m_glossy_state.relay_cnt_timeout = 0;
             m_n_tx = 0;
@@ -132,7 +131,7 @@ Glossy::Start(uint16_t initiator_id, Ptr<Packet> packet,
             if (n_tx_max)
             {
                 //m_last_event = Simulator::Schedule(Seconds(m_timeout_delay_seconds), &Glossy::RxHandler, this, packet);
-                m_last_packet_id = packet->GetUid();
+                m_last_packet= packet;
             }
         }
     }
@@ -152,29 +151,27 @@ Glossy::Stop(void)
 {
     NS_LOG_FUNCTION(this);
     
-    if (m_glossy_state.active)
+    if (m_active)
     {
         //stop the timeout
         
-        m_glossy_state.active = 0;
+        m_active = false;
         
-        if (m_glossy_state.t_ref_updated)
-        {
-            if (m_glossy_state.n_T_slot > 0)
-            {
-                m_glossy_state.t_ref -= (m_glossy_state.relay_cnt_t_ref * m_glossy_state.T_slot_sum) /
-                                        m_glossy_state.n_T_slot;
-            }
-            else
-            {
-                m_glossy_state.t_ref -= m_glossy_state.relay_cnt_t_ref * m_glossy_state.T_slot_estimated;
-            }
-        }
+//         if (m_glossy_state.t_ref_updated)
+//         {
+//             if (m_glossy_state.n_T_slot > 0)
+//             {
+//                 m_glossy_state.t_ref -= (m_glossy_state.relay_cnt_t_ref * m_glossy_state.T_slot_sum) /
+//                                         m_glossy_state.n_T_slot;
+//             }
+//             else
+//             {
+//                 m_glossy_state.t_ref -= m_glossy_state.relay_cnt_t_ref * m_glossy_state.T_slot_estimated;
+//             }
+//         }
     }
     
-    m_glossy_state.header.SetPktType(0);
-    
-    return m_glossy_state.n_rx;
+    return m_n_rx;
 }
 
 bool
@@ -183,44 +180,44 @@ Glossy::ProcessGlossyHeader(Ptr<Packet> packet)
     GlossyHeader header;
     packet->PeekHeader(header);
     
-    if (!m_glossy_state.header_ok)
-    {
-        if ((header.GetPktType() & 0xc0) != GLOSSY_COMMON_HEADER)
-        {
-            return false;
-        }
-        
-        if (((m_glossy_state.header.GetPktType() & 0x30) != GLOSSY_UNKNOWN_SYNC) &&
-            ((m_glossy_state.header.GetPktType() & 0x30) != (header.GetPktType() & 0x30)))
-        {
-            return false;
-        }
-        
-        if (((m_glossy_state.header.GetPktType() & 0x0f) != GLOSSY_UNKNOWN_N_TX_MAX) &&
-            ((m_glossy_state.header.GetPktType() & 0x30) != (header.GetPktType() & 0x30)))
-        {
-            return false;
-        }
-        
-        if ((m_glossy_state.header.GetInitiatorId() != GLOSSY_UNKNOWN_INITIATOR) &&
-            (m_glossy_state.header.GetInitiatorId() != header.GetInitiatorId()))
-        {
-            return false;
-        }
-        
-        if ((m_glossy_state.payload_len != GLOSSY_UNKNOWN_PAYLOAD_LEN) && 
-            (m_glossy_state.payload_len != (packet->GetSize() - 
-            ((((m_glossy_state.header.GetPktType()) & 0x30) == GLOSSY_WITHOUT_SYNC) ? 3 : 4))))
-        {
-            return false;
-        }
-        
-        m_glossy_state.header_ok = 1;
-    }
-    
-    m_glossy_state.header = header;
-    m_glossy_state.payload_len = packet->GetSize() - ((((m_glossy_state.header.GetPktType()) & 0x30) ==
-                                GLOSSY_WITHOUT_SYNC) ? 3 : 4);
+//     if (!m_glossy_state.header_ok)
+//     {
+//         if ((header.GetPktType() & 0xc0) != GLOSSY_COMMON_HEADER)
+//         {
+//             return false;
+//         }
+//         
+//         if (((m_glossy_state.header.GetPktType() & 0x30) != GLOSSY_UNKNOWN_SYNC) &&
+//             ((m_glossy_state.header.GetPktType() & 0x30) != (header.GetPktType() & 0x30)))
+//         {
+//             return false;
+//         }
+//         
+//         if (((m_glossy_state.header.GetPktType() & 0x0f) != GLOSSY_UNKNOWN_N_TX_MAX) &&
+//             ((m_glossy_state.header.GetPktType() & 0x30) != (header.GetPktType() & 0x30)))
+//         {
+//             return false;
+//         }
+//         
+//         if ((m_glossy_state.header.GetInitiatorId() != GLOSSY_UNKNOWN_INITIATOR) &&
+//             (m_glossy_state.header.GetInitiatorId() != header.GetInitiatorId()))
+//         {
+//             return false;
+//         }
+//         
+//         if ((m_glossy_state.payload_len != GLOSSY_UNKNOWN_PAYLOAD_LEN) && 
+//             (m_glossy_state.payload_len != (packet->GetSize() - 
+//             ((((m_glossy_state.header.GetPktType()) & 0x30) == GLOSSY_WITHOUT_SYNC) ? 3 : 4))))
+//         {
+//             return false;
+//         }
+//         
+//         m_glossy_state.header_ok = 1;
+//     }
+//     
+//     m_glossy_state.header = header;
+//     m_glossy_state.payload_len = packet->GetSize() - ((((m_glossy_state.header.GetPktType()) & 0x30) ==
+//                                 GLOSSY_WITHOUT_SYNC) ? 3 : 4);
     
     return true;
 }
@@ -233,11 +230,11 @@ Glossy::RxHandler(Ptr<Packet> packet)
     GlossyHeader new_header;
     Ptr<Packet> new_packet;
     
-    //m_glossy_state.t_rx_stop = (uint64_t) Simulator::Now().GetSeconds();
-    
-    if (ProcessGlossyHeader(packet))
+    if (/*ProcessGlossyHeader(packet)*/m_active)    // temp
     {
         //get payload?
+        
+        m_n_rx++;
         
         /*  inc relay counter*/
         new_packet =  = packet->Copy();
@@ -245,12 +242,17 @@ Glossy::RxHandler(Ptr<Packet> packet)
         new_header.SetRelayCnt(new_header.GetRelayCnt() + 1);
         new_packet->AddHeader(new_header);
         
-        if (((new_header.GetPktType() & 0x0f) == 0) ||
+        if ((new_header.GetNTxMax() == 0) ||
             (m_n_tx < m_n_tx_max))
         {
-            /*  retransmit  */
+            /*  retransmit and calc Tref and Tslot */
+            m_T_ref = Simulator::Now();
             m_lwb->GetPHY()->Send(packet);
+            m_T_slot = Simulator::Now() - m_T_ref;
+            m_T_ref -= m_T_slot * new_header.GetRelayCnt();
+            
             m_n_tx++;
+            m_last_packet = packet;
             
 //             if (m_n_tx < m_n_tx_max)
 //             {
@@ -277,31 +279,23 @@ Glossy::RxHandler(Ptr<Packet> packet)
             Stop();
         }
         
-        m_glossy_state.n_rx++;
-        
-        if ((m_glossy_state.header.GetInitiatorId() == m_lwb->GetId()) && (m_glossy_state.n_rx == 1))
-        {
-            /*  this node is a receiver and this is the first reception */
-            //
-        }
-        
-        if ((m_glossy_state.header.GetPktType() & 0x30) == GLOSSY_WITH_SYNC)
-        {
-            m_glossy_state.relay_cnt_last_rx = m_glossy_state.header.GetRelayCnt() - 1;
-            
-            if (m_glossy_state.t_ref_updated == 0)
-            {
-               //m_glossy_state.t_ref = m_glossy_state.t_rx_start - NS_TO_RTIMER_HF(TAU1);
-                m_glossy_state.t_ref_updated = 1;
-                m_glossy_state.relay_cnt_t_ref = m_glossy_state.header.GetRelayCnt() - 1;
-            }
-            
-            if ((m_glossy_state.relay_cnt_last_rx == m_glossy_state.relay_cnt_last_tx + 1) &&
-                (m_n_tx > 0))
-            {
-                //meaesure Tslot
-            }
-        }
+//         if (new_header.GetSync() == GLOSSY_WITH_SYNC)
+//         {
+//             m_glossy_state.relay_cnt_last_rx = m_glossy_state.header.GetRelayCnt() - 1;
+//             
+//             if (m_glossy_state.t_ref_updated == 0)
+//             {
+//                m_glossy_state.t_ref = m_glossy_state.t_rx_start - NS_TO_RTIMER_HF(TAU1);
+//                 m_glossy_state.t_ref_updated = 1;
+//                 m_glossy_state.relay_cnt_t_ref = m_glossy_state.header.GetRelayCnt() - 1;
+//             }
+//             
+//             if ((m_glossy_state.relay_cnt_last_rx == m_glossy_state.relay_cnt_last_tx + 1) &&
+//                 (m_n_tx > 0))
+//             {
+//                 meaesure Tslot
+//             }
+//         }
         
         NS_LOG_INFO("Node #" << m_lwb->GetId() << ": Received Packet(#" << packet->GetUid() << ")");
     }
@@ -316,32 +310,41 @@ Glossy::RxHandler(Ptr<Packet> packet)
 uint8_t
 Glossy::IsActive(void) const
 {
-    return m_glossy_state.active;
+    return m_active;
 }
 
 uint8_t
 Glossy::GetNRx(void) const
 {
-    return m_glossy_state.n_rx;
+    return m_n_rx;
 }
 
 uint8_t
 Glossy::GetNTx(void) const
 {
-    return m_glossy_state.n_tx;
+    return m_n_tx;
 }
 
 uint8_t
 Glossy::GetPayloadLength(void) const
 {
-    return m_glossy_state.payload_len;
+    GlossyHeader temp;
+    
+    if (m_last_packet)
+    {
+        return (m_last_packet->GetSize() - temp.GetSerializedSize());
+    }
+    else
+    {
+        return 0;
+    }
+    
 }
 
 void
 Glossy::SetNode(Ptr<Node> node)
 {
     m_node = node;
-    m_glossy_state.header.SetInitiatorId(node->GetId());
     
     return;
 }
@@ -366,16 +369,11 @@ Glossy::GetLWB(void) const
     return m_lwb;
 }
 
-uint8_t
-Glossy::IsTRefUpdated(void) const
-{
-    return m_glossy_state.t_ref_updated;
-}
 
 uint64_t
 Glossy::GetTRef(void) const
 {
-    return m_glossy_state.t_ref;
+    return m_T_ref;
 }
 
 void

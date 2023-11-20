@@ -93,16 +93,42 @@ GlossyHeader::GetInitiatorId(void) const
 }
 
 void 
-GlossyHeader::SetPktType(uint8_t pkt_type)
+GlossyHeader::SetHeaderType(glossy_header_t header_type)
 {
-    m_pkt_type = pkt_type;
+    m_header_type = header_type;
+    return;
+}
+
+glossy_header_t 
+GlossyHeader::GetHeaderType(void) const
+{
+    return m_header_type;
+}
+
+void 
+GlossyHeader::SetSync(glossy_sync_t sync)
+{
+    m_sync = sync;
+    return;
+}
+
+glossy_sync_t
+GlossyHeader::GetSync(void) const
+{
+    return m_sync;
+}
+
+void 
+GlossyHeader::SetNTxMax(uint8_t n_tx_max)
+{
+    m_n_tx_max = n_tx_max;
     return;
 }
 
 uint8_t
-GlossyHeader::GetPktType(void) const
+GlossyHeader::GetNTxMax(void) const
 {
-    return m_pkt_type;
+    return m_n_tx_max;
 }
 
 void
@@ -121,14 +147,16 @@ GlossyHeader::GetRelayCnt(void) const
 uint32_t
 GlossyHeader::GetSerializedSize(void) const
 {
-    return (uint32_t)5;
+    return (uint32_t)4;
 }
 
 void
 GlossyHeader::Serialize(Buffer::Iterator start) const
 {
+    uint8_t pkt_type = m_header_type | (m_sync & 0x30) | (m_n_tx_max & 0x0f);
+    
     start.WriteU16(m_initiator_id);
-    start.WriteU8(m_pkt_type);
+    start.WriteU8(pkt_type);
     start.WriteU8(m_relay_cnt);
     
     return;
@@ -138,8 +166,12 @@ uint32_t
 GlossyHeader::Deserialize(Buffer::Iterator start)
 {
     m_initiator_id = start.ReadU16();
-    m_pkt_type = start.ReadU8();
+    uint8_t pkt_type = start.ReadU8();
     m_relay_cnt = start.ReadU8();
+    
+    m_header_type = pkt_type & 0xc0;
+    m_sync = pkt_type & 0x30;
+    m_n_tx_max = pkt_type & 0x0f;
     
     return GetSerializedSize();
 }
@@ -148,7 +180,9 @@ void
 GlossyHeader::Print(std::ostream &os) const
 {
     os << "Initiator ID: " << m_initiator_id << std::endl;
-    os << "Packet Type ID: " << m_pkt_type << std::endl;
+    os << "Header Type: " << m_header_type << std::endl;
+    os << "Sync: " << m_sync << std::endl;
+    os << "Number of Max Transmissions Per Node: " << m_n_tx_max << std::endl;
     os << "Relay Count: " << m_relay_cnt << std::endl;
     
     return;

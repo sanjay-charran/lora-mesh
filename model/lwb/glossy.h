@@ -81,7 +81,7 @@
 #define GLOSSY_UNKNOWN_INITIATOR    0
 #define GLOSSY_UNKNOWN_PAYLOAD_LEN  0
 #define RF_CONF_MAX_PKT_LEN         63
-#define GLOSSY_COMMON_HEADER        0x80
+
 #define TIMEOUT_EXTRA_TICKS         70
 
 namespace ns3 {
@@ -94,34 +94,6 @@ typedef enum {
   GLOSSY_WITHOUT_RF_CAL = 0,
   GLOSSY_WITH_RF_CAL = 1,
 } glossy_rf_cal_t;
-
-typedef enum {
-  GLOSSY_UNKNOWN_SYNC = 0x00,
-  GLOSSY_WITH_SYNC = 0x10,
-  GLOSSY_WITHOUT_SYNC = 0x20,
-  GLOSSY_ONLY_RELAY_CNT = 0x30
-} glossy_sync_t;
-
-typedef struct {
-  uint64_t t_ref, t_tx_stop, t_rx_start, t_rx_stop, t_tx_start;
-  uint64_t T_slot_sum;
-  uint64_t T_slot_estimated;
-  uint64_t t_timeout;
-  GlossyHeader header;
-  uint8_t *payload;
-  uint8_t payload_len;
-  uint8_t n_T_slot;
-  uint8_t active;
-  uint8_t t_ref_updated;
-  uint8_t header_ok;
-  uint8_t  relay_cnt_last_rx;
-  uint8_t  relay_cnt_last_tx;
-  uint8_t  relay_cnt_t_ref;
-  uint8_t  relay_cnt_timeout;
-  uint8_t  n_rx;                                /* rx counter for last flood */
-  uint8_t  n_tx;
-} glossy_state_t;
-
 
 class Glossy : public Object
 {
@@ -177,12 +149,6 @@ public:
     uint8_t GetPayloadLength(void) const;
 
     /**
-     * @brief checks whether the reference time has been updated in the last
-     * glossy flood
-     */
-    uint8_t IsTRefUpdated(void) const;
-
-    /**
      * @brief get the reference time (timestamp of the reception of the first byte)
      * @return 64-bit timestamp (type uint64_t)
      */
@@ -202,18 +168,26 @@ public:
     void SetNTxMax(uint8_t n_tx_max);
     uint8_t GetNTxMax(void) const;
     
+    void SetRfCal(glossy_rf_cal_t rf_cal);
+    glossy_rf_cal_t GetRfCal(void) const;
+    
 private:
     bool ProcessGlossyHeader(Ptr<Packet> packet);
     
-    glossy_state_t      m_glossy_state;
     Ptr<Node>           m_node;
     Ptr<LWB>            m_lwb;
-    double              m_timeout_delay_seconds;
+    
+    glossy_rf_cal_t     m_rf_cal;
+    bool                m_active;
+    uint8_t             m_n_rx;
     uint8_t             m_n_tx;
     uint8_t             m_n_tx_max;
+    double              m_T_slot
+    double              m_T_ref;
     
+    double              m_timeout_delay_seconds;
     EventId             m_last_event;
-    uint64_t            m_last_packet_id;
+    Ptr<Packet>         m_last_packet;
 };
 
 }
