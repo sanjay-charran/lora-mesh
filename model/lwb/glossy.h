@@ -116,11 +116,11 @@ public:
     * start Glossy, i.e. initiate a flood (if node is initiator) or switch to RX
     * mode (receive/relay packets)
     */
-    void Start( uint16_t initiator_id,
-                Ptr<Packet> packet,
-                glossy_sync_t sync,
-                glossy_rf_cal_t rf_cal);
+    void StartInitiator(Ptr<Packet> packet, glossy_sync_t sync, glossy_rf_cal_t rf_cal);
 
+    void StartReceiver(void);
+    
+    
     /**
      * @brief stop glossy
      */

@@ -71,17 +71,30 @@ Glossy::~Glossy()
 }
 
 void
-Glossy::Start(uint16_t initiator_id, Ptr<Packet> packet,
-              glossy_sync_t sync, glossy_rf_cal_t rf_cal)
+Glossy::StartReceiver(void)
 {
-    NS_LOG_FUNCTION (this << initiator_id << packet << sync << rf_cal);
+    m_active = true;
+    m_n_rx = 0;
+    m_T_slot = 0;
+    
+    if (m_lwb && m_lwb->GetPHY())
+    {
+        m_lwb->GetPHY()->SwitchStateSTANDBY();
+    }
+    
+    return;
+}
+
+void
+Glossy::StartInitiator(Ptr<Packet> packet, glossy_sync_t sync, glossy_rf_cal_t rf_cal)
+{
+    NS_LOG_FUNCTION (this << packet << sync << rf_cal);
     
     GlossyHeader new_header;
 
-    m_active = true;
+    StartReceiver();    /*  things in common for both receivers and initiator nodes */
+    
     uint8_t payload_len = packet->GetSize() - new_header.GetSerializedSize();
-    m_n_rx = 0;
-    m_T_slot = 0;
     
     /*  prepare the Glossy header    */
     new_header.SetInitiatorId(initiator_id);
@@ -89,11 +102,6 @@ Glossy::Start(uint16_t initiator_id, Ptr<Packet> packet,
     new_header.SetSync(sync);
     new_header.SetNTxMax(m_n_tx_max);
     new_header.SetRelayCnt(0);
-    
-    if (m_lwb && m_lwb->GetPHY())
-    {
-        m_lwb->GetPHY()->SwitchStateSTANDBY();
-    }
     
     /*  Glossy initiator    */
     if (initiator_id == m_node->GetId())
@@ -135,13 +143,6 @@ Glossy::Start(uint16_t initiator_id, Ptr<Packet> packet,
             }
         }
     }
-    else
-    {
-        /*  Glossy receiver */
-        
-        //glossy receiver init (shouldn't be anything)
-        
-    }
     
     return;
 }
@@ -150,6 +151,13 @@ uint8_t
 Glossy::Stop(void)
 {
     NS_LOG_FUNCTION(this);
+    
+    uint8_t n_rx = m_n_rx;
+    m_n_rx = 0;
+    m_n_tx = 0;
+    m_T_slot = 0;
+    m_T_ref = 0;
+    m_last_packet = Ptr<nullptr>;
     
     if (m_active)
     {
@@ -171,7 +179,7 @@ Glossy::Stop(void)
 //         }
     }
     
-    return m_n_rx;
+    return n_rx;
 }
 
 bool
@@ -232,7 +240,7 @@ Glossy::RxHandler(Ptr<Packet> packet)
     
     if (/*ProcessGlossyHeader(packet)*/m_active)    // temp
     {
-        //get payload?
+        //need to add retransmit delay
         
         m_n_rx++;
         
