@@ -1,16 +1,16 @@
-#ifndef __LWB_HEADER_H__
-#define __LWB_HEADER_H__
+#ifndef __LWB_DATA_PACKET_HEADER_H__
+#define __LWB_DATA_PACKET_HEADER_H__
 
 #include "ns3/header.h"
 
 namespace ns3 {
 namespace lora_mesh {
 
-class LWBHeader : public header
+class LWBDataPacketHeader : public header
 {
 public:
-    LWBHeader();
-    ~LWBHeader();
+    LWBDataPacketHeader();
+    ~LWBDataPacketHeader();
     
     static TypeId GetTypeId(void);
     TypeId GetInstanceTypeId(void) const;
@@ -35,4 +35,4 @@ private:
 }
 }
 
-#endif /*   __LWB_HEADER_H__  */
+#endif /*   __LWB_DATA_PACKET_HEADER_H__    */
