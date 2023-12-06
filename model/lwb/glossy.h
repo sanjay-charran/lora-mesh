@@ -91,6 +91,13 @@ class LWB;
 class LoRaPHY;
 
 typedef enum {
+  GLOSSY_UNKNOWN_SYNC = 0x00,
+  GLOSSY_WITH_SYNC = 0x10,
+  GLOSSY_WITHOUT_SYNC = 0x20,
+  GLOSSY_ONLY_RELAY_CNT = 0x30
+} glossy_sync_t;
+
+typedef enum {
   GLOSSY_WITHOUT_RF_CAL = 0,
   GLOSSY_WITH_RF_CAL = 1,
 } glossy_rf_cal_t;

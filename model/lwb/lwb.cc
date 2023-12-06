@@ -60,10 +60,36 @@ LWB::~LWB()
 }
 
 void
-LWB::Start(void (*pre_lwb_func)(void), void *post_lwb_proc)
+LWB::Start(void)
 {
-    NS_LOG_FUNCTION(this << pre_lwb_func << post_lwb_proc);
-    //
+    NS_LOG_FUNCTION_NOARGS();
+    
+    //init schedule
+    m_schedule.SetTime(Simulator::Now().GetSeconds());
+    m_schedule.SetPeriod(LWB_CONF_SCHED_PERIOD_IDLE);
+    m_schedule.SetNSlots(0);
+    m_schedule.SetNSlots(m_schedule.GetNSlots() | LWB_SCHED_CONT_SLOT);
+    
+    Schedule();
+    
+    
+    return;
+}
+
+void 
+LWB::Schedule(void)
+{
+    Ptr<Packet> schedule_packet = Create<Packet>(50);
+    packet->AddHeader(m_schedule);
+    
+    //  glossy send schedule
+    if (m_glossy)
+    {
+        m_glossy->StartInitiator(schedule_packet, GLOSSY_ONLY_RELAY_CNT, GLOSSY_WITHOUT_RF_CAL);
+    }
+    
+    //  time and handle sack slots, data slots, contention slots
+    
     return;
 }
 
@@ -138,6 +164,19 @@ Ptr<Glossy>
 LWB::GetGlossy(void) const
 {
     return m_glossy;
+}
+
+void
+LWB::SetNode(Ptr<Node> node)
+{
+    m_node = node;
+    return;
+}
+
+Ptr<Node>
+LWB::GetNode(void) const
+{
+    return m_node;
 }
 
 }

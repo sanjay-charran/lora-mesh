@@ -49,8 +49,11 @@
 #ifndef __LWB_H__
 #define __LWB_H__
 
+#include <queue>
+
 #include "ns3/lora-mac.h"
 #include "ns3/glossy.h"
+#include "ns3/lwb-schedule-packet-header.h"
 
 /* whether the initiator should retransmit the packet after a certain
  * time of no reception */
@@ -149,14 +152,8 @@ public:
     
     /**
      * @brief start the Low-Power Wireless Bus
-     * @param pre_lwb_func a pointer to a function that needs to be executed
-     * before an LWB round. Set LWB_T_PREPROCESS to the worst-case 
-     * execution time of this function.
-     * @param post_lwb_proc a pointer to the application task process control
-     * block (struct process), this process will be called (polled) at the end
-     * of an LWB round
      */
-    void Start(void (*pre_lwb_func)(void), void *post_lwb_proc);
+    void Start(void);
     
     /**
      * @brief pause the LWB by stopping the rtimer
@@ -248,11 +245,19 @@ public:
     void SetGlossy(Ptr<Glossy> glossy);
     Ptr<Glossy> GetGlossy(void) const;
     
+    void SetNode(Ptr<Node> node);
+    Ptr<Node> GetNode(void) const;
+    
 private:
+    void Schedule(void);
+    
     //lwb_conn_state_t m_state;
     //lwb_statistics_t    m_stats;
-    lwb_sync_state_t    m_sync_state;
-    Ptr<Glossy>         m_glossy;
+    Ptr<Node>                   m_node;
+    lwb_sync_state_t            m_sync_state;
+    Ptr<Glossy>                 m_glossy;
+    std::queue<Ptr<Packet>>     m_packet_queue;
+    LWBSchedulePacketHeader     m_schedule;
 };
     
 /**
