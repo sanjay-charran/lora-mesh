@@ -54,6 +54,10 @@
 #include "ns3/lora-mac.h"
 #include "ns3/glossy.h"
 #include "ns3/lwb-schedule-packet-header.h"
+#include "ns3/lwb-header.h"
+#include "ns3/lwb-stream-request-header.h"
+#include "ns3/lwb-stream-ack-header.h"
+#include "ns3/lwb-data-packet-header.h"
 
 /* whether the initiator should retransmit the packet after a certain
  * time of no reception */
@@ -173,6 +177,8 @@ public:
 
     void Send(Ptr<Packet> packet);
     
+    void DoSend(void);
+    
     /** 
      * @brief get a data packet that have been received during the previous LWB
      * rounds
@@ -268,6 +274,7 @@ private:
     double                      m_data_delay;
     bool                        m_schedule_sack;
     bool                        m_schedule_cont;
+    bool                        m_schedule_dack;
     Time                        m_time;
     
 };

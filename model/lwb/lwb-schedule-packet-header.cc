@@ -84,6 +84,45 @@ LWBSchedulePacketHeader::SetSlots(uint16_t slot[LWB_MAX_DATA_SLOTS])
     return;
 }
 
+void
+LWBSchedulePacketHeader::SetSACK(bool has)
+{
+    m_hasSACK = has;
+    return;
+}
+
+bool
+LWBSchedulePacketHeader::HasSACK(void) const
+{
+    return m_hasSACK;
+}
+
+void
+LWBSchedulePacketHeader::SetDACK(bool has)
+{
+    m_hasDACK = has;
+    return;
+}
+
+bool
+LWBSchedulePacketHeader::HasDACK(void) const
+{
+    return m_hasDACK;
+}
+
+void
+LWBSchedulePacketHeader::SetCONT(bool has)
+{
+    m_hasCONT = has;
+    return;
+}
+
+bool
+LWBSchedulePacketHeader::HasCONT(void) const
+{
+    return m_hasCONT;
+}
+
 void 
 LWBSchedulePacketHeader::GetSlots(uint16_t slot[LWB_MAX_DATA_SLOTS]) const
 {
@@ -107,10 +146,26 @@ void
 LWBSchedulePacketHeader::Serialize(Buffer::Iterator start) const
 {
     unsigned int i;
+    uint16_t temp = m_n_slots;
+    
+    if (m_hasSACK)
+    {
+        temp |= LWB_SCHED_SACK_SLOT;
+    }
+    
+    if (m_hasCONT)
+    {
+        temp |= LWB_SCHED_CONT_SLOT;
+    }
+    
+    if (m_hasDACK)
+    {
+        temp |= LWB_SCHED_DACK_SLOT;
+    }
     
     start.WriteU32(m_time);
     start.WriteU16(m_period);
-    start.WriteU16(m_n_slots);
+    start.WriteU16(temp);
     
     for (i = 0;i < m_n_slots;i++)
     {
@@ -124,10 +179,43 @@ uint32_t
 LWBSchedulePacketHeader::Deserialize(Buffer::Iterator start)
 {
     unsigned int i;
+    uint16_t temp;
     
     m_time = start.ReadU32();
     m_period = start.ReadU16();
-    m_n_slots = start.ReadU16();
+    temp = start.ReadU16();
+    
+    if (temp & LWB_SCHED_SACK_SLOT)
+    {
+        m_hasSACK = true;
+        temp &= (~LWB_SCHED_SACK_SLOT);
+    }
+    else
+    {
+        m_hasSACK = false;
+    }
+    
+    if (temp & LWB_SCHED_CONT_SLOT)
+    {
+        m_hasCONT = true;
+        temp &= (~LWB_SCHED_CONT_SLOT);
+    }
+    else
+    {
+        m_hasCONT = false;
+    }
+    
+    if (temp & LWB_SCHED_DACK_SLOT)
+    {
+        m_hasDACK = true;
+        temp &= (~LWB_SCHED_DACK_SLOT);
+    }
+    else
+    {
+        m_hasDACK = false;
+    }
+    
+    m_n_slots = temp;
     
     for (i = 0;i < m_n_slots;i++)
     {

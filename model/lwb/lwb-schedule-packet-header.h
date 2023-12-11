@@ -8,6 +8,7 @@
 #endif  /*  LWB_MAX_DATA_SLOTS  */
 
 #define LWB_CONF_SCHED_PERIOD_IDLE  10
+#define LWB_SCHED_DACK_SLOT         0x2000
 #define LWB_SCHED_CONT_SLOT         0x4000
 #define LWB_SCHED_SACK_SLOT         0x8000
 
@@ -91,11 +92,24 @@ public:
     void SetSlots(uint16_t slot[LWB_MAX_DATA_SLOTS]);
     void GetSlots(uint16_t slot[LWB_MAX_DATA_SLOTS]) const;
     
+    void SetSACK(bool has);
+    bool HasSACK(void) const;
+    
+    void SetDACK(bool has);
+    bool HasDACK(void) const;
+    
+    void SetCONT(bool has);
+    bool HasCONT(void) const;
+    
 private:
     uint32_t m_time;
     uint16_t m_period;
     uint16_t m_n_slots;
     uint16_t m_slot[LWB_MAX_DATA_SLOTS];//ids
+    
+    bool    m_hasSACK;
+    bool    m_hasDACK;
+    bool    m_hasCONT;
 };
 
 }

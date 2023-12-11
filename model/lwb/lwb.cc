@@ -55,6 +55,7 @@ LWB::LWB()
 {
     m_schedule_sack = false;
     m_schedule_cont = true;
+    m_schedule_dack = false;
     m_schedule_delay = LWB_CONF_SCHED_PERIOD_IDLE;
     m_data_delay = 0.5;
     m_time = Seconds(0);
@@ -70,14 +71,11 @@ LWB::Start(void)
     NS_LOG_FUNCTION_NOARGS();
     
     //init schedule
-    m_schedule.SetTime(Simulator::Now().GetSeconds());
     m_schedule.SetPeriod(m_schedule_delay);
     m_schedule.SetNSlots(0);
-    
-    if (m_schedule_cont)
-    {
-        m_schedule.SetNSlots(m_schedule.GetNSlots() | LWB_SCHED_CONT_SLOT);
-    }
+    m_schedule.SetCONT(m_schedule_cont);
+    m_schedule.SetSACK(m_schedule_sack);
+    m_schedule.SetDACK(m_schedule_dack);
     
     Schedule();
     
@@ -88,9 +86,15 @@ LWB::Start(void)
 void 
 LWB::Schedule(void)
 {
+    LWBHeader header;
+    Time delay;
+    m_schedule.SetTime(Simulator::Now().GetSeconds());
+    
+    header.SetPacketType(SCHEDULE);
+    
     Ptr<Packet> schedule_packet = Create<Packet>(50);
     packet->AddHeader(m_schedule);
-    Time delay;
+    packet->AddHeader(header);
     
     //  glossy send schedule
     if (m_glossy)
@@ -98,13 +102,10 @@ LWB::Schedule(void)
         m_glossy->StartInitiator(schedule_packet, GLOSSY_ONLY_RELAY_CNT, GLOSSY_WITHOUT_RF_CAL);
     }
     
-    delay = Seconds(m_schedule_delay + 
-            (m_data_delay * ((m_schedule.GetNSlots() & ~(LWB_SCHED_CONT_SLOT | LWB_SCHED_SACK_SLOT)) +
-                ((m_schedule.GetNSlots() & LWB_SCHED_SACK_SLOT)?1:0) +
-                ((m_schedule.GetNSlots() & LWB_SCHED_CONT_SLOT)?1:0))));
+    delay = Seconds(m_schedule_delay + (m_data_delay * (m_schedule.GetNSlots() +
+                ((m_schedule.HasSACK())?1:0) +((m_schedule.HasCONT())?1:0))));
     
     Simulator::Schedule(delay, &LWB::Schedule, this);
-    
     
     return;
 }
@@ -143,8 +144,31 @@ LWB::Resume(void)
 void
 LWB::Send(Ptr<Packet> packet)
 {
-    /*  placeholder func call   */
-    //m_glossy->Start(GetId(), packet, 3, GLOSSY_WITHOUT_SYNC, GLOSSY_WITHOUT_RF_CAL);
+    /*  Add to queue    */
+    m_packet_queue.push(packet);
+    
+    return;
+}
+    
+void
+LWB::DoSend(void)
+{
+    Ptr<Packet> packet;
+    
+    if (!m_packet_queue.empty())
+    {
+        packet = m_packet_queue.front();
+        m_packet_queue.pop();
+        
+        NS_LOG_INFO("Node #" << m_node->GetId() << ": LWB Sending Packet #" << packet->GetUid());
+        
+        m_glossy->Start(GetId(), packet, 1, GLOSSY_WITHOUT_SYNC, GLOSSY_WITHOUT_RF_CAL);
+    }
+    else 
+    {
+        NS_LOG_INFO("Node #" << m_node->GetId() << ": Packet Queue Empty");
+    }
+    
     return;
 }
     
@@ -153,48 +177,67 @@ LWB::Receive(Ptr<Packet> packet)
 {
     GlossyHeader gheader;
     LWBSchedulePacketHeader sheader;
+    LWBHeader header;
     Time cur = Simulator::Now();
+    uint16_t slot[LWB_MAX_DATA_SLOTS;
+    unsigned int i;
+    Time delay;
     
-    packet->RemoveHeader(gheader);
+    packet->RemoveHeader(header);
     
-    if ((m_schedule.GetTime() == 0) ||
-        ((cur.GetSeconds() >= (m_time.GetSeconds() + m_schedule.GetPeriod())) &&
-            (cur.GetSeconds() < (m_time.GetSeconds() + m_schedule.GetPeriod()) + m_data_delay)))
+    switch (header.GetPacketType())
     {
-        //schedule
-        m_time = cur;
-        packet->PeekHeader(sheader);
-        m_schedule = sheader;
-        
-        
-    }
-    else
-    {
-        if ((m_schedule.GetNSlots() & LWB_SCHED_SACK_SLOT) &&
-            (cur.GetSeconds() >= (m_time.GetSeconds() + m_data_delay)) &&
-            (cur.GetSeconds() < (m_time.GetSeconds() + 2*m_data_delay)))
-        {
-            //sack
-        }
-        else if ((m_schedule.GetNSlots() & ~(LWB_SCHED_CONT_SLOT | LWB_SCHED_SACK_SLOT)) &&
-                (cur.GetSeconds() >= (m_time.GetSeconds() + 
-                        ((m_schedule.GetNSlots() & LWB_SCHED_SACK_SLOT)?2:1)*m_data_delay)) &&
-                (cur.GetSeconds() < (m_time.GetSeconds() + m_data_delay *
-                        (((m_schedule.GetNSlots() & LWB_SCHED_SACK_SLOT)?2:1) + 
-                            (m_schedule.GetNSlots() & ~(LWB_SCHED_CONT_SLOT | LWB_SCHED_SACK_SLOT))))))
-        {
+        case SCHEDULE:          
+            packet->PeekHeader(sheader);
             
-            //data
-        }
-        else if ((m_schedule.GetNSlots() & LWB_SCHED_CONT_SLOT) &&
-                 ())
-        {
-            //cont
-        }
+            if (sheader.GetTime() != m_schedule.GetTime())
+            {
+                /*  different schedule --- update actions  */
+                m_schedule.SetTime(sheader.GetTime());
+                m_schedule.SetPeriod(sheader.GetPeriod());
+                m_schedule.SetNSlots(sheader.GetNSlots());
+                sheader.GetSlots(slot);
+                m_schedule.SetSlots(slot);
+                
+                for (i = 0;i < m_schedule.GetNSlots();i++)
+                {
+                    if (slot[i] == m_node->GetId())
+                    {
+                        /*  this node is scheduled for position i    */
+                        
+                        delay = ((i + 1 + ((m_schedule.HasSACK())?1:0)) * m_data_delay) -
+                                (cur.GetSeconds() - m_schedule.GetTime());
+                        
+                        Simulator::Schedule(delay, &LWB::DoSend, this);
+                                
+                        break;
+                    }
+                }
+                
+                if (i == m_schedule.GetNSlots() && m_schedule.HasCONT())
+                {
+                    /*  node not in schedule    */
+                    
+                    //attempt to join in cont slot
+                }
+            }
+            
+            break;
+                                
+        case DATA:              
+                                break;
+                                
+        case STREAM_REQUEST:    
+                                break;
+                                
+        case STREAM_ACK:        //
+                                break;
+                                
+        case DATA_ACK:          //
+                                break;
     }
     
-    
-    packet->AddHeader(gheader);
+    packet->AddHeader(header);
     
     m_glossy->RxHandler(packet);
     return;
