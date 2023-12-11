@@ -312,6 +312,8 @@ Glossy::RxHandler(Ptr<Packet> packet)
         //some header fields are wrong
     }
     
+    //pass to LWB class
+    
     return;
 }
 

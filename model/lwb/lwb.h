@@ -248,6 +248,12 @@ public:
     void SetNode(Ptr<Node> node);
     Ptr<Node> GetNode(void) const;
     
+    void SetScheduleDelay(double delay);
+    double GetScheduleDelay(void) const;
+    
+    void SetDataDelay(double delay);
+    double GetDataDelay(void) const;
+    
 private:
     void Schedule(void);
     
@@ -258,6 +264,12 @@ private:
     Ptr<Glossy>                 m_glossy;
     std::queue<Ptr<Packet>>     m_packet_queue;
     LWBSchedulePacketHeader     m_schedule;
+    double                      m_schedule_delay;
+    double                      m_data_delay;
+    bool                        m_schedule_sack;
+    bool                        m_schedule_cont;
+    Time                        m_time;
+    
 };
     
 /**

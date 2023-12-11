@@ -53,6 +53,11 @@ LWB::GetTypeId(void)
 
 LWB::LWB()
 {
+    m_schedule_sack = false;
+    m_schedule_cont = true;
+    m_schedule_delay = LWB_CONF_SCHED_PERIOD_IDLE;
+    m_data_delay = 0.5;
+    m_time = Seconds(0);
 }
 
 LWB::~LWB()
@@ -66,9 +71,13 @@ LWB::Start(void)
     
     //init schedule
     m_schedule.SetTime(Simulator::Now().GetSeconds());
-    m_schedule.SetPeriod(LWB_CONF_SCHED_PERIOD_IDLE);
+    m_schedule.SetPeriod(m_schedule_delay);
     m_schedule.SetNSlots(0);
-    m_schedule.SetNSlots(m_schedule.GetNSlots() | LWB_SCHED_CONT_SLOT);
+    
+    if (m_schedule_cont)
+    {
+        m_schedule.SetNSlots(m_schedule.GetNSlots() | LWB_SCHED_CONT_SLOT);
+    }
     
     Schedule();
     
@@ -81,6 +90,7 @@ LWB::Schedule(void)
 {
     Ptr<Packet> schedule_packet = Create<Packet>(50);
     packet->AddHeader(m_schedule);
+    Time delay;
     
     //  glossy send schedule
     if (m_glossy)
@@ -88,7 +98,13 @@ LWB::Schedule(void)
         m_glossy->StartInitiator(schedule_packet, GLOSSY_ONLY_RELAY_CNT, GLOSSY_WITHOUT_RF_CAL);
     }
     
-    //  time and handle sack slots, data slots, contention slots
+    delay = Seconds(m_schedule_delay + 
+            (m_data_delay * ((m_schedule.GetNSlots() & ~(LWB_SCHED_CONT_SLOT | LWB_SCHED_SACK_SLOT)) +
+                ((m_schedule.GetNSlots() & LWB_SCHED_SACK_SLOT)?1:0) +
+                ((m_schedule.GetNSlots() & LWB_SCHED_CONT_SLOT)?1:0))));
+    
+    Simulator::Schedule(delay, &LWB::Schedule, this);
+    
     
     return;
 }
@@ -128,13 +144,58 @@ void
 LWB::Send(Ptr<Packet> packet)
 {
     /*  placeholder func call   */
-    m_glossy->Start(GetId(), packet, 3, GLOSSY_WITHOUT_SYNC, GLOSSY_WITHOUT_RF_CAL);
+    //m_glossy->Start(GetId(), packet, 3, GLOSSY_WITHOUT_SYNC, GLOSSY_WITHOUT_RF_CAL);
     return;
 }
     
 void
 LWB::Receive(Ptr<Packet> packet)
 {
+    GlossyHeader gheader;
+    LWBSchedulePacketHeader sheader;
+    Time cur = Simulator::Now();
+    
+    packet->RemoveHeader(gheader);
+    
+    if ((m_schedule.GetTime() == 0) ||
+        ((cur.GetSeconds() >= (m_time.GetSeconds() + m_schedule.GetPeriod())) &&
+            (cur.GetSeconds() < (m_time.GetSeconds() + m_schedule.GetPeriod()) + m_data_delay)))
+    {
+        //schedule
+        m_time = cur;
+        packet->PeekHeader(sheader);
+        m_schedule = sheader;
+        
+        
+    }
+    else
+    {
+        if ((m_schedule.GetNSlots() & LWB_SCHED_SACK_SLOT) &&
+            (cur.GetSeconds() >= (m_time.GetSeconds() + m_data_delay)) &&
+            (cur.GetSeconds() < (m_time.GetSeconds() + 2*m_data_delay)))
+        {
+            //sack
+        }
+        else if ((m_schedule.GetNSlots() & ~(LWB_SCHED_CONT_SLOT | LWB_SCHED_SACK_SLOT)) &&
+                (cur.GetSeconds() >= (m_time.GetSeconds() + 
+                        ((m_schedule.GetNSlots() & LWB_SCHED_SACK_SLOT)?2:1)*m_data_delay)) &&
+                (cur.GetSeconds() < (m_time.GetSeconds() + m_data_delay *
+                        (((m_schedule.GetNSlots() & LWB_SCHED_SACK_SLOT)?2:1) + 
+                            (m_schedule.GetNSlots() & ~(LWB_SCHED_CONT_SLOT | LWB_SCHED_SACK_SLOT))))))
+        {
+            
+            //data
+        }
+        else if ((m_schedule.GetNSlots() & LWB_SCHED_CONT_SLOT) &&
+                 ())
+        {
+            //cont
+        }
+    }
+    
+    
+    packet->AddHeader(gheader);
+    
     m_glossy->RxHandler(packet);
     return;
 }
@@ -177,6 +238,32 @@ Ptr<Node>
 LWB::GetNode(void) const
 {
     return m_node;
+}
+
+void
+LWB::SetScheduleDelay(double delay)
+{
+    m_schedule_delay = delay;
+    return;
+}
+
+double
+LWB::GetScheduleDelay(void) const
+{
+    return m_schedule_delay;
+}
+
+void
+LWB::SetDataDelay(double delay)
+{
+    m_data_delay = delay;
+    return;
+}
+
+double
+LWB::GetDataDelay(void) const
+{
+    return m_data_delay;
 }
 
 }

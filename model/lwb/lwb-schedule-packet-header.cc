@@ -7,6 +7,9 @@ namespace lora_mesh {
  
 LWBSchedulePacketHeader::LWBSchedulePacketHeader()
 {
+    m_time = 0;
+    m_period = LWB_SCHED_CONT_SLOT;
+    m_n_slots = 0;
 }
 
 LWBSchedulePacketHeader::~LWBSchedulePacketHeader()

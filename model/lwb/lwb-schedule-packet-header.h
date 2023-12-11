@@ -9,6 +9,7 @@
 
 #define LWB_CONF_SCHED_PERIOD_IDLE  10
 #define LWB_SCHED_CONT_SLOT         0x4000
+#define LWB_SCHED_SACK_SLOT         0x8000
 
 
 /**
