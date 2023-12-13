@@ -276,7 +276,7 @@ private:
     bool                        m_schedule_cont;
     bool                        m_schedule_dack;
     Time                        m_time;
-    
+    bool                        m_isInitiator;
 };
     
 /**

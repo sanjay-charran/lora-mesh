@@ -7,6 +7,7 @@ namespace lora_mesh {
  
 LWBStreamRequestHeader::LWBStreamRequestHeader()
 {
+    m_stream_id = 0;
 }
  
 LWBStreamRequestHeader::~LWBStreamRequestHeader()

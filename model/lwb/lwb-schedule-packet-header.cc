@@ -124,7 +124,7 @@ LWBSchedulePacketHeader::HasCONT(void) const
 }
 
 void 
-LWBSchedulePacketHeader::GetSlots(uint16_t slot[LWB_MAX_DATA_SLOTS]) const
+LWBSchedulePacketHeader::GetSlots(uint16_t slot[LWB_MAX_DATA_SLOTS])
 {
     unsigned int i;
     

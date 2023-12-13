@@ -90,7 +90,7 @@ public:
     uint16_t GetNSlots(void) const;
     
     void SetSlots(uint16_t slot[LWB_MAX_DATA_SLOTS]);
-    void GetSlots(uint16_t slot[LWB_MAX_DATA_SLOTS]) const;
+    void GetSlots(uint16_t slot[LWB_MAX_DATA_SLOTS]);
     
     void SetSACK(bool has);
     bool HasSACK(void) const;

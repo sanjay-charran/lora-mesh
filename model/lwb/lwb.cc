@@ -59,6 +59,7 @@ LWB::LWB()
     m_schedule_delay = LWB_CONF_SCHED_PERIOD_IDLE;
     m_data_delay = 0.5;
     m_time = Seconds(0);
+    m_isInitiator = false;
 }
 
 LWB::~LWB()
@@ -76,6 +77,8 @@ LWB::Start(void)
     m_schedule.SetCONT(m_schedule_cont);
     m_schedule.SetSACK(m_schedule_sack);
     m_schedule.SetDACK(m_schedule_dack);
+    
+    m_isInitiator = true;
     
     Schedule();
     
@@ -175,9 +178,11 @@ LWB::DoSend(void)
 void
 LWB::Receive(Ptr<Packet> packet)
 {
+    Ptr<Packet> new_packet;
     GlossyHeader gheader;
     LWBSchedulePacketHeader sheader;
-    LWBHeader header;
+    LWBStreamRequestHeader cheader;
+    LWBHeader header, new_header;
     Time cur = Simulator::Now();
     uint16_t slot[LWB_MAX_DATA_SLOTS;
     unsigned int i;
@@ -187,7 +192,8 @@ LWB::Receive(Ptr<Packet> packet)
     
     switch (header.GetPacketType())
     {
-        case SCHEDULE:          
+        case SCHEDULE:    
+            
             packet->PeekHeader(sheader);
             
             if (sheader.GetTime() != m_schedule.GetTime())
@@ -214,27 +220,72 @@ LWB::Receive(Ptr<Packet> packet)
                     }
                 }
                 
-                if (i == m_schedule.GetNSlots() && m_schedule.HasCONT())
+                if ((i == m_schedule.GetNSlots()) && m_schedule.HasCONT() && (!m_isInitiator) &&
+                    (m_schedule.GetNSlots() <= LWB_MAX_DATA_SLOTS))
                 {
                     /*  node not in schedule    */
+                    new_packet = Create<Packet>(50);
                     
-                    //attempt to join in cont slot
+                    cheader.SetNodeId(m_node->GetId())
+                    new_packet->AddHeader(cheader);
+                    
+                    new_header.SetPacketType(STREAM_REQUEST);
+                    new_packet->AddHeader(new_header);
+                    
+                    Send(new_packet);   //adds cont packet to queue
+                    
+                    delay = ((m_schedule.GetNSlots() + ((m_schedule.HasSACK())?1:0) + 1) * m_data_delay) -
+                            (cur.GetSeconds() - m_schedule.GetTime());
+                    
+                    Simulator::Schedule(delay, &LWB::DoSend, this);
                 }
             }
             
             break;
                                 
         case DATA:              
-                                break;
+            break;
                                 
         case STREAM_REQUEST:    
-                                break;
+            
+            packet->PeekHeader(cheader);
+            
+            if (m_isInitiator)
+            {
+                m_schedule.GetSlots(slot);
+                
+                for (i = 0;i < m_schedule.GetNSlots();i++)
+                {
+                    if (slot[i] == cheader.GetNodeId())
+                    {
+                        /*  Node already added to network   */
+                        break;
+                    }
+                }
+                
+                if ((i == m_schedule.GetNSlots()) && m_schedule.HasCONT() && 
+                    (m_schedule.GetNSlots() < LWB_MAX_DATA_SLOTS))
+                {
+                    slot[i] = cheader.GetNodeId();
+                    m_schedule.SetSlots(slot);
+                    m_schedule.SetNSlots(m_schedule.GetNSlots() + 1);
+                    
+                    /*  schedule SACK is needed */
+                    if (m_schedule.HasSACK())
+                    {
+                        //
+                    }
+                }
+                
+            }
+            
+            break;
                                 
-        case STREAM_ACK:        //
-                                break;
+        case STREAM_ACK:        
+            break;
                                 
-        case DATA_ACK:          //
-                                break;
+        case DATA_ACK:          
+            break;
     }
     
     packet->AddHeader(header);

@@ -19,8 +19,13 @@ def build(bld):
         'model/lora-mac.cc',
         'model/lora-net-device.cc',
         'model/lora-phy.cc',
-        'model/lwb/glossy.cc',
         'model/lwb/glossy-header.cc',
+        'model/lwb/glossy.cc',
+        'model/lwb/lwb-data-packet-header.cc',
+        'model/lwb/lwb-header.cc',
+        'model/lwb/lwb-schedule-packet-header.cc',
+        'model/lwb/lwb-stream-ack-header.cc',
+        'model/lwb/lwb-stream-request-header.cc',
         'model/lwb/lwb.cc',
         'helper/ascii-helper-for-custom-mesh.cc'
         ]
@@ -49,8 +54,13 @@ def build(bld):
         'model/lora-mac.h',
         'model/lora-net-device.h',
         'model/lora-phy.h',
-        'model/lwb/glossy.h',
         'model/lwb/glossy-header.h',
+        'model/lwb/glossy.h',
+        'model/lwb/lwb-data-packet-header.h',
+        'model/lwb/lwb-header.h',
+        'model/lwb/lwb-schedule-packet-header.h',
+        'model/lwb/lwb-stream-ack-header.h',
+        'model/lwb/lwb-stream-request-header.h',
         'model/lwb/lwb.h',
         'helper/ascii-helper-for-custom-mesh.h'
         ]
