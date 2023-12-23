@@ -189,7 +189,7 @@ private:
     uint8_t             m_n_rx;
     uint8_t             m_n_tx;
     uint8_t             m_n_tx_max;
-    double              m_T_slot
+    double              m_T_slot;
     double              m_T_ref;
     
     double              m_timeout_delay_seconds;

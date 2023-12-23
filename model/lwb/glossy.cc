@@ -59,7 +59,7 @@ Glossy::Glossy()
 {    
     m_timeout_delay_seconds = 1;
     m_active = false;
-    m_n_tx_max = 0;
+    m_n_tx_max = 1;
     m_n_tx = 0;
     m_Tslot = 0;
     m_Tref = 0;
@@ -139,7 +139,7 @@ Glossy::StartInitiator(Ptr<Packet> packet, glossy_sync_t sync, glossy_rf_cal_t r
             if (n_tx_max)
             {
                 //m_last_event = Simulator::Schedule(Seconds(m_timeout_delay_seconds), &Glossy::RxHandler, this, packet);
-                m_last_packet= packet;
+                m_last_packet = packet;
             }
         }
     }
@@ -153,17 +153,18 @@ Glossy::Stop(void)
     NS_LOG_FUNCTION(this);
     
     uint8_t n_rx = m_n_rx;
-    m_n_rx = 0;
-    m_n_tx = 0;
-    m_T_slot = 0;
-    m_T_ref = 0;
     m_last_packet = Ptr<nullptr>;
+    Time delay = Simulator::Now();
+    
+    delay -=
     
     if (m_active)
     {
         //stop the timeout
         
         m_active = false;
+        
+        Simulator::Schedule(delay, &Glossy::StartReceiver, this);
         
 //         if (m_glossy_state.t_ref_updated)
 //         {
@@ -178,6 +179,11 @@ Glossy::Stop(void)
 //             }
 //         }
     }
+    
+    m_n_rx = 0;
+    m_n_tx = 0;
+    m_T_slot = 0;
+    m_T_ref = 0;
     
     return n_rx;
 }
@@ -240,8 +246,7 @@ Glossy::RxHandler(Ptr<Packet> packet)
     
     if (/*ProcessGlossyHeader(packet)*/m_active)    // temp
     {
-        //need to add retransmit delay
-        
+
         m_n_rx++;
         
         /*  inc relay counter*/
@@ -254,32 +259,13 @@ Glossy::RxHandler(Ptr<Packet> packet)
             (m_n_tx < m_n_tx_max))
         {
             /*  retransmit and calc Tref and Tslot */
-            m_T_ref = Simulator::Now();
+            m_T_ref = Simulator::Now().GetSeconds();
             m_lwb->GetPHY()->Send(packet);
-            m_T_slot = Simulator::Now() - m_T_ref;
+            m_T_slot = Simulator::Now().GetSeconds() - m_T_ref;
             m_T_ref -= m_T_slot * new_header.GetRelayCnt();
             
             m_n_tx++;
             m_last_packet = packet;
-            
-//             if (m_n_tx < m_n_tx_max)
-//             {
-//                 if (!m_last_event.IsExpired())
-//                 {
-//                     if (packet->GetUid() != m_last_packet_id)
-//                     {
-//                         m_last_event.Cancel();
-//                         m_last_event = Simulator::Schedule(Seconds(m_timeout_delay_seconds), &Glossy::RxHandler, this, packet);
-//                         m_n_tx = 0;
-//                     }
-//                 }
-//                 else
-//                 {
-//                     m_last_event = Simulator::Schedule(Seconds(m_timeout_delay_seconds), &Glossy::RxHandler, this, packet);
-//                 }
-//             }
-            
-//             m_last_packet_id = packet->GetUid();
         }
         else
         {
@@ -305,14 +291,12 @@ Glossy::RxHandler(Ptr<Packet> packet)
 //             }
 //         }
         
-        NS_LOG_INFO("Node #" << m_lwb->GetId() << ": Received Packet(#" << packet->GetUid() << ")");
+        NS_LOG_INFO("Node #" << m_lwb->GetId() << ": Glossy Received Packet(#" << packet->GetUid() << ")");
     }
     else
     {
-        //some header fields are wrong
+        
     }
-    
-    //pass to LWB class
     
     return;
 }

@@ -182,12 +182,14 @@ LWB::Receive(Ptr<Packet> packet)
     GlossyHeader gheader;
     LWBSchedulePacketHeader sheader;
     LWBStreamRequestHeader cheader;
+    LWBDataPacketHeader     dheader;
     LWBHeader header, new_header;
     Time cur = Simulator::Now();
     uint16_t slot[LWB_MAX_DATA_SLOTS;
     unsigned int i;
     Time delay;
     
+    packet->RemoveHeader(gheader);
     packet->RemoveHeader(header);
     
     switch (header.GetPacketType())
@@ -241,9 +243,31 @@ LWB::Receive(Ptr<Packet> packet)
                 }
             }
             
+            delay = (m_data_delay * (m_schedule.GetNSlots() + ((m_schedule.HasSACK())?1:0) +
+                    ((m_schedule.HasCONT())?1:0))) - (cur.GetSeconds() - m_schedule.GetTime()) - 1;
+            
+            /*  stop glossy after scheduled slots   */
+            Simulator::Schedule(delay, &Glossy::Stop, m_glossy);
+            
+            delay = m_schedule_delay + (m_data_delay * (m_schedule.GetNSlots() + 
+                    ((m_schedule.HasSACK())?1:0) + ((m_schedule.HasCONT())?1:0)))
+                    - (cur.GetSeconds() - m_schedule.GetTime()) - 1;
+            
+            /*  resume it in time for next schedule */
+            Simulator::Schedule(delay, &Glossy::StartReceiver, m_glossy);
+            
             break;
                                 
-        case DATA:              
+        case DATA:    
+            
+            new_packet = packet->Copy();
+            new_packet->RemoveHeader(dheader);
+            
+            if (dheader.GetRecipientId() == m_node->GetId())
+            {
+                m_node->GetDevice()->Receive(new_packet);
+            }
+            
             break;
                                 
         case STREAM_REQUEST:    
@@ -266,6 +290,7 @@ LWB::Receive(Ptr<Packet> packet)
                 if ((i == m_schedule.GetNSlots()) && m_schedule.HasCONT() && 
                     (m_schedule.GetNSlots() < LWB_MAX_DATA_SLOTS))
                 {
+                    /*  add node to network */
                     slot[i] = cheader.GetNodeId();
                     m_schedule.SetSlots(slot);
                     m_schedule.SetNSlots(m_schedule.GetNSlots() + 1);
@@ -289,8 +314,9 @@ LWB::Receive(Ptr<Packet> packet)
     }
     
     packet->AddHeader(header);
-    
+    packet->AddHeader(gheader);
     m_glossy->RxHandler(packet);
+    
     return;
 }
 
