@@ -200,6 +200,8 @@ LWB::Receive(Ptr<Packet> packet)
             
             if (sheader.GetTime() != m_schedule.GetTime())
             {
+                NS_LOG_INFO("Node #" << m_node->GetId() << ": Received New Schedule");
+                
                 /*  different schedule --- update actions  */
                 m_schedule.SetTime(sheader.GetTime());
                 m_schedule.SetPeriod(sheader.GetPeriod());
@@ -290,6 +292,9 @@ LWB::Receive(Ptr<Packet> packet)
                 if ((i == m_schedule.GetNSlots()) && m_schedule.HasCONT() && 
                     (m_schedule.GetNSlots() < LWB_MAX_DATA_SLOTS))
                 {
+                    NS_LOG_INFO("Node #" << m_node->GetId() << "(Scheduler): Added Node #" << 
+                                cheader.GetNodeId() << "to Shedule");
+                    
                     /*  add node to network */
                     slot[i] = cheader.GetNodeId();
                     m_schedule.SetSlots(slot);
