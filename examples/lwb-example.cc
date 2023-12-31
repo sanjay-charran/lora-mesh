@@ -67,6 +67,8 @@ main (int argc, char *argv[])
     Ptr<LWB> mac;
     Ptr<Glossy> glossy;
     
+	const double sx1278_RxSens[7] = {-118, -123, -126, -129, -132, -133, -136};   //for BW=125kHz
+	
     for (NodeContainer::Iterator i = loranodes.Begin(); i != loranodes.End(); ++i)
     {
         Ptr<Node> node = *i;
@@ -128,7 +130,7 @@ main (int argc, char *argv[])
         node->GetDevice(0)->Send(packet, Address(), 0);
     }
     
-    loranodes.Get(0)->GetDevice(0)->GetMAC()->GetObject<LWB>()->Start();
+    loranodes.Get(0)->GetDevice(0)->GetObject<LoRaNetDevice>()->GetMAC()->GetObject<LWB>()->Start();
     
     //simulator setup
     Simulator::Stop(Minutes(10));

@@ -61,8 +61,8 @@ Glossy::Glossy()
     m_active = false;
     m_n_tx_max = 1;
     m_n_tx = 0;
-    m_Tslot = 0;
-    m_Tref = 0;
+    m_T_slot = 0;
+    m_T_ref = 0;
 }
  
 Glossy::~Glossy()
@@ -94,56 +94,53 @@ Glossy::StartInitiator(Ptr<Packet> packet, glossy_sync_t sync, glossy_rf_cal_t r
 
     StartReceiver();    /*  things in common for both receivers and initiator nodes */
     
-    uint8_t payload_len = packet->GetSize() - new_header.GetSerializedSize();
+    //uint8_t payload_len = packet->GetSize() - new_header.GetSerializedSize();
     
     /*  prepare the Glossy header    */
-    new_header.SetInitiatorId(initiator_id);
+    new_header.SetInitiatorId(m_node->GetId());
     new_header.SetHeaderType(GLOSSY_COMMON_HEADER);
     new_header.SetSync(sync);
     new_header.SetNTxMax(m_n_tx_max);
     new_header.SetRelayCnt(0);
     
-    /*  Glossy initiator    */
-    if (initiator_id == m_node->GetId())
-    {
-        if ((new_header.GetSync() == GLOSSY_UNKNOWN_SYNC) || 
-            ((packet->GetSize() + 1) > RF_CONF_MAX_PKT_LEN))
-        {
-            /** 
-             * the initiator must know whether there will be synchronization or
-             * not and the packet length may not exceed the max length 
-             */
-            Stop();
-            return;
-        }
-        else
-        {
-            /*  start the first transmission    */
-            //m_glossy_state.t_timeout = Simulator::Now().GetSeconds() + m_timeout_delay_seconds;
-            
-            if (m_lwb && m_lwb->GetPHY())
-            {
-                new_header.SetPacketLen(packet->GetSize());
-                packet->AddHeader(new_header);
+
+	if ((new_header.GetSync() == GLOSSY_UNKNOWN_SYNC) || 
+		((packet->GetSize() + 1) > RF_CONF_MAX_PKT_LEN))
+	{
+		/** 
+		 * the initiator must know whether there will be synchronization or
+		 * not and the packet length may not exceed the max length 
+		 */
+		Stop();
+		return;
+	}
+	else
+	{
+		/*  start the first transmission    */
+		//m_glossy_state.t_timeout = Simulator::Now().GetSeconds() + m_timeout_delay_seconds;
+		
+		if (m_lwb && m_lwb->GetPHY())
+		{
+			new_header.SetPacketLen(packet->GetSize());
+			packet->AddHeader(new_header);
                 
-                /*  calc Tslot from difference in time for sending  */
-                m_T_ref = Simulator::Now().GetSeconds();
-                m_lwb->GetPHY()->Send(packet);
-                m_T_slot = Simulator::Now().GetSeconds() - m_Tref;
-            }
+			/*  calc Tslot from difference in time for sending  */
+			m_T_ref = Simulator::Now().GetSeconds();
+			m_lwb->GetPHY()->Send(packet);
+			m_T_slot = Simulator::Now().GetSeconds() - m_T_ref;
+		}
             
             
-            //m_glossy_state.relay_cnt_timeout = 0;
-            m_n_tx = 0;
+		//m_glossy_state.relay_cnt_timeout = 0;
+		m_n_tx = 0;
             
-            if (n_tx_max)
-            {
-                //m_last_event = Simulator::Schedule(Seconds(m_timeout_delay_seconds), &Glossy::RxHandler, this, packet);
-                m_last_packet = packet;
-            }
-        }
-    }
-    
+		if (m_n_tx_max)
+		{
+			//m_last_event = Simulator::Schedule(Seconds(m_timeout_delay_seconds), &Glossy::RxHandler,this, packet);
+			m_last_packet = packet;
+		}
+	}
+        
     return;
 }
  
@@ -153,10 +150,8 @@ Glossy::Stop(void)
     NS_LOG_FUNCTION(this);
     
     uint8_t n_rx = m_n_rx;
-    m_last_packet = Ptr<nullptr>;
-    Time delay = Simulator::Now();
-    
-    delay -=
+    m_last_packet = Ptr<Packet>(nullptr);
+    //Time delay = Seconds(m_T_slot * 2);
     
     if (m_active)
     {
@@ -164,7 +159,7 @@ Glossy::Stop(void)
         
         m_active = false;
         
-        Simulator::Schedule(delay, &Glossy::StartReceiver, this);
+        //Simulator::Schedule(delay, &Glossy::StartReceiver, this);
         
 //         if (m_glossy_state.t_ref_updated)
 //         {
@@ -250,7 +245,7 @@ Glossy::RxHandler(Ptr<Packet> packet)
         m_n_rx++;
         
         /*  inc relay counter*/
-        new_packet =  = packet->Copy();
+        new_packet = packet->Copy();
         new_packet->RemoveHeader(new_header);
         new_header.SetRelayCnt(new_header.GetRelayCnt() + 1);
         new_packet->AddHeader(new_header);

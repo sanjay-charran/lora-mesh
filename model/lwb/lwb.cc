@@ -96,8 +96,8 @@ LWB::Schedule(void)
     header.SetPacketType(SCHEDULE);
     
     Ptr<Packet> schedule_packet = Create<Packet>(50);
-    packet->AddHeader(m_schedule);
-    packet->AddHeader(header);
+    schedule_packet->AddHeader(m_schedule);
+    schedule_packet->AddHeader(header);
     
     //  glossy send schedule
     if (m_glossy)
@@ -165,7 +165,7 @@ LWB::DoSend(void)
         
         NS_LOG_INFO("Node #" << m_node->GetId() << ": LWB Sending Packet #" << packet->GetUid());
         
-        m_glossy->Start(GetId(), packet, 1, GLOSSY_WITHOUT_SYNC, GLOSSY_WITHOUT_RF_CAL);
+        m_glossy->StartInitiator(packet, GLOSSY_WITHOUT_SYNC, GLOSSY_WITHOUT_RF_CAL);
     }
     else 
     {
@@ -185,7 +185,7 @@ LWB::Receive(Ptr<Packet> packet)
     LWBDataPacketHeader     dheader;
     LWBHeader header, new_header;
     Time cur = Simulator::Now();
-    uint16_t slot[LWB_MAX_DATA_SLOTS;
+    uint16_t slot[LWB_MAX_DATA_SLOTS];
     unsigned int i;
     Time delay;
     
@@ -215,8 +215,8 @@ LWB::Receive(Ptr<Packet> packet)
                     {
                         /*  this node is scheduled for position i    */
                         
-                        delay = ((i + 1 + ((m_schedule.HasSACK())?1:0)) * m_data_delay) -
-                                (cur.GetSeconds() - m_schedule.GetTime());
+                        delay = Seconds(((i + 1 + ((m_schedule.HasSACK())?1:0)) * m_data_delay) -
+                                (cur.GetSeconds() - m_schedule.GetTime()));
                         
                         Simulator::Schedule(delay, &LWB::DoSend, this);
                                 
@@ -230,7 +230,7 @@ LWB::Receive(Ptr<Packet> packet)
                     /*  node not in schedule    */
                     new_packet = Create<Packet>(50);
                     
-                    cheader.SetNodeId(m_node->GetId())
+                    cheader.SetNodeId(m_node->GetId());
                     new_packet->AddHeader(cheader);
                     
                     new_header.SetPacketType(STREAM_REQUEST);
@@ -238,22 +238,23 @@ LWB::Receive(Ptr<Packet> packet)
                     
                     Send(new_packet);   //adds cont packet to queue
                     
-                    delay = ((m_schedule.GetNSlots() + ((m_schedule.HasSACK())?1:0) + 1) * m_data_delay) -
-                            (cur.GetSeconds() - m_schedule.GetTime());
+                    delay = Seconds(((m_schedule.GetNSlots() + 
+							((m_schedule.HasSACK())?1:0) + 1) * m_data_delay) - 
+							(cur.GetSeconds() - m_schedule.GetTime()));
                     
                     Simulator::Schedule(delay, &LWB::DoSend, this);
                 }
             }
             
-            delay = (m_data_delay * (m_schedule.GetNSlots() + ((m_schedule.HasSACK())?1:0) +
-                    ((m_schedule.HasCONT())?1:0))) - (cur.GetSeconds() - m_schedule.GetTime()) - 1;
+            delay = Seconds((m_data_delay * (m_schedule.GetNSlots() + ((m_schedule.HasSACK())?1:0) +
+                    ((m_schedule.HasCONT())?1:0))) - (cur.GetSeconds() - m_schedule.GetTime()) - 1);
             
             /*  stop glossy after scheduled slots   */
             Simulator::Schedule(delay, &Glossy::Stop, m_glossy);
             
-            delay = m_schedule_delay + (m_data_delay * (m_schedule.GetNSlots() + 
+            delay = Seconds(m_schedule_delay + (m_data_delay * (m_schedule.GetNSlots() + 
                     ((m_schedule.HasSACK())?1:0) + ((m_schedule.HasCONT())?1:0)))
-                    - (cur.GetSeconds() - m_schedule.GetTime()) - 1;
+                    - (cur.GetSeconds() - m_schedule.GetTime()) - 1);
             
             /*  resume it in time for next schedule */
             Simulator::Schedule(delay, &Glossy::StartReceiver, m_glossy);
@@ -267,7 +268,7 @@ LWB::Receive(Ptr<Packet> packet)
             
             if (dheader.GetRecipientId() == m_node->GetId())
             {
-                m_node->GetDevice()->Receive(new_packet);
+                m_node->GetDevice(0)->GetObject<LoRaNetDevice>()->Receive(new_packet);
             }
             
             break;

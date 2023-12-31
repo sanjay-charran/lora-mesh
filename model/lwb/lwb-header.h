@@ -14,7 +14,7 @@ typedef enum {
     DATA_ACK = 4
 }lwb_packet_type;
     
-class LWBHeader : public header
+class LWBHeader : public Header
 {
 public:
     LWBHeader();

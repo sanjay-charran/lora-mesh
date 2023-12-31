@@ -169,8 +169,19 @@ GlossyHeader::Deserialize(Buffer::Iterator start)
     uint8_t pkt_type = start.ReadU8();
     m_relay_cnt = start.ReadU8();
     
-    m_header_type = pkt_type & 0xc0;
-    m_sync = pkt_type & 0x30;
+    m_header_type = GLOSSY_COMMON_HEADER;   //only one option
+    
+    m_sync = GLOSSY_UNKNOWN_SYNC;
+    
+    for (uint8_t i = GLOSSY_UNKNOWN_SYNC;i <= GLOSSY_ONLY_RELAY_CNT;i += GLOSSY_WITH_SYNC)
+    {
+        if ((pkt_type & 0x30) == i)
+        {
+            m_sync = static_cast<glossy_sync_t>(i);
+            break;
+        }
+    }
+    
     m_n_tx_max = pkt_type & 0x0f;
     
     return GetSerializedSize();

@@ -6,7 +6,7 @@
 namespace ns3 {
 namespace lora_mesh {
 
-class LWBDataPacketHeader : public header
+class LWBDataPacketHeader : public Header
 {
 public:
     LWBDataPacketHeader();

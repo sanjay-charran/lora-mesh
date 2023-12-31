@@ -73,8 +73,8 @@ LWBStreamACKHeader::Serialize(Buffer::Iterator start) const
 uint32_t 
 LWBStreamACKHeader::Deserialize(Buffer::Iterator start)
 {
-    start.ReadU16(m_node_id);
-    start.ReadU8(m_stream_id);
+    m_node_id = start.ReadU16();
+    m_stream_id = start.ReadU8();
     
     return GetSerializedSize();
 }

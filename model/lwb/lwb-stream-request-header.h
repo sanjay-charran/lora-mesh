@@ -6,7 +6,7 @@
 namespace ns3 {
 namespace lora_mesh {
 
-class LWBStreamRequestHeader : public header
+class LWBStreamRequestHeader : public Header
 {
 public:
     LWBStreamRequestHeader();

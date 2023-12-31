@@ -45,7 +45,7 @@ LWBHeader::GetPacketType(void) const
 void 
 LWBHeader::Serialize(Buffer::Iterator start) const
 {
-    Start.WriteU8((uint8_t)m_type);
+    start.WriteU8((uint8_t)m_type);
     
     return;
 }
@@ -53,8 +53,18 @@ LWBHeader::Serialize(Buffer::Iterator start) const
 uint32_t
 LWBHeader::Deserialize(Buffer::Iterator start)
 {
-    m_type = start.ReadU8();
+    uint8_t temp = start.ReadU8();
     
+
+	if (temp >= SCHEDULE && temp <= DATA_ACK)
+	{
+		m_type = static_cast<lwb_packet_type>(temp);
+	}
+	else
+	{
+		m_type = DATA;	//used as default here
+	}
+	
     return GetSerializedSize();
 }
 

@@ -8,7 +8,7 @@
 namespace ns3 {
 namespace lora_mesh {
 
-class LWBStreamACKHeader : public header
+class LWBStreamACKHeader : public Header
 {
 public:
     LWBStreamACKHeader();

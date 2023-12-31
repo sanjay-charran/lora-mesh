@@ -65,7 +65,7 @@
 namespace ns3 {
 namespace lora_mesh {
     
-class LWBSchedulePacketHeader : public header
+class LWBSchedulePacketHeader : public Header
 {
 public:
     LWBSchedulePacketHeader();

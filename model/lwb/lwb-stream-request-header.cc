@@ -88,9 +88,9 @@ LWBStreamRequestHeader::Serialize(Buffer::Iterator start) const
 uint32_t 
 LWBStreamRequestHeader::Deserialize(Buffer::Iterator start)
 {
-    start.ReadU16(m_node_id);
-    start.ReadU8(m_stream_id);
-    start.ReadU16(m_ipi);
+    m_node_id = start.ReadU16();
+    m_stream_id = start.ReadU8();
+    m_ipi = start.ReadU16();
     
     return GetSerializedSize();
 }
