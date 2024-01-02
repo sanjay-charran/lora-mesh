@@ -57,7 +57,7 @@ LWB::LWB()
     m_schedule_cont = true;
     m_schedule_dack = false;
     m_schedule_delay = LWB_CONF_SCHED_PERIOD_IDLE;
-    m_data_delay = 0.5;
+    m_data_delay = 1;
     m_time = Seconds(0);
     m_isInitiator = false;
 }
@@ -247,14 +247,14 @@ LWB::Receive(Ptr<Packet> packet)
             }
             
             delay = Seconds((m_data_delay * (m_schedule.GetNSlots() + ((m_schedule.HasSACK())?1:0) +
-                    ((m_schedule.HasCONT())?1:0))) - (cur.GetSeconds() - m_schedule.GetTime()) - 1);
+                    ((m_schedule.HasCONT())?1:0))));// - (cur.GetSeconds() - m_schedule.GetTime()) - 1);
             
             /*  stop glossy after scheduled slots   */
             Simulator::Schedule(delay, &Glossy::Stop, m_glossy);
             
             delay = Seconds(m_schedule_delay + (m_data_delay * (m_schedule.GetNSlots() + 
-                    ((m_schedule.HasSACK())?1:0) + ((m_schedule.HasCONT())?1:0)))
-                    - (cur.GetSeconds() - m_schedule.GetTime()) - 1);
+                    ((m_schedule.HasSACK())?1:0) + ((m_schedule.HasCONT())?1:0))))
+                    ;//- (cur.GetSeconds() - m_schedule.GetTime()) - 1)*/;
             
             /*  resume it in time for next schedule */
             Simulator::Schedule(delay, &Glossy::StartReceiver, m_glossy);

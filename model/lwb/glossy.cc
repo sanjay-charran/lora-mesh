@@ -58,11 +58,12 @@ Glossy::GetTypeId(void)
 Glossy::Glossy()
 {    
     m_timeout_delay_seconds = 1;
-    m_active = false;
+    m_active = true;
     m_n_tx_max = 1;
     m_n_tx = 0;
     m_T_slot = 0;
     m_T_ref = 0;
+	//m_node = 0;
 }
  
 Glossy::~Glossy()

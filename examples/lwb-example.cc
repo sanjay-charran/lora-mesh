@@ -27,7 +27,7 @@
 #include <vector>
 
 #define NUM_NODES       5
-#define SIMULATION_SF   6
+#define SIMULATION_SF   7
 
 using namespace ns3;
 using namespace lora_mesh;
@@ -48,15 +48,16 @@ main (int argc, char *argv[])
     loss->SetPathLossExponent (4);
     loss->SetReference (1, 7.7);
     
+	channel->SetLossModel(loss);
+    channel->SetDelayModel(delay);
+
     MobilityHelper mobility;
     
-    Ptr<RandomDiscPositionAllocator> position = CreateObject<RandomDiscPositionAllocator>();
-    position->SetAttribute("Rho", StringValue("ns3::UniformRandomVariable[Min=0|Max=1000]"));
-    
-    mobility.SetMobilityModel("ns3::ConstantPositionMobilityModel",
-                            "PositionAllocator", PointerValue(position)
-    );
-    
+    mobility.SetMobilityModel("ns3::ConstantPositionMobilityModel");
+    mobility.SetPositionAllocator(	"ns3::RandomDiscPositionAllocator",
+									"Rho", StringValue("ns3::UniformRandomVariable[Min=0|Max=1000]")
+	);
+
     NodeContainer loranodes;
     loranodes.Create(NUM_NODES);
     
@@ -75,6 +76,7 @@ main (int argc, char *argv[])
         device = Create<LoRaNetDevice>();
         phy = CreateObject<LoRaPHY>();
         mac = CreateObject<LWB>();
+        glossy = CreateObject<Glossy>();
         
         phy->SetChannel(channel);
         phy->SetNetDevice(device);
