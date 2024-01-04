@@ -60,6 +60,9 @@ LWB::LWB()
     m_data_delay = 1;
     m_time = Seconds(0);
     m_isInitiator = false;
+	m_cont_count = 0;
+	m_cont_rand = 0;
+	m_cont_attempts = 0;
 }
 
 LWB::~LWB()
@@ -99,11 +102,7 @@ LWB::Schedule(void)
     schedule_packet->AddHeader(m_schedule);
     schedule_packet->AddHeader(header);
     
-    //  glossy send schedule
-    if (m_glossy)
-    {
-        m_glossy->StartInitiator(schedule_packet, GLOSSY_ONLY_RELAY_CNT, GLOSSY_WITHOUT_RF_CAL);
-    }
+    DoSend(schedule_packet);
     
     delay = Seconds(m_schedule_delay + (m_data_delay * (m_schedule.GetNSlots() +
                 ((m_schedule.HasSACK())?1:0) +((m_schedule.HasCONT())?1:0))));
@@ -154,31 +153,63 @@ LWB::Send(Ptr<Packet> packet)
 }
     
 void
-LWB::DoSend(void)
+LWB::DoSend(Ptr<Packet> packet)
 {
-    Ptr<Packet> packet;
-    
-    if (!m_packet_queue.empty())
-    {
-        packet = m_packet_queue.front();
-        m_packet_queue.pop();
+    LWBHeader header;
+	std::string packet_type;
         
-        NS_LOG_INFO("Node #" << m_node->GetId() << ": LWB Sending Packet #" << packet->GetUid());
+	packet->PeekHeader(header);
+	
+	switch (header.GetPacketType())
+	{
+		case SCHEDULE:
+			packet_type = "Schedule";
+			break;
+		case DATA:
+			packet_type = "Data";
+			break;
+		case STREAM_REQUEST:
+			packet_type = "StreamRequest";
+			break;
+		case STREAM_ACK:
+			packet_type = "StreamACK";
+			break;
+		case DATA_ACK:
+			packet_type = "DataACK";
+			break;
+	}
+        
+        NS_LOG_INFO("Node #" << m_node->GetId() << ": LWB Sending " << packet_type 
+					<< " Packet(#" << packet->GetUid() << ")");
         
         m_glossy->StartInitiator(packet, GLOSSY_WITHOUT_SYNC, GLOSSY_WITHOUT_RF_CAL);
-    }
-    else 
-    {
-        NS_LOG_INFO("Node #" << m_node->GetId() << ": Packet Queue Empty");
-    }
     
     return;
+}
+    
+Ptr<Packet> 
+LWB::GetNextPacketFromQueue(void)
+{
+	Ptr<Packet> packet;
+	
+	if (!m_packet_queue.empty())
+	{
+		packet = m_packet_queue.front();
+		m_packet_queue.pop();
+		return packet;
+	}
+	else
+	{
+		NS_LOG_INFO("Node #" << m_node->GetId() << ": Packet Queue Empty");
+		return NULL;
+	}
+	
 }
     
 void
 LWB::Receive(Ptr<Packet> packet)
 {
-    Ptr<Packet> new_packet;
+    Ptr<Packet> new_packet, packet_copy;
     GlossyHeader gheader;
     LWBSchedulePacketHeader sheader;
     LWBStreamRequestHeader cheader;
@@ -188,37 +219,47 @@ LWB::Receive(Ptr<Packet> packet)
     uint16_t slot[LWB_MAX_DATA_SLOTS];
     unsigned int i;
     Time delay;
+	Ptr<UniformRandomVariable> x;
     
-    packet->RemoveHeader(gheader);
-    packet->RemoveHeader(header);
+	m_glossy->RxHandler(packet);
+	
+	packet_copy = packet->Copy();
+	
+    packet_copy->RemoveHeader(gheader);
+    packet_copy->RemoveHeader(header);
     
     switch (header.GetPacketType())
     {
         case SCHEDULE:    
             
-            packet->PeekHeader(sheader);
+            packet_copy->PeekHeader(sheader);
             
             if (sheader.GetTime() != m_schedule.GetTime())
             {
-                NS_LOG_INFO("Node #" << m_node->GetId() << ": Received New Schedule");
-                
                 /*  different schedule --- update actions  */
                 m_schedule.SetTime(sheader.GetTime());
                 m_schedule.SetPeriod(sheader.GetPeriod());
                 m_schedule.SetNSlots(sheader.GetNSlots());
                 sheader.GetSlots(slot);
                 m_schedule.SetSlots(slot);
-                
+				m_schedule.SetCONT(sheader.HasCONT());
+				m_schedule.SetSACK(sheader.HasSACK());
+				
+				NS_LOG_INFO("Node #" << m_node->GetId() << ": Received New Schedule");
+				
                 for (i = 0;i < m_schedule.GetNSlots();i++)
                 {
                     if (slot[i] == m_node->GetId())
                     {
                         /*  this node is scheduled for position i    */
-                        
-                        delay = Seconds(((i + 1 + ((m_schedule.HasSACK())?1:0)) * m_data_delay) -
+						
+                        if (!m_packet_queue.empty())
+						{
+							delay = Seconds(((i + 1 + ((m_schedule.HasSACK())?1:0)) * m_data_delay) -
                                 (cur.GetSeconds() - m_schedule.GetTime()));
-                        
-                        Simulator::Schedule(delay, &LWB::DoSend, this);
+							
+							Simulator::Schedule(delay, &LWB::DoSend, this, GetNextPacketFromQueue());
+						}
                                 
                         break;
                     }
@@ -227,22 +268,29 @@ LWB::Receive(Ptr<Packet> packet)
                 if ((i == m_schedule.GetNSlots()) && m_schedule.HasCONT() && (!m_isInitiator) &&
                     (m_schedule.GetNSlots() <= LWB_MAX_DATA_SLOTS))
                 {
-                    /*  node not in schedule    */
-                    new_packet = Create<Packet>(50);
+					 /*  node not in schedule    */
+					 
+					if (m_cont_rand <= m_cont_count)
+					{
+						new_packet = Create<Packet>(50);
                     
-                    cheader.SetNodeId(m_node->GetId());
-                    new_packet->AddHeader(cheader);
-                    
-                    new_header.SetPacketType(STREAM_REQUEST);
-                    new_packet->AddHeader(new_header);
-                    
-                    Send(new_packet);   //adds cont packet to queue
-                    
-                    delay = Seconds(((m_schedule.GetNSlots() + 
-							((m_schedule.HasSACK())?1:0) + 1) * m_data_delay) - 
-							(cur.GetSeconds() - m_schedule.GetTime()));
-                    
-                    Simulator::Schedule(delay, &LWB::DoSend, this);
+						cheader.SetNodeId(m_node->GetId());
+						new_packet->AddHeader(cheader);
+						
+						new_header.SetPacketType(STREAM_REQUEST);
+						new_packet->AddHeader(new_header);
+						
+						delay = Seconds(((m_schedule.GetNSlots() + 
+								((m_schedule.HasSACK())?1:0) + 1) * m_data_delay) - 
+								(cur.GetSeconds() - m_schedule.GetTime()));
+						
+						Simulator::Schedule(delay, &LWB::DoSend, this, new_packet);
+						
+						x = CreateObject<UniformRandomVariable>();
+						m_cont_rand += x->GetInteger(1, MIN_RAND_UPPER_LIMIT_CONT * (m_cont_attempts + 1));
+						m_cont_attempts++;
+					}
+                    m_cont_count++;
                 }
             }
             
@@ -263,11 +311,12 @@ LWB::Receive(Ptr<Packet> packet)
                                 
         case DATA:    
             
-            new_packet = packet->Copy();
+            new_packet = packet_copy->Copy();
             new_packet->RemoveHeader(dheader);
             
             if (dheader.GetRecipientId() == m_node->GetId())
             {
+				NS_LOG_INFO("Node #" << m_node->GetId() << ": Received Packet #" << packet->GetUid());
                 m_node->GetDevice(0)->GetObject<LoRaNetDevice>()->Receive(new_packet);
             }
             
@@ -275,7 +324,7 @@ LWB::Receive(Ptr<Packet> packet)
                                 
         case STREAM_REQUEST:    
             
-            packet->PeekHeader(cheader);
+            packet_copy->PeekHeader(cheader);
             
             if (m_isInitiator)
             {
@@ -294,7 +343,7 @@ LWB::Receive(Ptr<Packet> packet)
                     (m_schedule.GetNSlots() < LWB_MAX_DATA_SLOTS))
                 {
                     NS_LOG_INFO("Node #" << m_node->GetId() << "(Scheduler): Added Node #" << 
-                                cheader.GetNodeId() << "to Shedule");
+                                cheader.GetNodeId() << " to Schedule");
                     
                     /*  add node to network */
                     slot[i] = cheader.GetNodeId();
@@ -319,9 +368,8 @@ LWB::Receive(Ptr<Packet> packet)
             break;
     }
     
-    packet->AddHeader(header);
-    packet->AddHeader(gheader);
-    m_glossy->RxHandler(packet);
+    packet_copy->AddHeader(header);
+    packet_copy->AddHeader(gheader);
     
     return;
 }

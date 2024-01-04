@@ -105,18 +105,18 @@ Glossy::StartInitiator(Ptr<Packet> packet, glossy_sync_t sync, glossy_rf_cal_t r
     new_header.SetRelayCnt(0);
     
 
-	if ((new_header.GetSync() == GLOSSY_UNKNOWN_SYNC) || 
-		((packet->GetSize() + 1) > RF_CONF_MAX_PKT_LEN))
-	{
-		/** 
-		 * the initiator must know whether there will be synchronization or
-		 * not and the packet length may not exceed the max length 
-		 */
-		Stop();
-		return;
-	}
-	else
-	{
+// 	if ((new_header.GetSync() == GLOSSY_UNKNOWN_SYNC) || 
+// 		((packet->GetSize() + 1) > RF_CONF_MAX_PKT_LEN))
+// 	{
+// 		/** 
+// 		 * the initiator must know whether there will be synchronization or
+// 		 * not and the packet length may not exceed the max length 
+// 		 */
+// 		Stop();
+// 		return;
+// 	}
+// 	else
+// 	{
 		/*  start the first transmission    */
 		//m_glossy_state.t_timeout = Simulator::Now().GetSeconds() + m_timeout_delay_seconds;
 		
@@ -140,7 +140,7 @@ Glossy::StartInitiator(Ptr<Packet> packet, glossy_sync_t sync, glossy_rf_cal_t r
 			//m_last_event = Simulator::Schedule(Seconds(m_timeout_delay_seconds), &Glossy::RxHandler,this, packet);
 			m_last_packet = packet;
 		}
-	}
+// 	}
         
     return;
 }

@@ -51,6 +51,7 @@
 
 #include <queue>
 
+#include "ns3/random-variable-stream.h"
 #include "ns3/lora-mac.h"
 #include "ns3/glossy.h"
 #include "ns3/lwb-schedule-packet-header.h"
@@ -90,6 +91,8 @@
 
 /* max. header length (with sync) */
 #define GLOSSY_MAX_HEADER_LEN                   4
+
+#define MIN_RAND_UPPER_LIMIT_CONT				3
 
 namespace ns3 {
 namespace lora_mesh {
@@ -177,8 +180,6 @@ public:
 
     void Send(Ptr<Packet> packet);
     
-    void DoSend(void);
-    
     /** 
      * @brief get a data packet that have been received during the previous LWB
      * rounds
@@ -194,6 +195,8 @@ public:
      */
     void Receive(Ptr<Packet> packet);
     
+	Ptr<Packet> GetNextPacketFromQueue(void);
+	
     /**
      * @brief check the status of the receive buffer (incoming messages)
      * @return the number of packets in the queue
@@ -262,6 +265,7 @@ public:
     
 private:
     void Schedule(void);
+	void DoSend(Ptr<Packet> packet);
     
     //lwb_conn_state_t m_state;
     //lwb_statistics_t    m_stats;
@@ -277,6 +281,9 @@ private:
     bool                        m_schedule_dack;
     Time                        m_time;
     bool                        m_isInitiator;
+	unsigned int				m_cont_count;
+	unsigned int				m_cont_attempts;
+	unsigned int 				m_cont_rand;
 };
     
 /**

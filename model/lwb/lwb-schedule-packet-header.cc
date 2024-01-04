@@ -10,6 +10,11 @@ LWBSchedulePacketHeader::LWBSchedulePacketHeader()
     m_time = 0;
     m_period = LWB_SCHED_CONT_SLOT;
     m_n_slots = 0;
+	
+	for (unsigned int i = 0;i < LWB_MAX_DATA_SLOTS;i++)
+	{
+		m_slot[i] = 0;
+	}
 }
 
 LWBSchedulePacketHeader::~LWBSchedulePacketHeader()

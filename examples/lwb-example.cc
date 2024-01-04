@@ -39,6 +39,10 @@ main (int argc, char *argv[])
 {
     Time::SetResolution (Time::NS);
     LogComponentEnableAll(LOG_PREFIX_TIME);
+	LogComponentEnable("LoRaMAC", LOG_LEVEL_ALL);
+    //LogComponentEnable("Glossy", LOG_LEVEL_ALL);
+	//LogComponentEnable("LoRaPHY", LOG_LEVEL_ALL);
+    LogComponentEnable("LWB", LOG_LEVEL_ALL);
     NS_LOG_UNCOND ("LWB Example..." << std::endl);
     
     Ptr<LoRaChannel> channel = CreateObject<LoRaChannel>();
@@ -103,6 +107,7 @@ main (int argc, char *argv[])
         glossy->SetNode(node);
         glossy->SetLWB(mac);
         glossy->SetNTxMax(1);
+		glossy->StartReceiver();
     }
     
     ApplicationContainer apps;
@@ -117,14 +122,14 @@ main (int argc, char *argv[])
         apps.Add(app);
     }
     
-    for (NodeContainer::Iterator i = loranodes.Begin();i != loranodes.End(); ++i)
+    for (NodeContainer::Iterator i = loranodes.Begin() + 1;i != loranodes.End(); ++i)
     {
         Ptr<Node> node = *i;
         Ptr<Packet> packet = Create<Packet>(50);
         LWBHeader header;
         LWBDataPacketHeader dheader;
     
-        dheader.SetRecipientId(1);
+        dheader.SetRecipientId(0);
         header.SetPacketType(DATA);
         packet->AddHeader(dheader);
         packet->AddHeader(header);
