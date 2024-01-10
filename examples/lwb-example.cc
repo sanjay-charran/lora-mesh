@@ -26,7 +26,7 @@
 #include <iterator>
 #include <vector>
 
-#define NUM_NODES       5
+#define NUM_NODES       10
 #define SIMULATION_SF   7
 
 using namespace ns3;
